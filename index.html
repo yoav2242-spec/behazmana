@@ -1,0 +1,1395 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>בהזמנה · יצירה בעבודת יד בהזמנה אישית</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="בהזמנה: מזמינים יצירה בעבודת יד בהזמנה אישית, ישירות מאומנים בעץ, עור, קרמיקה, תכשיטים ומתכת. גרסת הדגמה.">
+<meta name="theme-color" content="#f3ebdd">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="he_IL">
+<meta property="og:url" content="https://yoav2242-spec.github.io/behazmana/">
+<meta property="og:title" content="בהזמנה · יצירה בעבודת יד בהזמנה אישית">
+<meta property="og:description" content="בהזמנה: מזמינים יצירה בעבודת יד בהזמנה אישית, ישירות מאומנים בעץ, עור, קרמיקה, תכשיטים ומתכת. גרסת הדגמה.">
+<meta property="og:image" content="https://yoav2242-spec.github.io/behazmana/img/hero.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="בהזמנה">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=IBM+Plex+Sans+Hebrew:wght@300;400;500;600;700&display=swap">
+<style>
+/* Look: a warm parchment house. Cream ground, oat and sand surfaces, espresso ink, and ONE accent of burnished brass
+   (prices, links, selection, my chat bubbles). Primary buttons are espresso with cream type, like a gallery label.
+   One rich dark field (espresso) per long screen. Photos sit on sand-coloured mats, so they glow against the cream.
+   Palette chosen with ui-ux-pro-max ("E-commerce Luxury": premium dark + gold; "warm ink on cream"), taken from the materials: walnut, leather, clay, brass. */
+:root {
+  color-scheme: light;
+  --paper: #f3ebdd;      /* parchment cream: the ground */
+  --stone: #e8dcc7;      /* oat: quiet panels, chips, the segmented control (ink 11.8:1) */
+  --sand: #dccbb0;       /* sand: photo mats and placeholders */
+  --surface: #faf5ec;    /* ivory: raised things (cards, inputs, bubbles). Never pure white */
+  --ink: #2b1f17;        /* espresso ink, 13.5:1 on parchment */
+  --muted: #6a5848;      /* walnut grey, 5.7:1 on parchment, 5.0:1 on oat */
+  --line: #d9c9ae;
+  --accent: #7a5418;     /* burnished brass, 5.7:1 on parchment, 6.2:1 under ivory text */
+  --accent-soft: #eedfc2;
+  --on-accent: #faf5ec;
+  --action: #2b1f17;     /* primary buttons: espresso */
+  --on-action: #f3ebdd;
+  --heart: #9e2f2a;      /* garnet */
+  --warn: #8e3a1c;
+  --warn-soft: #f1dccd;
+  --placeholder: #dccbb0;
+  --on-image: #fbf6ee;
+  --on-image-ink: #2b1f17;
+  --field: #2a1e16;      /* the one dark field: espresso, like an oiled walnut board */
+  --on-field: #f3ebdd;
+  --field-muted: #c9b79f; /* 8.3:1 on the field */
+  --field-num: #d2a85e;   /* brass, lifted for the dark field (7.3:1) */
+  --r-img: 4px;          /* photographs sit like prints: almost square */
+  --r-panel: 14px;
+  --ease: cubic-bezier(.16, 1, .3, 1);     /* slow, confident arrival */
+  --ease-soft: cubic-bezier(.45, 0, .25, 1);
+  --display: "Frank Ruhl Libre", "Bellefair", "Times New Roman", serif;
+  --body: "IBM Plex Sans Hebrew", "Assistant", "Segoe UI", Arial, sans-serif;
+  --gl: max(20px, env(safe-area-inset-left, 0px));
+  --gr: max(20px, env(safe-area-inset-right, 0px));
+  --kb: 0px;              /* height of the on-screen keyboard, set by script */
+  --composer-h: 60px;     /* measured by script */
+  --nav-h: 62px;
+}
+html, body { background: var(--paper); color: var(--ink); margin: 0; }
+body { font-family: var(--body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--paper); }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+[hidden] { display: none !important; }
+::selection { background: var(--accent-soft); color: var(--ink); }
+input, textarea { caret-color: var(--accent); }
+::placeholder { color: #766555; } /* 5.1:1 on ivory */
+h1, h2, h3 { text-wrap: balance; }
+img { -webkit-user-drag: none; user-select: none; }
+
+.app { max-width: 440px; margin: 0 auto; min-height: 100vh; min-height: 100dvh; background: var(--paper); position: relative; padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); overflow-x: clip; }
+@media (min-width: 480px) { .app { border-inline: 1px solid var(--line); } }
+.g { padding-left: var(--gl); padding-right: var(--gr); }
+.bleed { margin-left: calc(-1 * var(--gl)); margin-right: calc(-1 * var(--gr)); }
+.demo-note { font-size: 12px; letter-spacing: .02em; color: var(--muted); text-align: center; padding-block: 7px; background: var(--stone); }
+
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--paper); display: flex; align-items: center; gap: 12px; min-height: 60px; padding-block: 8px; }
+.wordmark { font-family: var(--display); font-weight: 500; font-size: 33px; line-height: .95; flex: 1; letter-spacing: -.01em; }
+.wordmark small { display: block; font-family: var(--body); font-size: 12.5px; font-weight: 400; color: var(--muted); margin-top: 5px; }
+.top h1 { font-family: var(--display); font-weight: 500; font-size: 23px; margin: 0; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.round { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--stone); display: grid; place-items: center; flex: none; padding: 0; }
+.round svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.me-btn { font-family: var(--display); font-weight: 500; font-size: 19px; background: var(--ink); color: var(--paper); }
+
+.stack { display: flex; flex-direction: column; gap: 52px; padding-block: 26px 8px; }
+.eyebrow { font-size: 13px; color: var(--muted); font-weight: 400; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.sec-title { font-family: var(--display); font-weight: 500; font-size: 32px; line-height: 1.05; letter-spacing: -.015em; margin: 0; }
+.sec-lede { font-size: 15px; color: var(--muted); margin: -10px 0 18px; max-width: 34ch; }
+.link { background: none; border: 0; padding: 0; color: var(--accent); font-size: 14px; font-weight: 500; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+.muted { color: var(--muted); }
+.small { font-size: 13.5px; }
+.row { display: flex; align-items: center; gap: 10px; }
+.between { justify-content: space-between; }
+.wrap { flex-wrap: wrap; }
+p { margin: 0; }
+
+/* photographs */
+.art { position: relative; overflow: hidden; background: var(--placeholder); isolation: isolate; width: 100%; max-width: 100%; aspect-ratio: 1; }
+.art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+/* product photos sit on a warm ivory mat and are printed onto it (multiply): white studio backdrops turn to cream, nothing stays stark white */
+.works .art, .best-card .art, .strip .art, .req .art, .gallery .art, .photos .art, .mat .art, .row > div > .art { background: #f2e8d8; }
+.works .art img, .best-card .art img, .strip .art img, .req .art img, .gallery .art img, .photos .art img, .mat .art img, .row > div > .art img { mix-blend-mode: multiply; }
+.art .cap { position: absolute; inset: auto 0 0 0; z-index: 1; font-size: 12px; color: var(--on-image); padding: 20px 12px 9px; background: linear-gradient(transparent, rgba(0,0,0,.6)); }
+
+/* swipeable carousels (scroll-snap) */
+.carwrap { position: relative; }
+.car { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+.car::-webkit-scrollbar { display: none; }
+.slide { flex: 0 0 100%; scroll-snap-align: start; scroll-snap-stop: always; position: relative; }
+.dots { display: flex; gap: 0; justify-content: center; }
+.dots button { width: 34px; height: 24px; border: 0; padding: 0; background: none; position: relative; }
+.dots button::before { content: ""; position: absolute; inset-inline: 6px; top: 11px; height: 2px; border-radius: 2px; background: rgba(255,255,255,.95); opacity: .4; transform: scaleX(.45); box-shadow: 0 0 6px rgba(0,0,0,.25); }
+.dots button[aria-current="true"]::before { opacity: 1; transform: scaleX(1); }
+.carwrap > .dots { position: absolute; inset: auto 0 16px 0; z-index: 2; }
+
+.hero { position: relative; }
+.hero .art { aspect-ratio: 3 / 4; max-height: min(700px, 86vh); }
+.hero .credit { position: absolute; top: 18px; inset-inline-start: var(--gl); z-index: 1; font-size: 12.5px; color: rgba(255,255,255,.9); text-shadow: 0 1px 8px rgba(0,0,0,.45); }
+.hero .shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, rgba(30,20,13,.86) 0%, rgba(30,20,13,.42) 38%, rgba(30,20,13,0) 66%), linear-gradient(to bottom, rgba(30,20,13,.38), rgba(30,20,13,0) 18%); }
+.hero .copy { position: absolute; inset: auto 0 0 0; color: var(--on-image); padding-block: 32px 30px; display: flex; flex-direction: column; gap: 16px; pointer-events: none; }
+.hero .copy button { pointer-events: auto; }
+.hero .eyebrow { color: rgba(255,255,255,.8); }
+.hero h1 { font-family: var(--display); font-weight: 500; font-size: clamp(30px, 10.2vw, 50px); line-height: 1.08; letter-spacing: -.015em; margin: 0; text-wrap: initial; }
+.hero h1 .ln { display: block; white-space: nowrap; }
+.hero h1 .ln + .ln { color: #e6c98f; } /* brass-lit second line */
+.hero h1 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .1em; margin-bottom: -.1em; }
+.hero h1 .w > span { display: inline-block; }
+.hero p { font-size: 16px; line-height: 1.55; color: rgba(255,255,255,.9); max-width: 31ch; }
+.hero .dots { justify-content: flex-start; margin-top: 4px; margin-inline-start: -6px; }
+
+.btn { border: 0; border-radius: 999px; padding: 15px 28px; font-weight: 500; font-size: 15.5px; letter-spacing: .01em; --mx: 0px; --my: 0px; translate: var(--mx) var(--my); background: var(--action); color: var(--on-action); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn.on-image { background: var(--paper); color: var(--on-image-ink); align-self: flex-start; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
+.btn.block { width: 100%; }
+.btn.small { padding: 9px 16px; font-size: 14px; }
+.btn.danger { background: transparent; color: var(--warn); border: 1px solid var(--line); }
+
+.search { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; height: 52px; padding-inline: 18px; }
+.search:focus-within { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+.search svg { width: 18px; height: 18px; stroke: var(--ink); fill: none; stroke-width: 1.8; flex: none; }
+.search input { border: 0; background: none; outline: none; flex: 1; min-width: 0; height: 100%; font-size: 16px; }
+
+.rail { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x mandatory; padding-left: var(--gl); padding-right: var(--gr); scroll-padding-inline: var(--gr); }
+.rail::-webkit-scrollbar { display: none; }
+.rail > * { scroll-snap-align: start; }
+.mat { flex: none; width: 88px; background: none; border: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; text-align: start; }
+.mat .art { aspect-ratio: 3 / 4; border-radius: var(--r-img); }
+.mat .all { aspect-ratio: 3 / 4; border-radius: var(--r-img); display: grid; place-items: center; font-family: var(--display); font-weight: 500; font-size: 24px; background: var(--sand); }
+.mat span.n { font-size: 14px; color: var(--muted); align-self: flex-start; padding: 1px 10px; margin-inline-start: -2px; border-radius: 99px; }
+.mat[aria-pressed="true"] span.n { color: var(--on-accent); background: var(--accent); font-weight: 600; }
+.mat[aria-pressed="true"] .art, .mat[aria-pressed="true"] .all { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--accent); }
+
+/* works: 2-column grid with full-width feature cards */
+.works { display: grid; grid-template-columns: 1fr 1fr; gap: 34px 14px; }
+.work { position: relative; min-width: 0; }
+.work.feature { grid-column: 1 / -1; }
+.work-open { display: flex; flex-direction: column; gap: 10px; background: none; border: 0; padding: 0; text-align: start; width: 100%; }
+.work .art { border-radius: var(--r-img); aspect-ratio: 4 / 5; }
+/* every fifth work runs edge to edge, like a plate in a catalogue */
+.work.feature { margin-inline: calc(-1 * var(--gl)) calc(-1 * var(--gr)); }
+.work.feature .art { aspect-ratio: 4 / 5; border-radius: 0; }
+.work.feature .label { padding-inline: var(--gl) var(--gr); }
+.work.feature .heart { inset-inline-end: var(--gr); top: 14px; }
+.work.feature .label .t { font-family: var(--display); font-weight: 400; font-size: 29px; line-height: 1.1; letter-spacing: -.01em; }
+.label { display: flex; flex-direction: column; gap: 1px; }
+.label .t { font-weight: 500; font-size: 15.5px; line-height: 1.3; }
+.label .m { font-size: 13px; color: var(--muted); }
+.price { color: var(--accent); font-weight: 500; font-variant-numeric: tabular-nums; font-size: 14.5px; }
+.heart { position: absolute; top: 10px; inset-inline-end: 10px; z-index: 2; width: 40px; height: 40px; border-radius: 50%; border: 0; padding: 0; display: grid; place-items: center; background: rgba(250,245,236,.94); box-shadow: 0 2px 12px rgba(34,24,16,.14); }
+.heart svg { width: 19px; height: 19px; stroke: var(--ink); fill: none; stroke-width: 1.5; stroke-linejoin: round; }
+.heart[aria-pressed="true"] svg { fill: var(--heart); stroke: var(--heart); }
+
+.maker { flex: none; width: min(72vw, 286px); aspect-ratio: 3 / 4; position: relative; border-radius: var(--r-img); overflow: hidden; border: 0; padding: 0; text-align: start; color: var(--on-image); }
+.maker .art { position: absolute; inset: 0; aspect-ratio: auto; height: 100%; }
+.maker .shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(30,20,13,.8), rgba(30,20,13,0) 58%); }
+.maker .info { position: absolute; inset: auto 0 0 0; padding: 20px; display: flex; flex-direction: column; gap: 4px; }
+.maker .nm { font-family: var(--display); font-size: 31px; line-height: 1.02; }
+.maker .sm { font-size: 13px; opacity: .9; }
+.stars { font-variant-numeric: tabular-nums; font-size: 13px; }
+.best-card { flex: none; width: 164px; display: flex; flex-direction: column; gap: 10px; background: none; border: 0; padding: 0; text-align: start; }
+.best-card .art { aspect-ratio: 4 / 5; border-radius: var(--r-img); }
+.best-card .craft { font-family: var(--display); font-size: 25px; line-height: 1; }
+
+.band { position: relative; }
+.band .art { aspect-ratio: 4 / 5; max-height: 78vh; }
+.band .shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(30,20,13,.82), rgba(30,20,13,0) 60%); }
+.band .copy { position: absolute; inset: auto 0 0 0; padding-block: 30px; color: var(--on-image); display: flex; flex-direction: column; gap: 8px; }
+.band q { font-family: var(--display); font-size: 33px; line-height: 1.12; letter-spacing: -.01em; quotes: "״" "״"; display: block; max-width: 13em; text-wrap: balance; }
+
+/* ranked list of makers (also used for maker search results) */
+.rank { display: flex; flex-direction: column; }
+.rank-row { padding-block: 18px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+.rank-main { display: flex; align-items: center; gap: 12px; border: 0; background: none; width: 100%; text-align: start; padding: 0; }
+.rank-row .num { font-family: var(--display); font-size: 30px; line-height: 1; color: var(--accent); width: 26px; flex: none; text-align: center; font-variant-numeric: tabular-nums; }
+.rank-row .av { width: 60px; height: 72px; border-radius: var(--r-img); }
+.rank-row .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.rank-row .nm { font-family: var(--display); font-size: 23px; line-height: 1.05; }
+.rank-row .sub { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank-row .sub .stars { color: var(--ink); font-weight: 600; }
+.rank-links { display: flex; gap: 8px; flex-wrap: wrap; padding-inline-start: 110px; }
+.rank-row.nonum .rank-links { padding-inline-start: 72px; }
+.chip { border: 1px solid transparent; background: var(--stone); border-radius: 999px; padding: 5px 13px; font-size: 13.5px; font-weight: 500; color: var(--ink); }
+.sub-title { font-family: var(--display); font-weight: 400; font-size: 23px; line-height: 1.1; margin: 0 0 4px; }
+.found + .sub-title { margin-top: 26px; }
+
+.how { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.how li { display: grid; grid-template-columns: 48px 1fr; gap: 6px; padding: 16px 18px 16px 12px; background: var(--stone); border-radius: var(--r-panel); }
+/* the one dark field on the home screen: how a commission happens */
+.how-field { background: var(--field); color: var(--on-field); padding-block: 60px 64px; }
+.how-field .sec-title { color: var(--on-field); font-size: 40px; margin-bottom: 30px; }
+.how-field .how { gap: 30px; }
+.how-field .how li { background: none; padding: 0; grid-template-columns: 56px 1fr; gap: 10px; border-radius: 0; }
+.how-field .how .num { font-weight: 500; font-size: 52px; color: var(--field-num); text-align: start; line-height: .9; }
+.how-field .how b { font-family: var(--display); font-weight: 500; font-size: 25px; line-height: 1.15; margin-bottom: 4px; }
+.how-field .how .muted { color: var(--field-muted); font-size: 15px; }
+.how-field .btn { margin-top: 38px; background: var(--on-field); color: var(--field); }
+.how .num { font-family: var(--display); font-size: 34px; line-height: 1; color: var(--accent); text-align: center; }
+.how b { display: block; font-weight: 600; }
+
+.tag { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; padding: 3px 11px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink); white-space: nowrap; }
+.tag.solid { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+.tag.warn { background: var(--warn-soft); border-color: transparent; color: var(--warn); }
+.tag svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.6; }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.display { font-family: var(--display); font-weight: 400; font-size: 40px; line-height: 1.04; letter-spacing: -.01em; margin: 0; }
+.specs { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); margin: 0; }
+.specs div { padding: 12px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; }
+.specs div:nth-child(odd) { padding-inline-end: 12px; }
+.specs dt { font-size: 13px; color: var(--muted); }
+.specs dd { margin: 0; font-weight: 500; }
+.big-price { font-family: var(--display); font-size: 32px; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums; }
+.maker-line { display: flex; align-items: center; gap: 12px; background: none; border: 0; padding: 0; text-align: start; }
+.av { width: 46px; height: 46px; border-radius: 50%; overflow: hidden; flex: none; position: relative; }
+.av .art { position: absolute; inset: 0; aspect-ratio: auto; height: 100%; }
+.av .ini { position: absolute; inset: 0; display: grid; place-items: center; color: var(--on-image); font-family: var(--display); font-size: 19px; text-shadow: 0 1px 3px rgba(0,0,0,.5); }
+
+.gallery .art { aspect-ratio: 4 / 5; max-height: 74vh; }
+.gallery .heart { top: 14px; inset-inline-end: var(--gr); }
+.gallery .count { position: absolute; top: 16px; inset-inline-start: var(--gl); z-index: 2; font-size: 12px; color: #fff; background: rgba(34,24,16,.4); padding: 3px 10px; border-radius: 99px; font-variant-numeric: tabular-nums; }
+
+.req { display: flex; gap: 14px; padding-block: 16px; border: 0; border-bottom: 1px solid var(--line); background: none; text-align: start; width: 100%; padding-inline: 0; align-items: flex-start; }
+.req .art { width: 92px; flex: none; border-radius: var(--r-img); aspect-ratio: 4 / 5; }
+.req .info { display: flex; flex-direction: column; gap: 5px; min-width: 0; flex: 1; }
+.req .t { font-weight: 500; font-size: 16.5px; line-height: 1.35; }
+.meta { display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 13px; color: var(--muted); }
+.meta b { color: var(--ink); font-weight: 500; }
+
+.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--stone); border-radius: 999px; padding: 4px; }
+.seg button { border: 0; background: none; padding: 9px; font-weight: 500; color: var(--muted); border-radius: 999px; }
+.seg button[aria-pressed="true"] { color: var(--paper); background: var(--ink); font-weight: 600; }
+.filters { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-left: var(--gl); padding-right: var(--gr); }
+.filters::-webkit-scrollbar { display: none; }
+.filters button { flex: none; border: 1px solid transparent; background: var(--stone); border-radius: 999px; padding: 6px 15px; font-size: 14px; }
+.filters button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+.offer { border: 0; border-radius: var(--r-panel); padding: 16px; display: flex; flex-direction: column; gap: 10px; background: var(--surface); }
+/* offers on a request: every card looks the same, no ranking implied */
+.offer-card { border: 0; border-radius: var(--r-panel); padding: 18px; display: flex; flex-direction: column; gap: 10px; background: var(--surface); width: 100%; text-align: start; color: inherit; }
+.offer-card .who { display: flex; align-items: center; gap: 12px; }
+.offer-card .who .info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.offer-card .foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13.5px; border-top: 1px solid var(--line); padding-top: 10px; }
+.offer-card .foot .go { color: var(--accent); font-weight: 600; white-space: nowrap; }
+.udot { width: 10px; height: 10px; border-radius: 50%; background: var(--heart); flex: none; }
+.onums { display: flex; gap: 22px; }
+.onums > span { display: flex; flex-direction: column; }
+.onums .k { font-size: 12.5px; color: var(--muted); }
+.onums .v { font-family: var(--display); font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.offer-full { display: flex; flex-direction: column; gap: 12px; padding: 18px; background: var(--surface); border: 0; border-radius: var(--r-panel); }
+.offer-full .otitle { font-family: var(--display); font-size: 22px; line-height: 1.2; }
+.offer-full .strip { margin-top: 2px; }
+.offer-full .strip .work-open { gap: 0; }
+.thread-sep { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+.thread-sep::before, .thread-sep::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.nums { display: flex; gap: 22px; }
+.nums div { display: flex; flex-direction: column; }
+.nums span { font-size: 12.5px; color: var(--muted); }
+.nums strong { font-family: var(--display); font-weight: 400; font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+
+form.f { display: flex; flex-direction: column; gap: 26px; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field > label, .field .lbl { font-weight: 600; font-size: 15px; }
+.hint { font-size: 13px; color: var(--muted); }
+.input { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; padding: 9px 0; width: 100%; min-width: 0; outline: none; font-size: 16px; }
+.input:focus { border-color: var(--accent); }
+textarea.input { min-height: 96px; resize: vertical; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--surface); }
+.picks { display: flex; flex-wrap: wrap; gap: 8px; }
+.pick { position: relative; }
+.pick input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.pick span { display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; border-radius: 999px; padding: 8px 17px; font-size: 14.5px; background: var(--stone); }
+.pick input:checked + span { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.pick input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.estimate { background: var(--accent-soft); border-radius: var(--r-panel); padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.estimate .eyebrow { color: var(--accent); font-weight: 500; }
+.estimate .val { font-family: var(--display); font-size: 40px; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--ink); }
+.estimate .link { align-self: flex-start; margin-top: 2px; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+.opt input { accent-color: var(--accent); width: 18px; height: 18px; }
+.opt .grow { flex: 1; }
+.photos { display: flex; gap: 8px; flex-wrap: wrap; }
+.photos .art { width: 68px; border-radius: var(--r-img); }
+.add-photo { width: 68px; height: 68px; border-radius: var(--r-img); border: 1px dashed var(--muted); background: none; color: var(--muted); font-size: 24px; }
+
+.story { font-family: var(--display); font-size: 25px; line-height: 1.42; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--field); color: var(--on-field); border-radius: var(--r-panel); padding: 6px 16px; }
+.stats div { padding: 12px 0; display: flex; flex-direction: column; }
+.stats strong { font-family: var(--display); font-weight: 400; font-size: 28px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stats span { font-size: 12.5px; color: var(--field-muted); }
+.stats strong { color: var(--on-field); }
+.stats div:first-child strong { color: var(--field-num); }
+.stats.four { grid-template-columns: repeat(4, 1fr); }
+.stats.four div { min-width: 0; padding-inline-end: 6px; }
+.stats.four strong { font-size: 23px; white-space: nowrap; }
+.banner { position: relative; }
+.banner .art { aspect-ratio: 4 / 5; max-height: 72vh; }
+.banner .shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(30,20,13,.8), rgba(30,20,13,0) 58%); }
+.banner .copy { position: absolute; inset: auto 0 0 0; padding-block: 22px; color: var(--on-image); display: flex; flex-direction: column; gap: 6px; }
+.banner h2 { font-family: var(--display); font-weight: 400; font-size: 50px; line-height: .98; letter-spacing: -.015em; margin: 0; }
+.banner .where { font-size: 15px; color: rgba(255,255,255,.88); margin-bottom: 6px; }
+.banner .tag { color: var(--on-image); border-color: rgba(255,255,255,.45); }
+.ptabs { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 60px); z-index: 18; display: flex; gap: 6px; padding-block: 8px; background: var(--paper); margin-block: -8px; }
+.ptabs button { flex: 1; border: 1px solid transparent; background: var(--stone); border-radius: 999px; padding: 8px 6px; font-size: 14.5px; font-weight: 500; }
+.ptabs button[aria-current="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+[id^="sec-"] { scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 122px); }
+.tab-pad { flex: none; margin-top: -52px; }
+.review { padding: 18px 20px; background: var(--surface); border: 0; border-radius: var(--r-panel); display: flex; flex-direction: column; gap: 6px; }
+.reviews { display: flex; flex-direction: column; gap: 10px; }
+.review q { font-family: var(--display); font-size: 21px; line-height: 1.38; quotes: "״" "״"; }
+.review .st { color: var(--accent); letter-spacing: .1em; font-size: 13px; }
+
+.chat-list .item { display: flex; gap: 14px; align-items: center; padding-block: 14px; border: 0; border-bottom: 1px solid var(--line); width: 100%; background: none; text-align: start; padding-inline: 0; }
+.chat-list .item .info { flex: 1; min-width: 0; }
+.chat-list .last { color: var(--muted); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-list .item .av .ini.solo { background: var(--accent); }
+.chat-list .about { font-size: 12.5px; color: var(--accent); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bubbles { display: flex; flex-direction: column; gap: 8px; }
+.bubble { max-width: 80%; padding: 10px 15px; border-radius: 20px; font-size: 15.5px; line-height: 1.45; overflow-wrap: anywhere; white-space: pre-wrap; }
+.bubble.them { background: var(--surface); border: 0; align-self: flex-end; border-end-end-radius: 6px; }
+.bubble.me { background: var(--accent); color: var(--on-accent); align-self: flex-start; border-end-start-radius: 6px; }
+/* chat screen: one column exactly the size of the visible screen (above the keyboard).
+   header on top, the messages scroll on their own, composer at the bottom. The page itself never scrolls here. */
+.chat-shell { position: fixed; z-index: 15; left: 0; right: 0; margin-inline: auto; width: min(440px, 100%);
+  top: var(--vvt, 0px); height: var(--vvh, 100vh); display: flex; flex-direction: column; background: var(--paper); padding-top: env(safe-area-inset-top, 0px); }
+@media (min-width: 480px) { .chat-shell { border-inline: 1px solid var(--line); } }
+.chat-shell > .top { position: relative; top: 0; flex: none; border-bottom: 1px solid var(--line); }
+.thread-wrap { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; }
+.thread { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 16px; padding-block: 14px 16px; }
+.thread.plain .bubbles { margin-top: auto; }
+.newpill { position: absolute; z-index: 3; bottom: 12px; inset-inline: 0; margin-inline: auto; width: max-content; border: 0; border-radius: 999px; background: var(--ink); color: var(--paper); padding: 8px 18px; font-size: 14px; font-weight: 600; box-shadow: 0 6px 18px rgba(43,31,23,.22); }
+.choose-bar { flex: none; padding-top: 10px; border-top: 1px solid var(--line); background: var(--paper); display: flex; flex-direction: column; gap: 4px; }
+.kb-open .choose-bar { display: none; }
+.composer { flex: none; display: flex; gap: 8px; padding: 6px; padding-inline-start: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 8px 28px rgba(43,31,23,.10);
+  margin: 10px var(--gr) max(12px, calc(env(safe-area-inset-bottom, 0px) + 6px)) var(--gl); }
+.composer input { flex: 1; min-width: 0; border: 0; background: none; outline: none; font-size: 16px; }
+.kb-open .composer { margin-bottom: 8px; }
+.chat-mode .nav { display: none; }
+body.chat-mode { overflow: hidden; }
+.chat-mode .app { min-height: 0; padding-bottom: 0; }
+
+/* bottom sheet (rejecting a maker, confirming an offer); sized to the visible screen so the keyboard never covers it */
+.sheet { position: fixed; z-index: 50; left: 0; right: 0; top: var(--vvt, 0px); height: var(--vvh, 100vh); display: flex; flex-direction: column; justify-content: flex-end; }
+.sheet[hidden] { display: none; }
+.sheet-back { position: absolute; inset: 0; background: rgba(34,24,16,.45); }
+.sheet-panel { position: relative; width: min(440px, 100%); margin-inline: auto; max-height: calc(100% - 16px - env(safe-area-inset-top, 0px)); overflow-y: auto; overscroll-behavior: contain;
+  background: var(--paper); border-radius: 18px 18px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,.18);
+  padding: 8px var(--gr) max(18px, calc(env(safe-area-inset-bottom, 0px) + 10px)) var(--gl); }
+.grab { width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: 0 auto 14px; }
+.sheet-panel h2:focus { outline: none; }
+.sheet-body { display: flex; flex-direction: column; gap: 18px; }
+body.sheet-open { overflow: hidden; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { padding: 0; margin-bottom: 2px; }
+.to-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 12px 14px; background: var(--stone); border-radius: 8px; }
+.to-line .em { font-size: 13.5px; color: var(--muted); overflow-wrap: anywhere; }
+.opt .em { font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; text-align: end; }
+.qs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+textarea.input.big { min-height: 150px; }
+.btn:disabled { background: var(--placeholder); color: var(--muted); cursor: not-allowed; }
+.btn.warnbtn:not(:disabled) { background: var(--warn); }
+.done-tag { white-space: normal; align-self: flex-start; line-height: 1.4; }
+.sent summary { list-style: none; cursor: pointer; display: inline-block; }
+.sent summary::-webkit-details-marker { display: none; }
+.sent .c, .sent[open] .o { display: none; }
+.sent[open] .c { display: inline; }
+.sent-box { margin-top: 10px; padding: 12px 14px; background: var(--surface); border: 0; border-radius: 8px; display: flex; flex-direction: column; gap: 6px; }
+.sent-box .txt { white-space: pre-wrap; overflow-wrap: anywhere; }
+.note { border-inline-start: 2px solid var(--accent); padding: 2px 12px; font-size: 13.5px; color: var(--muted); }
+
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.step { display: grid; grid-template-columns: 26px 1fr; gap: 14px; position: relative; padding-bottom: 22px; }
+.step:not(:last-child)::before { content: ""; position: absolute; inset-inline-start: 12px; top: 28px; bottom: 2px; width: 1px; background: var(--line); }
+.step.done:not(:last-child)::before { background: var(--accent); }
+.dot { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); display: grid; place-items: center; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.step.done .dot { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.step.now .dot { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.dot svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.6; }
+.step .st { font-weight: 600; }
+.step .sd { font-size: 13.5px; color: var(--muted); }
+.progress { height: 3px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--accent); }
+.strip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.strip .art { border-radius: var(--r-img); aspect-ratio: 4 / 5; }
+.rate { display: flex; gap: 6px; margin-top: 10px; }
+.rate button { border: 0; background: var(--stone); border-radius: 50%; width: 44px; height: 44px; font-size: 14px; color: var(--accent); }
+
+.panel { border-top: 1px solid var(--line); padding-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+
+.nav { position: fixed; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); width: min(416px, calc(100% - 24px)); height: var(--nav-h); background: var(--surface); border: 1px solid var(--line); border-radius: 24px; display: grid; grid-template-columns: repeat(5, 1fr); z-index: 20; box-shadow: 0 12px 34px rgba(43,31,23,.12); }
+.nav button { border: 0; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 0; font-size: 11px; color: var(--muted); position: relative; }
+.nav button svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.nav button[aria-current="page"] { color: var(--accent); font-weight: 600; }
+.nav .plus .c { --mx: 0px; --my: 0px; translate: var(--mx) var(--my); width: 40px; height: 40px; border-radius: 50%; background: var(--ink); color: var(--paper); display: grid; place-items: center; margin-top: -2px; }
+.nav .plus .c svg { width: 20px; height: 20px; stroke-width: 2; }
+.badge { position: absolute; top: 5px; inset-inline-end: calc(50% - 20px); background: var(--heart); color: var(--on-image); font-size: 10.5px; font-weight: 700; min-width: 17px; height: 17px; border-radius: 9px; display: grid; place-items: center; padding: 0 4px; }
+/* keyboard open: the tab bar steps aside instead of riding up with the keyboard */
+.kb-open .nav { opacity: 0; visibility: hidden; pointer-events: none; transform: translate(-50%, 24px); }
+
+.toast { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(16px); background: var(--ink); color: var(--paper); padding: 11px 20px; border-radius: 999px; font-weight: 500; font-size: 14.5px; opacity: 0; pointer-events: none; z-index: 40; width: max-content; max-width: calc(100% - 32px); text-align: center; }
+.chat-mode .toast, .kb-open .toast { bottom: calc(var(--composer-h) + var(--kb) + 30px); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.empty { text-align: center; color: var(--muted); padding: 28px 10px; }
+
+/* ---------- motion: only for people who haven't asked for less ----------
+   The house moves slowly and surely: long eased arrivals, no bounce. Everything is fully visible at rest;
+   GSAP (loaded from cdnjs) adds the hero reveal, the drifting photographs, scroll reveals and counters on top. */
+@media (prefers-reduced-motion: no-preference) {
+  .car { scroll-behavior: smooth; }
+  button { transition: transform .55s var(--ease), background-color .3s, color .3s, box-shadow .3s, border-color .3s; }
+  button:active { transform: scale(.97); transition-duration: .14s; }
+  .rank-main:active, .req:active, .chat-list .item:active, .work-open:active, .offer-card:active { transform: scale(.985); }
+  /* photographs lean in slowly when touched */
+  .work-open .art img, .maker .art img, .best-card .art img, .mat .art img { transition: transform 1.4s var(--ease); }
+  .work-open:active .art img, .maker:active .art img, .best-card:active .art img, .mat:active .art img { transform: scale(1.045); }
+  @media (hover: hover) {
+    .work-open:hover .art img, .maker:hover .art img, .best-card:hover .art img { transform: scale(1.035); }
+    .btn:hover { background: color-mix(in srgb, var(--action) 82%, var(--accent)); }
+    .btn.on-image:hover { background: var(--surface); }
+    .link:hover { text-decoration-color: currentColor; }
+  }
+  .link { transition: text-decoration-color .3s; }
+  /* screens cross-fade with a short, soft travel */
+  #view.in-fwd, .chat-shell.in-fwd { animation: inFwd .6s var(--ease); }
+  #view.in-back, .chat-shell.in-back { animation: inBack .6s var(--ease); }
+  #view.in-fade, .chat-shell.in-fade { animation: inFade .55s var(--ease); }
+  @keyframes inFwd { from { transform: translateX(-16px); opacity: 0; } }
+  @keyframes inBack { from { transform: translateX(16px); opacity: 0; } }
+  @keyframes inFade { from { transform: translateY(8px); opacity: 0; } }
+  .sheet-back { transition: opacity .45s var(--ease); }
+  .sheet-panel { transition: transform .6s var(--ease); }
+  .sheet:not(.on) .sheet-back { opacity: 0; }
+  .sheet:not(.on) .sheet-panel { transform: translateY(100%); }
+  .newpill { animation: inFade .4s var(--ease); }
+  .heart.pop svg { animation: pop .7s var(--ease); }
+  @keyframes pop { 0% { transform: scale(.8); } 45% { transform: scale(1.16); } 100% { transform: scale(1); } }
+  .bubble.new { animation: bubIn .45s var(--ease); }
+  @keyframes bubIn { from { transform: translateY(10px); opacity: 0; } }
+  .dots button::before { transition: transform .8s var(--ease), opacity .8s var(--ease); }
+  .hero .art img, .band .art img, .banner .art img { will-change: transform; }
+  .nav { transition: opacity .3s, transform .45s var(--ease), visibility 0s; }
+  .kb-open .nav { transition: opacity .15s, transform .2s, visibility 0s linear .2s; }
+  .toast { transition: opacity .35s var(--ease), transform .45s var(--ease); }
+}
+</style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<div class="app" dir="rtl" lang="he">
+  <div class="demo-note g">גרסת הדגמה · שמות ומחירים לדוגמה · צילומים חינמיים מ-Unsplash</div>
+  <main id="view"></main>
+  <nav class="nav" id="nav" aria-label="ניווט ראשי"></nav>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="sheet" id="sheet" hidden></div>
+</div>
+
+<script>
+/* ---------- data (all examples) ---------- */
+const CRAFTS = { wood: 'עץ', leather: 'עור', ceramic: 'קרמיקה', jewelry: 'תכשיטים', metal: 'מתכת' };
+const MAT = { wood: 'mat-wood', leather: 'mat-leather', ceramic: 'mat-ceramic', jewelry: 'mat-jewelry', metal: 'mat-metal' };
+const UI = {
+  back: '<path d="M9 6l6 6-6 6"/>', search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  home: '<path d="M4 11l8-7 8 7v9H4z"/>', board: '<path d="M5 6h14M5 12h14M5 18h9"/>', plus: '<path d="M12 5v14M5 12h14"/>',
+  chat: '<path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4z"/>', box: '<path d="M4 8l8-4 8 4v9l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v9"/>',
+  check: '<path d="M5 12l5 5 9-10"/>', heart: '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z"/>'
+};
+const svg = p => `<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
+/* photos: free Unsplash images, cropped and resized, published next to the page under img/ */
+const art = (img, cls = '', cap = '') => `<div class="art ${cls}"><img src="img/${img}.jpg" alt="" loading="${/eager/.test(cls) ? 'eager' : 'lazy'}" decoding="async" draggable="false">${cap ? `<span class="cap">${cap}</span>` : ''}</div>`;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const ils = n => '₪' + Number(n).toLocaleString('he-IL');
+const initials = name => name.split(' ').slice(0, 2).map(w => w[0]).join('');
+
+const MAKERS = {
+  noa: { name: 'נועה ברק', craft: 'ceramic', city: 'חיפה', since: 2018, rating: 4.9, orders: 41, verified: true, story: 'אני עובדת עם חומר כבר שמונה שנים, בסטודיו קטן מול הים. כל כלי נזרק על האובניים, מזוגג ונשרף פעמיים בתנור.' },
+  itay: { name: 'איתי לוי', craft: 'wood', city: 'פרדס חנה-כרכור', since: 2016, rating: 4.8, orders: 27, verified: true, story: 'אני בונה רהיטים מאלון ומאגוז מלא, בלי סיבית ובלי ברגים גלויים. כל רהיט נבנה לפי המידות של הבית שלכם.' },
+  maya: { name: 'מאיה שרעבי', craft: 'leather', city: 'תל אביב-יפו', since: 2020, rating: 5.0, orders: 58, verified: true, story: 'אני תופרת עור ביד, בתפר אוכף, עם עור בעיבוד צמחי שמשנה גוון עם השנים. כל ארנק נושא את ראשי התיבות של מי שיחזיק בו.' },
+  yoni: { name: 'יעל אזולאי', craft: 'jewelry', city: 'ירושלים', since: 2015, rating: 4.9, orders: 33, verified: true, story: 'אני מרקעת, מלחימה ומלטשת כסף וזהב בסדנה קטנה. תכשיט טוב מספר סיפור אחד, של מי שעונדת אותו.' },
+  guy: { name: 'גיא נחום', craft: 'metal', city: 'צפת', since: 2014, rating: 4.9, orders: 22, verified: true, story: 'אני נפח. מחשל סכינים וכלי מטבח מפלדת פחמן, וכל להב מושחז ביד על אבן.' },
+  dana: { name: 'דנה פרץ', craft: 'wood', city: 'באר שבע', since: 2021, rating: 4.7, orders: 12, verified: false, story: 'תחביב שהפך לאהבה: צעצועי עץ בטוחים לילדים, צבועים בצבעים טבעיים.' },
+  amit: { name: 'עמית כהן', craft: 'leather', city: 'רחובות', since: 2019, rating: 4.6, orders: 19, verified: true, story: 'מוצרי עור קלאסיים בעבודת יד.' },
+  hevel: { name: 'סטודיו חבל', craft: 'leather', city: 'חולון', since: 2017, rating: 4.8, orders: 64, verified: true, story: 'סטודיו קטן לעור ולטקסטיל.' },
+  ori: { name: 'אורי בן דוד', craft: 'wood', city: 'קריית שמונה', since: 2022, rating: 4.6, orders: 9, verified: false, story: 'אני נגר צעיר מהגליל. בונה מדפים, ספסלים וקופסאות מאלון ומאורן, ואוהב להשאיר בכל חתיכה את הקשרים והסדקים של העץ.' },
+  tamar: { name: 'תמר אלון', craft: 'ceramic', city: 'רמת השרון', since: 2023, rating: 5.0, orders: 3, verified: false, story: 'התחלתי בחוג ערב, והיום יש לי פינה קטנה בבית עם אובניים ותנור. אני אוהבת ספלים וכלים קטנים בצבעים רכים.' },
+  yossi: { name: 'יוסי אברהם', craft: 'ceramic', city: 'עכו', since: 2010, rating: 4.7, orders: 74, verified: true, story: 'אני קדר כבר יותר מחמש עשרה שנה, בסדנה בעיר העתיקה. אני מכין קערות, קנקנים וכלי הגשה גדולים לשימוש של כל יום.' },
+  hila: { name: 'הילה רוזן', craft: 'jewelry', city: 'הרצליה', since: 2017, rating: 4.9, orders: 88, verified: true, story: 'אני מעצבת תכשיטים עדינים מכסף ומזהב, בעיקר עגילים ושרשראות שם. לפני שתכשיט יוצא מהסטודיו, אני שולחת לכם תמונה שלו.' },
+  alon: { name: 'אלון דהן', craft: 'jewelry', city: 'אשדוד', since: 2022, rating: 4.5, orders: 15, verified: false, story: 'אני צורף בתחילת הדרך, עם הרבה סבלנות. מכין טבעות כסף פשוטות וצמידים לפי מידה.' },
+  rotem: { name: 'רותם שגיא', craft: 'metal', city: 'זכרון יעקב', since: 2019, rating: 4.8, orders: 37, verified: true, story: 'אני מרתכת ומעצבת פריטי מתכת לבית: פמוטים, מתלים ומנורות. אני אוהבת לשלב ברזל גולמי עם עץ ופליז.' },
+  boaz: { name: 'בועז קליין', craft: 'metal', city: 'קצרין', since: 2008, rating: 4.4, orders: 61, verified: true, story: 'אני מסגר ברמת הגולן. בונה מעקות, שערים ורהיטי ברזל, הכול לפי מידה ובעבודת יד.' },
+  me: { name: 'הסדנה שלך', craft: 'wood', city: 'ישראל', since: 2026, rating: 5.0, orders: 0, verified: false, story: '' }
+};
+/* grammatical gender for labels: f = feminine, m = masculine, n = neutral (studios) */
+const GENDER = { noa: 'f', maya: 'f', yoni: 'f', dana: 'f', tamar: 'f', hila: 'f', rotem: 'f', hevel: 'n', me: 'n' };
+for (const k in MAKERS) MAKERS[k].g = GENDER[k] || 'm';
+const FEATURED = ['maya', 'noa', 'guy', 'yoni', 'itay', 'dana'];
+
+/* short reviews from buyers (examples) */
+const REVIEWS = {
+  noa: [['מיכל ר.', 5, 'הספלים יצאו בדיוק בגוון שביקשתי, ונועה שלחה תמונות מכל שלב.'], ['עידו ק.', 5, 'קערות יפות וכבדות בדיוק במידה. הגיעו ארוזות היטב.'], ['שרון ל.', 5, 'סבלנות אינסופית לכל השאלות שלי. ממליצה בחום.']],
+  itay: [['אורית מ.', 5, 'השולחן נכנס לפינת האוכל כאילו נבנה בשבילה. וזה בדיוק מה שקרה.'], ['דני ש.', 5, 'איתי הגיע להרכיב בעצמו והסביר איך לשמן את העץ.'], ['נגה ב.', 4, 'לקח קצת יותר זמן מהמתוכנן, אבל התוצאה שווה כל יום.']],
+  maya: [['רון מ.', 5, 'הארנק לאבא יצא מושלם, והאותיות קטנות ועדינות כמו שביקשתי.'], ['טל ג.', 5, 'תפירה מדויקת וריח של עור אמיתי. מאיה שלחה סקיצה לפני שהתחילה.'], ['יעל פ.', 5, 'הזמנתי תיק לאחותי, והיא לא מורידה אותו.']],
+  yoni: [['אביב ש.', 5, 'הטבעת התאימה בדיוק במידה. נפגשנו בסדנה, וזה היה חלק מהחוויה.'], ['מורן ד.', 5, 'התליון עדין ומלוטש יפה. קיבלתי גם קופסה קטנה ומתוקה.']],
+  guy: [['עמרי ל.', 5, 'הסכין חדה מאוד ומאוזנת ביד. רואים שהיא נעשתה באהבה.'], ['הדס נ.', 5, 'גיא הסביר איך לשמור על להב פחמן. שירות של פעם.']],
+  dana: [['ליאת ח.', 5, 'הרקטה מלוטשת לגמרי, בלי קוצים. הילד משחק בה כל יום.'], ['גלעד ר.', 4, 'צעצוע יפה ובטוח. המשלוח לקח כמה ימים יותר.']],
+  amit: [['יוסי ט.', 5, 'חגורה חזקה ופשוטה, בדיוק מה שחיפשתי.'], ['רינת א.', 4, 'ארנק קלאסי ויפה. הייתי שמחה לעוד אפשרויות צבע.']],
+  hevel: [['ענבל ס.', 5, 'האריזה לבד שווה את המחיר. מתנה מושלמת.'], ['אלעד כ.', 5, 'מהיר, מדויק ונעים. בסטודיו ענו לכל שאלה תוך שעה.'], ['נועם ר.', 4, 'ארנק יפה מאוד. ביקשתי שינוי קטן, ועשו אותו בלי בעיה.']],
+  ori: [['שירה ב.', 5, 'המדף עם הקשרים בעץ נראה חי. בדיוק הסגנון שרציתי.'], ['משה א.', 4, 'עבודה טובה ומחיר הוגן. אורי מקשיב ואכפתי.']],
+  tamar: [['דפנה ל.', 5, 'ספלים בצבעים רכים ומרגיעים. תמר כתבה פתק אישי בחבילה.'], ['אסף מ.', 5, 'הקערית קטנה ומושלמת לזיתים. כבר הזמנתי עוד אחת.']],
+  yossi: [['רחל ע.', 5, 'קערת הגשה ענקית ויפה. כל האורחים שאלו מאיפה היא.'], ['איתן צ.', 4, 'עבודה יציבה ומסורתית. האיסוף מעכו היה חוויה בפני עצמה.'], ['מאיה ס.', 5, 'יוסי הסביר לי על הזיגוג ועל השריפה. אמן אמיתי.']],
+  hila: [['קרן ו.', 5, 'העגילים עדינים ונוצצים. הילה שלחה תמונה לפני המשלוח.'], ['שגיא פ.', 5, 'הזמנתי שרשרת שם לאשתי, והיא התרגשה עד דמעות.']],
+  alon: [['נטע ג.', 5, 'טבעת פשוטה ונקייה, בדיוק לפי המידה.'], ['עדי ה.', 4, 'צמיד יפה. לקח קצת זמן, אבל אלון עדכן אותי כל הדרך.']],
+  rotem: [['יונתן ב.', 5, 'הפמוטים משלבים ברזל ופליז בצורה מדהימה. הם במרכז השולחן בשבת.'], ['מיכאל ר.', 5, 'רותם בנתה לנו מנורה לפי מידה. היא הלב של הסלון.']],
+  boaz: [['אבי ק.', 4, 'השער חזק ויפה. ההתקנה התעכבה בכמה ימים.'], ['סיגל מ.', 5, 'מעקה ברזל מעוצב, בדיוק לפי השרטוט שלנו.']],
+  me: []
+};
+for (const k in REVIEWS) REVIEWS[k] = REVIEWS[k].map(([w, s, t]) => ({ w, s, t }));
+
+const ITEMS = [
+  { id: 'i5', title: 'ארנק עם ראשי תיבות', maker: 'maya', craft: 'leather', price: 180, days: '10 ימים', mat: 'עור בעיבוד צמחי', size: '11×9 ס״מ', text: 'ארנק דק עם 6 תאים לכרטיסים, בתפר אוכף ידני. ראשי התיבות מוטבעים בחום.' },
+  { id: 'i1', title: 'ספל בזיגוג ירוק-ים', maker: 'noa', craft: 'ceramic', price: 120, days: 'כשבועיים', mat: 'אבניים, זיגוג ירוק-ים', size: '350 מ״ל', text: 'נזרק על האובניים ומזוגג ביד. אפשר להוסיף שם או תאריך חרוט בתחתית.' },
+  { id: 'i7', title: 'טבעת כסף עם טופז כחול', maker: 'yoni', craft: 'jewelry', price: 340, days: '3 שבועות', mat: 'כסף 925, טופז כחול', size: 'לפי מידה', text: 'טבעת בשיבוץ ידני סביב טופז בהיר. מתאימים את המידה לפני שמתחילים.' },
+  { id: 'i3', title: 'קרש הגשה עם ידית', maker: 'itay', craft: 'wood', price: 220, days: 'שבוע', mat: 'עץ זית מלא', size: '45×22 ס״מ', text: 'קרש הגשה מעץ זית מלא, מגולף ביד ומשומן בשמן מזון. אפשר להוסיף חריטה של שם.' },
+  { id: 'i10', title: 'סכין שף מחושלת', maker: 'guy', craft: 'metal', price: 890, days: '4 שבועות', mat: 'פלדה מרוקעת, ידית עץ', size: 'להב 21 ס״מ', text: 'להב מחושל ביד ומושחז על אבן. מגיעה עם נדן עור.' },
+  { id: 'i2', title: 'סט קערות בזיגוגי אדמה', maker: 'noa', craft: 'ceramic', price: 420, days: '3 שבועות', mat: 'אבניים, זיגוגים ביד', size: '6 קערות, קוטר 14 ס״מ', text: 'שש קערות קטנות, כל אחת בזיגוג משלה. בטוחות למדיח.' },
+  { id: 'i6', title: 'תיק צד מעור צמחי', maker: 'maya', craft: 'leather', price: 650, days: '3 שבועות', mat: 'עור בעיבוד צמחי', size: '26×20 ס״מ', text: 'תיק צד עם רצועה מתכווננת. בוחרים צבע עור וחוטים.' },
+  { id: 'i8', title: 'תליון עץ החיים מכסף', maker: 'yoni', craft: 'jewelry', price: 290, days: 'שבועיים', mat: 'כסף 925', size: 'שרשרת 45 ס״מ', text: 'תליון עגול עם עץ החיים, מנוסר ומלוטש ביד.' },
+  { id: 'i4', title: 'שולחן קפה מפרוסת עץ', maker: 'itay', craft: 'wood', price: 2400, days: '5 שבועות', mat: 'עץ מלא, רגלי ברזל', size: '120×60 ס״מ', text: 'פרוסת עץ שלמה עם קצה טבעי, על רגלי ברזל דקות. כל שולחן יוצא שונה.' },
+  { id: 'i9', title: 'רקטת קוביות מעץ', maker: 'dana', craft: 'wood', price: 160, days: '10 ימים', mat: 'אשור, שמן טבעי', size: '7 חלקים', text: 'צעצוע הרכבה מעץ אשור, מלוטש היטב ובטוח לפעוטות.' },
+  { id: 'i11', title: 'עגילי טיפה מכסף', maker: 'hila', craft: 'jewelry', price: 260, days: '10 ימים', mat: 'כסף 925', size: 'אורך 3 ס״מ', text: 'עגילים עדינים בצורת טיפה, מנוסרים ומלוטשים ביד. אפשר לבקש גם בציפוי זהב.' },
+  { id: 'i12', title: 'קערת הגשה גדולה', maker: 'yossi', craft: 'ceramic', price: 340, days: '3 שבועות', mat: 'חימר אדום, זיגוג שקוף', size: 'קוטר 30 ס״מ', text: 'קערה רחבה לסלטים ולפירות, נזרקת על האובניים בעכו. בטוחה למדיח.' },
+  { id: 'i16', title: 'שרפרף צד עם משטח שיש', maker: 'itay', craft: 'wood', price: 780, days: '3 שבועות', mat: 'אורן כהה, שיש', size: 'גובה 50 ס״מ', text: 'שרפרף צד קטן עם רגליים מגולפות ומשטח שיש עגול. מושלם ליד הכורסה.' },
+  { id: 'i13', title: 'קרש חיתוך עם תעלה', maker: 'ori', craft: 'wood', price: 190, days: '10 ימים', mat: 'עץ מלא, שמן מזון', size: '40×28 ס״מ', text: 'קרש חיתוך רחב עם תעלה למיצים מסביב. אפשר לחרוט שם בפינה.' },
+  { id: 'i14', title: 'קערית בזיגוג שחור', maker: 'tamar', craft: 'ceramic', price: 140, days: 'שבועיים', mat: 'אבניים, זיגוג שחור מבריק', size: 'קוטר 12 ס״מ', text: 'קערית קטנה בזיגוג שחור עמוק, עם בסיס חשוף. לזיתים, לתבלינים או לתה.' },
+  { id: 'i15', title: 'ארנק כיס מעור משומן', maker: 'hevel', craft: 'leather', price: 210, days: '10 ימים', mat: 'עור משומן', size: '10×8 ס״מ', text: 'ארנק קטן לכיס הקדמי, מעור משומן שמקבל גוון עמוק עם הזמן.' }
+];
+
+/* completed deals the price estimate learns from (examples) */
+const PAST = [
+  ['ארנק עור', ['leather'], 190], ['ארנק עם ראשי תיבות', ['leather'], 230], ['מחזיק מפתחות מעור', ['leather'], 80], ['תיק עור', ['leather'], 620], ['חגורת עור', ['leather'], 260], ['כיסוי למחברת מעור', ['leather'], 210],
+  ['ספל קרמיקה', ['ceramic'], 110], ['סט ספלים', ['ceramic'], 400], ['קערה', ['ceramic'], 240], ['סט צלחות', ['ceramic'], 520], ['אגרטל', ['ceramic'], 300],
+  ['קרש חיתוך', ['wood'], 210], ['קרש חיתוך עם חריטה', ['wood'], 250], ['שולחן קפה', ['wood'], 2300], ['שולחן אוכל', ['wood'], 5200], ['מדף קיר', ['wood'], 650], ['צעצוע עץ', ['wood'], 150],
+  ['טבעת כסף', ['jewelry'], 360], ['טבעת אירוסין', ['jewelry'], 1400], ['שרשרת שם', ['jewelry'], 300], ['עגילי כסף', ['jewelry'], 240], ['עגילים מעץ', ['jewelry', 'wood'], 170], ['תליון מעץ זית', ['jewelry', 'wood'], 190],
+  ['סכין שף', ['metal'], 850], ['פמוטים', ['metal'], 480], ['מתלה מתכת', ['metal'], 390]
+];
+
+const S = {
+  role: 'buyer', stack: [{ s: 'home' }], craft: 'all', makersCraft: 'all', boardCraft: 'all', boardTab: 'all', q: '', est: null, saved: new Set(), anim: null,
+  requests: [
+    { id: 'r1', title: 'ארנק עור לאבא, עם ראשי התיבות שלו', crafts: ['leather'], other: '', budget: '₪150–250', budgetSrc: 'buyer', due: 'לפני חנוכה (4.12)', buyer: 'רון מ.', city: 'מודיעין', ago: 'לפני שעתיים', mine: true, text: 'אבא שלי בן 60. מחפש ארנק דק בחום כהה, עם ראשי התיבות מ.ש. חשוב שיגיע עד תחילת חנוכה.',
+      offers: [
+        { maker: 'maya', price: 220, days: 12, note: 'עור בעיבוד צמחי, תפירה ביד, הטבעת אותיות בחום. אשלח סקיצה לפני שאני מתחילה, ואפשר לבחור את צבע החוט. הארנק מגיע עטוף בנייר ועם כרטיס קטן לטיפול בעור.', seen: 2,
+          thread: [{ by: 'maker', t: 'היי רון, תודה על הבקשה! איזה גוון חום אבא שלך אוהב? יש לי חום שוקולד, חום דבש וכמעט שחור.' }, { by: 'buyer', t: 'כהה, כמעט שוקולד.' }, { by: 'maker', t: 'מעולה. ואת ראשי התיבות להטביע בחזית, או בפנים ליד התאים?' }] },
+        { maker: 'amit', price: 170, days: 21, note: 'ארנק קלאסי עם 6 תאים לכרטיסים. ראשי תיבות בהטבעה.', thread: [] },
+        { maker: 'hevel', price: 250, days: 9, note: 'כולל קופסת מתנה ופתק בכתב יד. אפשר לבחור בין עור משומן בחום עמוק לבין עור שחור חלק.',
+          thread: [{ by: 'buyer', t: 'קופסת המתנה כלולה במחיר?' }, { by: 'maker', t: 'כן, הקופסה והפתק כלולים. אפשר גם לבחור צבע חוט.' }, { by: 'buyer', t: 'מעולה, תודה!' }] }] },
+    { id: 'r5', title: 'עגילים מעץ זית עם וו מכסף', crafts: ['jewelry', 'wood'], other: '', budget: '₪150–200', budgetSrc: 'app', due: 'עד סוף החודש', buyer: 'הדר א.', city: 'נצרת', ago: 'לפני שעה', mine: false, text: 'עגילים קטנים בצורת טיפה, מעץ זית, לאמא שלי. משהו עדין.', offers: [] },
+    { id: 'r3', title: 'סט 4 ספלים לחתונה של חברה, עם התאריך חרוט', crafts: ['ceramic'], other: '', budget: '₪300–450', budgetSrc: 'buyer', due: 'עד 20.12', buyer: 'ליאור ב.', city: 'רמת גן', ago: 'אתמול', mine: false, text: 'ארבעה ספלים בגוון תכלת-ירוק, על כל אחד התאריך 03.01.27 בתחתית.',
+      offers: [{ maker: 'noa', price: 380, days: 18, note: 'אשמח! אפשר לבחור בין שלושה גווני זיגוג, אשלח דוגמאות.' }] },
+    { id: 'r2', title: 'שולחן אוכל מעץ ל-6 סועדים, 180 ס״מ', crafts: ['wood'], other: '', budget: '₪4,000–6,000', budgetSrc: 'buyer', due: 'תוך חודשיים', buyer: 'שני ו.', city: 'קריית טבעון', ago: 'לפני 3 ימים', mine: false, text: 'שולחן מעץ מלא, רגליים ישרות, גימור טבעי מט. רוחב 90 ס״מ.',
+      offers: [{ maker: 'itay', price: 5400, days: 45, note: 'אלון אמריקאי מלא, כולל הובלה והרכבה בבית.' }, { maker: 'dana', price: 4200, days: 60, note: 'אורן מלא בגימור שמן. אפשר לבוא לראות דוגמאות בסדנה.' }] },
+    { id: 'r4', title: 'טבעת אירוסין מכסף עם אבן כחולה', crafts: ['jewelry'], other: '', budget: '₪800–1,200', budgetSrc: 'buyer', due: 'אין לחץ', buyer: 'אביב ש.', city: 'ירושלים', ago: 'לפני שבוע', mine: false, text: 'עיצוב עדין עם אבן כחולה במרכז, מוקפת אבנים קטנות. מידה 6.',
+      offers: [{ maker: 'yoni', price: 1100, days: 25, note: 'ספיר כחול בשיבוץ שיניים. נקבע פגישה בסדנה למדידה.' }] }
+  ],
+  orders: [
+    { id: 'o1', title: 'ארנק עור עם ראשי תיבות', maker: 'maya', price: 220, stage: 2, delivery: 'משלוח עד הבית' },
+    { id: 'o2', title: 'ספל בזיגוג ירוק-ים', maker: 'noa', price: 120, stage: 5, delivery: 'איסוף עצמי מחיפה' }
+  ],
+  chats: {
+    maya: [{ me: false, t: 'היי רון! ראיתי את הבקשה לארנק. איזה גוון חום אבא שלך אוהב?' }, { me: true, t: 'כהה, כמעט שוקולד. ואם אפשר, שהאותיות יהיו קטנות.' }, { me: false, t: 'מעולה. סיימתי היום את התפירה, העליתי תמונה למעקב ההזמנה.' }],
+    itay: [{ me: true, t: 'אפשר לחרוט על הקרש משפט של כ-30 אותיות?' }, { me: false, t: 'בטח, עד 40 אותיות בלי תוספת מחיר.' }]
+  },
+  pending: [
+    { id: 'p1', name: 'שירה גולן', greet: 'שירה', email: 'shira.golan@example.com', craft: 'ceramic', city: 'נהריה', note: '6 תמונות מהסטודיו וסרטון קצר של עבודה על האובניים.', flag: false, status: 'pending' },
+    { id: 'p2', name: 'מתנות פלוס', greet: 'צוות מתנות פלוס', email: 'hello.matanotplus@example.com', craft: 'jewelry', city: 'אילת', note: 'התמונות נראות כמו מוצרי קטלוג של מפעל, ואין אף תמונה מהסדנה.', flag: true, status: 'pending' }
+  ]
+};
+/* which photo belongs to which maker, item, request, order and applicant */
+const MAKER_IMG = { noa: 'mk-ceramic', itay: 'mk-wood', maya: 'mk-leather', yoni: 'mk-jewelry', guy: 'mk-metal', dana: 'mk-toys', amit: 'leather-elder', hevel: 'wallet-black', ori: 'carpenter', tamar: 'clay-pot', yossi: 'clay-hands', hila: 'pendant', alon: 'mat-jewelry', rotem: 'forge', boaz: 'forge-shop', me: 'mat-wood' };
+for (const k in MAKER_IMG) MAKERS[k].img = MAKER_IMG[k];
+/* each item has a swipeable gallery: the first photo is the cover */
+const ITEM_GAL = {
+  i5: ['wallet', 'wallet-black', 'mk-leather'], i1: ['mug', 'mug-white', 'mugs-many', 'pr-wheel'], i7: ['ring', 'rq-ring', 'hero-jewel'],
+  i3: ['board', 'tray-wood', 'wood-pencil'], i10: ['knife', 'forge', 'forge-shop'], i2: ['bowls', 'bowl-cream', 'bowl-black', 'clay-hands'],
+  i6: ['bag', 'bag-woven', 'mk-leather'], i8: ['pendant', 'pendant-silver', 'mk-jewelry'], i4: ['slab-table', 'table-dining', 'hero-shop'],
+  i9: ['rocket', 'mk-toys', 'wood-pencil'], i11: ['rq-earrings', 'pendant-silver', 'hero-jewel'], i12: ['pr-bowl', 'bowl-cream', 'wheel-tools'],
+  i16: ['side-table', 'chair-maker', 'hero-shop'], i13: ['tray-wood', 'carpenter', 'wood-pencil'], i14: ['bowl-black', 'clay-pot', 'wheel-tools'], i15: ['wallet-black', 'wallet', 'pr-wallet']
+};
+ITEMS.forEach(i => { i.gal = ITEM_GAL[i.id]; i.v = i.gal[0]; });
+const REQ_IMG = { r1: 'mat-leather', r5: 'rq-earrings', r3: 'rq-mugs', r2: 'rq-table', r4: 'rq-ring' };
+S.requests.forEach(r => { r.v = REQ_IMG[r.id]; r.offers.forEach(o => { o.thread = o.thread || []; if (o.seen == null) o.seen = o.thread.length; }); });
+S.orders[0].v = 'wallet'; S.orders[0].photos = [['יום 1: גזירה ותפירה', 'mk-leather'], ['יום 3: מוכן לבדיקה', 'pr-wallet']];
+S.orders[1].v = 'mug'; S.orders[1].photos = [['יום 2: על האובניים', 'pr-wheel'], ['יום 9: אחרי השריפה', 'pr-mug']];
+S.pending[0].v = ['mat-ceramic', 'pr-wheel', 'pr-bowl'];
+S.pending[1].v = ['rq-ring', 'mat-jewelry', 'rq-mugs'];
+const STAGES = [['ההזמנה סוכמה', 'הפרטים נסגרו בצ׳אט'], ['מקדמה 30%', 'נשמרת עד המסירה'], ['בעבודה', 'היוצר מעלה תמונות מהסדנה'], ['תשלום סופי 70%', 'כשהעבודה מוכנה'], ['איסוף או משלוח', ''], ['ביקורת', 'מדרגים את היוצר']];
+
+/* ---------- price estimate from similar deals ---------- */
+/* material and filler words: the craft checkboxes already carry the material, so only the object's name ("ארנק", "עגילים") is matched */
+const STOP = new Set(['עם', 'של', 'בשביל', 'לאבא', 'לאמא', 'עץ', 'מעץ', 'עור', 'מעור', 'כסף', 'מכסף', 'זהב', 'מזהב', 'זית', 'אגוז', 'מאגוז', 'אלון', 'מאלון', 'צמחי', 'קרמיקה', 'מקרמיקה', 'מתכת', 'ממתכת', 'קטן', 'קטנים', 'גדול', 'ידני', 'חרוט', 'חריטה']);
+const words = t => t.replace(/[^֐-׿a-zA-Z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length >= 3 && !STOP.has(w)).map(w => w.length > 3 && 'הלבומש'.includes(w[0]) && !ITEMWORDS.has(w) ? w.slice(1) : w);
+let ITEMWORDS = new Set();
+function dataPoints() {
+  const pts = PAST.map(([t, c, p]) => ({ t, c, p }));
+  ITEMS.forEach(i => pts.push({ t: i.title, c: [i.craft], p: i.price }));
+  S.requests.forEach(r => r.offers.forEach(o => pts.push({ t: r.title, c: r.crafts, p: o.price })));
+  return pts;
+}
+ITEMWORDS = new Set(dataPoints().flatMap(p => p.t.split(/\s+/)));
+function estimate(title, crafts) {
+  const tw = words(title || ''); if (!tw.length && !crafts.length) return null;
+  const pts = dataPoints().map(p => {
+    const pw = words(p.t);
+    const kw = tw.some(a => pw.some(b => a.includes(b) || b.includes(a)));
+    const cr = crafts.some(c => p.c.includes(c));
+    return { ...p, kw, cr };
+  });
+  let pick = pts.filter(p => p.kw && (p.cr || !crafts.length));
+  if (pick.length < 2) pick = pts.filter(p => p.kw);
+  if (pick.length < 2 && crafts.length) pick = pts.filter(p => p.cr);
+  if (pick.length < 2) return null;
+  const ps = pick.map(p => p.p).sort((a, b) => a - b), q = f => ps[Math.min(ps.length - 1, Math.floor(f * (ps.length - 1) + .5))];
+  const round = n => n >= 1000 ? Math.round(n / 100) * 100 : Math.round(n / 10) * 10;
+  let lo = round(q(.25)), hi = round(q(.75));
+  if (lo === hi) { lo = round(lo * .85); hi = round(hi * 1.15); }
+  return { lo, hi, n: pick.length };
+}
+const estHTML = e => e
+  ? `<span class="eyebrow">הערכת המחיר של בהזמנה</span><span class="val">${ils(e.lo)}–${Number(e.hi).toLocaleString('he-IL')}</span>
+     <p class="small">לפי ${e.n} עסקאות דומות שנעשו באפליקציה. המחיר הסופי נקבע בהצעות של היוצרים.</p>
+     <button type="button" class="link" data-act="useest">להשתמש בהערכה הזאת</button>`
+  : `<span class="eyebrow">הערכת המחיר של בהזמנה</span><p class="small">כתבו מה תרצו ובחרו תחום, ונראה לכם כמה עלו דברים דומים באפליקציה.</p>`;
+
+/* ---------- screens ---------- */
+const MOTION = window.matchMedia('(prefers-reduced-motion: no-preference)');
+const motionOK = () => MOTION.matches;
+const cur = () => S.stack[S.stack.length - 1];
+function go(s, p = {}) { S.stack.push({ s, ...p }); S.anim = 'fwd'; render(true); }
+function back() { if (S.stack.length > 1) S.stack.pop(); S.anim = 'back'; render(true); }
+function tab(s) { S.stack = [{ s }]; S.anim = 'fade'; render(true); }
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2400); }
+
+const head = (title, extra = '') => `<header class="top g">${S.stack.length > 1 ? `<button class="round" data-act="back" aria-label="חזרה">${svg(UI.back)}</button>` : ''}<h1>${title}</h1>${extra}</header>`;
+const avatar = id => { const m = MAKERS[id]; return `<span class="av">${art(m.img)}<span class="ini">${initials(m.name)}</span></span>`; };
+const makerLine = id => { const m = MAKERS[id]; return `<button class="maker-line" data-act="maker" data-v="${id}">${avatar(id)}<span style="display:flex;flex-direction:column"><b>${m.name}</b><span class="small muted">${CRAFTS[m.craft]} · ${m.city} · ★ ${m.rating.toFixed(1)}</span></span></button>`; };
+const craftTags = r => `<span class="tags">${r.crafts.map(c => `<span class="tag">${CRAFTS[c]}</span>`).join('')}${r.other ? `<span class="tag">${esc(r.other)}</span>` : ''}</span>`;
+const heart = id => `<button class="heart" data-act="save" data-v="${id}" aria-pressed="${S.saved.has(id)}" aria-label="שמירה לרשימה שלי">${svg(UI.heart)}</button>`;
+/* every 5th card (starting with the first) is a full-width feature card; the rest form a 2-column grid */
+const workCard = (it, i = 1) => `<div class="work ${i % 5 === 0 ? 'feature' : ''}"><button class="work-open" data-act="item" data-v="${it.id}">${art(it.v)}<span class="label"><span class="t">${it.title}</span><span class="m">${it.mat} · ${MAKERS[it.maker].name}</span><span class="price">${ils(it.price)}</span></span></button>${heart(it.id)}</div>`;
+const worksGrid = list => `<div class="works">${list.map(workCard).join('')}</div>`;
+const dotsHTML = n => n > 1 ? `<div class="dots">${Array.from({ length: n }, (_, i) => `<button data-act="dot" data-v="${i}" aria-label="תמונה ${i + 1} מתוך ${n}" ${i ? '' : 'aria-current="true"'}></button>`).join('')}</div>` : '';
+const filters = (act, val) => `<div class="filters bleed" role="group" aria-label="סינון לפי תחום">${[['all', 'הכל'], ...Object.entries(CRAFTS)].map(([k, v]) => `<button data-act="${act}" data-v="${k}" aria-pressed="${val === k}">${v}</button>`).join('')}</div>`;
+/* fair ranking: a Bayesian average pulls makers with few orders toward 4.5, so 5.0 from 2 orders doesn't beat 4.9 from 60 */
+const score = m => (m.rating * m.orders + 4.5 * 10) / (m.orders + 10);
+const ranked = (craft = 'all') => Object.keys(MAKERS).filter(id => id !== 'me' && (craft === 'all' || MAKERS[id].craft === craft))
+  .sort((a, b) => score(MAKERS[b]) - score(MAKERS[a]) || MAKERS[b].orders - MAKERS[a].orders);
+const craftRank = id => ranked(MAKERS[id].craft).indexOf(id) + 1;
+const itemsOf = id => ITEMS.filter(i => i.maker === id);
+/* a row in the makers list: rank, photo, rating and orders, plus quick buttons to the maker's works and reviews */
+const makerRow = (id, n) => { const m = MAKERS[id];
+  return `<div class="rank-row ${n ? '' : 'nonum'}"><button class="rank-main" data-act="maker" data-v="${id}">${n ? `<span class="num">${n}</span>` : ''}${avatar(id)}<span class="info"><span class="nm">${m.name}</span>
+    <span class="sub">${CRAFTS[m.craft]} · ${m.city}</span><span class="sub"><span class="stars">★ ${m.rating.toFixed(1)}</span> · ${m.orders} הזמנות</span></span></button>
+    <div class="rank-links"><button class="chip" data-act="makerat" data-v="${id}|works">עבודות (${itemsOf(id).length})</button><button class="chip" data-act="makerat" data-v="${id}|reviews">ביקורות (${REVIEWS[id].length})</button></div></div>`; };
+function worksHTML() {
+  const q = S.q.trim();
+  const list = ITEMS.filter(i => (S.craft === 'all' || i.craft === S.craft) && (!q || i.title.includes(q) || i.mat.includes(q) || CRAFTS[i.craft].includes(q) || MAKERS[i.maker].name.includes(q)));
+  const works = list.length ? worksGrid(list) : '';
+  if (!q) return works || `<p class="empty">לא מצאנו עבודה כזאת. אפשר לתאר אותה בבקשה, ויוצרים יציעו לבנות.</p>`;
+  const people = ranked().filter(id => { const m = MAKERS[id]; return m.name.includes(q) || m.city.includes(q) || CRAFTS[m.craft].includes(q); });
+  if (!people.length && !list.length) return `<p class="empty">לא מצאנו יוצרים או עבודות שמתאימים ל״${esc(q)}״. נסו מילה אחרת, או תארו מה תרצו בבקשה, ויוצרים יציעו לבנות.</p>`;
+  return `${people.length ? `<div class="found"><h3 class="sub-title">יוצרים</h3><div class="rank">${people.map(id => makerRow(id)).join('')}</div></div>` : ''}
+    ${list.length ? `<h3 class="sub-title" style="margin-bottom:14px">עבודות</h3>${works}` : ''}`;
+}
+const HERO = [['hero', 'גילוף בעץ'], ['hero-clay', 'על האובניים'], ['hero-jewel', 'בשולחן הצורפת']];
+const HEADLINE = ['יצירות שעוד לא קיימות.', 'עד שתבקשו.'];
+const bubbleHTML = (b, mine, isNew) => `<div class="bubble ${mine ? 'me' : 'them'}${isNew ? ' new' : ''}">${esc(b.t)}</div>`;
+const msgCount = n => n === 1 ? 'הודעה אחת' : `${n} הודעות`;
+
+/* ---------- conversations: plain chats ("c:<maker>") and offer threads ("o:<request>|<offer index>") ---------- */
+const offerAt = v => { const [rid, i] = v.split('|'), r = S.requests.find(x => x.id === rid); return { r, o: r.offers[+i], i: +i }; };
+/* who is looking at this offer's thread: the buyer who posted it, the maker who sent it, or nobody (it is private) */
+const sideFor = (r, o) => S.role === 'buyer' && r.mine ? 'buyer' : S.role === 'maker' && o.maker === 'me' ? 'maker' : null;
+const threadOf = key => key.startsWith('o:') ? offerAt(key.slice(2)).o.thread : (S.chats[key.slice(2)] = S.chats[key.slice(2)] || []);
+const isMine = (key, b) => { if (!key.startsWith('o:')) return b.me; const { r, o } = offerAt(key.slice(2)); return b.by === sideFor(r, o); };
+const unreadOf = (r, o) => { const side = sideFor(r, o), th = o.thread, last = th[th.length - 1]; return !!(side && last && last.by !== side && th.length > (o.seen || 0)); };
+const buyerAv = name => `<span class="av"><span class="ini solo" style="background:var(--accent)">${esc(initials(name))}</span></span>`;
+
+/* the one chat layout used for every conversation: header, a message list that scrolls by itself, then the composer */
+const chatShell = ({ key, title, extra = '', intro = '', foot = '', canWrite = true, empty = 'שלחו הודעה ראשונה.', plain = false }) => {
+  const list = canWrite ? threadOf(key) : [];
+  return `<div class="chat-shell">${head(title, extra)}
+    <div class="thread-wrap"><div class="thread g${plain ? ' plain' : ''}" id="thread" data-thread="${esc(key)}">${intro}
+      <div class="bubbles" id="bubbles">${list.map(b => bubbleHTML(b, isMine(key, b))).join('') || (canWrite ? `<p class="empty">${empty}</p>` : '')}</div></div>
+      <button class="newpill" id="newpill" data-act="tobottom" hidden>הודעה חדשה ↓</button></div>
+    ${foot}
+    ${canWrite ? `<form class="composer" data-form="msg" data-v="${esc(key)}"><input id="msg" name="msg" type="text" enterkeyhint="send" placeholder="כתבו הודעה..." autocomplete="off" aria-label="הודעה"><button class="btn small" type="submit">שליחה</button></form>` : ''}
+  </div>`; };
+
+/* simulated replies: pick something that fits what was asked, otherwise rotate a few friendly answers */
+let replyN = 0;
+const MAKER_REPLIES = [
+  [/צבע|גוון|חום|שחור|לבן|ירוק|כחול|תכלת/, 'יש כמה גוונים לבחירה. אשלח לכאן תמונה של שלוש דוגמאות, ותבחרו את מה שהכי מתאים.'],
+  [/מיד|גודל|גדול|קטן|ס״מ|סמ|אורך|רוחב|גובה/, 'אפשר להתאים את המידות בדיוק. כתבו לי כמה ס״מ, ואגיד אם זה משנה את המחיר.'],
+  [/מחיר|עול|הנחה|יקר|תשלום|משלוח/, 'המחיר כולל את החומרים ואת כל העבודה. משלוח עד הבית עולה עוד ₪35, ואיסוף מהסדנה בחינם.'],
+  [/מתי|זמן|דחוף|להספיק|תאריך|חג|ימים/, 'אפשר להספיק בזמן. במהלך העבודה אשלח תמונות מהסדנה, כדי שתראו איך זה מתקדם.'],
+  [/תמונ|דוגמ|לראות|סקיצה/, 'בטח. בפרופיל שלי יש עוד עבודות, ואשלח לכאן גם תמונה של עבודה דומה.'],
+  [/תודה|מעולה|יופי|מושלם|סגור/, 'בכיף! אם עולה עוד שאלה, אני כאן.']];
+const MAKER_GENERIC = ['שאלה טובה. אבדוק ואחזור אליכם עוד היום.', 'אפשר לגמרי. אכין סקיצה קטנה, כדי שנראה יחד איך זה ייראה.', 'בשמחה. אם סוגרים השבוע, אפשר להתחיל כבר ביום ראשון.'];
+const BUYER_REPLIES = ['תודה! זה נשמע טוב.', 'אפשר לראות תמונה של עבודה דומה שעשית?', 'מעולה. אחשוב על זה ואחזור אליך עד הערב.'];
+let lastReply = '';
+const makerReply = text => { const hit = MAKER_REPLIES.find(([re]) => re.test(text));
+  lastReply = hit && hit[1] !== lastReply ? hit[1] : MAKER_GENERIC[replyN++ % MAKER_GENERIC.length]; return lastReply; };
+const buyerReply = () => BUYER_REPLIES[replyN++ % BUYER_REPLIES.length];
+
+/* offer card on a request: all offers look alike, tapping opens the full offer and its conversation */
+const offerCard = (r, o, i) => { const m = MAKERS[o.maker], side = sideFor(r, o), n = o.thread.length, unread = unreadOf(r, o);
+  return `<button class="offer-card" data-act="offer" data-v="${r.id}|${i}" aria-label="ההצעה של ${m.name}: ${ils(o.price)}, ${o.days} ימים${unread ? ', הודעה חדשה' : ''}">
+    <span class="who">${avatar(o.maker)}<span class="info"><b>${m.name}</b><span class="small muted">★ ${m.rating.toFixed(1)} · ${CRAFTS[m.craft]} · ${m.city}</span></span>${unread ? '<span class="udot" aria-hidden="true"></span>' : ''}</span>
+    <span class="onums"><span><span class="k">מחיר</span><span class="v">${ils(o.price)}</span></span><span><span class="k">זמן הכנה</span><span class="v">${o.days} ימים</span></span></span>
+    <span class="small clamp">${esc(o.note)}</span>
+    <span class="foot"><span class="muted">${side ? (n ? `${msgCount(n)}${unread ? ' · <b style="color:var(--heart)">חדשה</b>' : ''}` : 'אין עדיין שיחה') : 'השיחה פרטית'}</span><span class="go">${side ? 'לקרוא ולדבר' : 'לקריאת ההצעה'} ←</span></span></button>`; };
+
+/* ---------- bottom sheets ---------- */
+let sheetReturn = null, sheetT;
+function openSheet(html, label) {
+  const s = document.getElementById('sheet'); clearTimeout(sheetT);
+  sheetReturn = document.activeElement;
+  s.innerHTML = `<div class="sheet-back" data-act="closesheet"></div><div class="sheet-panel" role="dialog" aria-modal="true" aria-label="${esc(label)}">${html}</div>`;
+  s.hidden = false; s.classList.remove('on'); document.body.classList.add('sheet-open');
+  void s.offsetWidth; s.classList.add('on');
+  const h = s.querySelector('h2'); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); }
+}
+function closeSheet(now) {
+  const s = document.getElementById('sheet'); if (s.hidden) return;
+  s.classList.remove('on'); document.body.classList.remove('sheet-open');
+  const done = () => { s.hidden = true; s.innerHTML = ''; };
+  clearTimeout(sheetT); if (now || !motionOK()) done(); else sheetT = setTimeout(done, 320);
+  if (!now && sheetReturn && document.contains(sheetReturn)) sheetReturn.focus({ preventScroll: true });
+}
+const QUICK = [g => `שלום ${g}, תודה שנרשמת לבהזמנה.`, g => `שלום ${g}, תודה על הזמן שהקדשת להרשמה.`, g => `היי ${g}, קראנו בעיון את מה ששלחת.`];
+const rejectSheet = p => `<div class="grab" aria-hidden="true"></div>
+  <form class="sheet-body" data-form="reject" data-v="${p.id}" novalidate>
+    <div><h2 class="sec-title" style="font-size:27px">דחיית ההרשמה</h2><p class="small muted" style="margin-top:4px">כותבים את ההודעה במילים שלכם. שום דבר לא נשלח לפני שלוחצים ״שליחה ודחייה״.</p></div>
+    <div class="to-line"><span class="eyebrow">אל</span><b>${esc(p.name)}</b><span class="em" dir="ltr">${esc(p.email)}</span></div>
+    <fieldset class="field"><legend class="lbl">איך לשלוח? אפשר לבחור את שתי הדרכים</legend>
+      <label class="opt"><input type="checkbox" name="byMail" id="rj-mail"><span class="grow">שליחה במייל</span><span class="em" dir="ltr">${esc(p.email)}</span></label>
+      <label class="opt"><input type="checkbox" name="byApp" id="rj-app"><span class="grow">הודעה באפליקציה</span></label></fieldset>
+    <div class="field" id="rj-subj-f" hidden><label for="rj-subj">נושא המייל</label><input class="input" id="rj-subj" name="subject" value="לגבי ההרשמה שלך לבהזמנה" autocomplete="off"></div>
+    <div class="field"><label for="rj-text">ההודעה שלך</label>
+      <div class="qs" role="group" aria-label="התחלה מהירה"><span class="small muted">התחלה מהירה:</span>${QUICK.map((q, i) => `<button type="button" class="chip" data-act="qs" data-v="${i}">${esc(q(p.greet).split(',')[1].trim().replace(/\.$/, ''))}</button>`).join('')}</div>
+      <textarea class="input big" id="rj-text" name="text" rows="6" placeholder="כתבו כאן במילים שלכם: למה ההרשמה לא אושרה, ומה אפשר לעשות אחרת."></textarea></div>
+    <p class="small muted">בהדגמה לא נשלח מייל אמיתי.</p>
+    <p class="hint" id="rj-why" aria-live="polite"></p>
+    <div class="row"><button type="button" class="btn ghost block" data-act="closesheet">ביטול</button><button type="submit" class="btn block warnbtn" id="rj-send" disabled>שליחה ודחייה</button></div>
+  </form>`;
+/* the send button only wakes up when there is a message and at least one way to send it */
+function rjState() {
+  const f = document.querySelector('form[data-form="reject"]'); if (!f) return null;
+  const mail = f.querySelector('#rj-mail').checked, app = f.querySelector('#rj-app').checked, text = f.querySelector('#rj-text').value.trim();
+  return { f, mail, app, text, subject: f.querySelector('#rj-subj').value.trim() || 'לגבי ההרשמה שלך לבהזמנה', ok: !!text && (mail || app) };
+}
+function rjCheck() {
+  const st = rjState(); if (!st) return;
+  st.f.querySelector('#rj-subj-f').hidden = !st.mail;
+  st.f.querySelector('#rj-send').disabled = !st.ok;
+  st.f.querySelector('#rj-why').textContent = st.ok ? 'מוכן לשליחה.' : !st.text && !(st.mail || st.app) ? 'כדי לשלוח: כתבו הודעה ובחרו לפחות דרך שליחה אחת.' : !st.text ? 'כדי לשלוח: כתבו הודעה.' : 'כדי לשלוח: בחרו מייל, אפליקציה או את שניהם.';
+}
+const chooseSheet = v => { const { r, o } = offerAt(v), m = MAKERS[o.maker];
+  return `<div class="grab" aria-hidden="true"></div><div class="sheet-body">
+    <div><h2 class="sec-title" style="font-size:27px">לבחור את ההצעה של ${m.name}?</h2><p class="small muted" style="margin-top:4px">${esc(r.title)}</p></div>
+    <div class="row">${avatar(o.maker)}<span style="display:flex;flex-direction:column"><b>${m.name}</b><span class="small muted">★ ${m.rating.toFixed(1)} · ${CRAFTS[m.craft]} · ${m.city}</span></span></div>
+    <div class="onums"><span><span class="k">מחיר</span><span class="v">${ils(o.price)}</span></span><span><span class="k">זמן הכנה</span><span class="v">${o.days} ימים</span></span></div>
+    <div class="field"><span class="lbl">מה קורה עכשיו</span>
+      <ol class="how"><li><span class="num">1</span><span><b>סיכום פרטים בצ׳אט</b><span class="small muted">סוגרים יחד צבע, מידות ואיך זה מגיע אליכם.</span></span></li>
+        <li><span class="num">2</span><span><b>מקדמה 30%</b><span class="small muted">והשאר רק כשהעבודה מוכנה.</span></span></li>
+        <li><span class="num">3</span><span><b>תמונות מהסדנה</b><span class="small muted">רואים את זה נולד, שלב אחרי שלב.</span></span></li></ol></div>
+    <div class="row"><button type="button" class="btn ghost block" data-act="closesheet">עוד לא</button><button type="button" class="btn block" data-act="choose" data-v="${v}">כן, בוחרים</button></div></div>`; };
+
+const SCREENS = {
+  home: () => `<header class="top g"><div class="wordmark">בהזמנה<small>יצירה בעבודת יד · בהזמנה אישית</small></div>
+      <button class="round me-btn" data-act="go" data-v="profile" aria-label="החשבון שלי">ר</button></header>
+    <section class="hero carwrap${S.introDone ? '' : ' intro'}"><div class="car" data-car>${HERO.map(([n, c], i) => `<div class="slide">${art(n, i ? '' : 'eager')}<span class="credit">${c} · צילום לדוגמה</span></div>`).join('')}</div>
+      <div class="shade"></div>
+      <div class="copy g"><h1>${HEADLINE.map(l => `<span class="ln">${l.split(' ').map(w => `<span class="w"><span>${w}</span></span>`).join(' ')}</span>`).join('')}</h1>
+        <p>מתארים את מה שאתם מדמיינים, ויוצרים מכל הארץ מציעים ליצור אותו בשבילכם, ביד.</p>
+        <button class="btn on-image" data-act="tab" data-v="post">לתאר בקשה</button>${dotsHTML(HERO.length)}</div></section>
+    <div class="stack g">
+      <label class="search">${svg(UI.search)}<input id="q" type="search" placeholder="חיפוש: יוצרים, ארנק, ספל, עץ..." value="${esc(S.q)}" aria-label="חיפוש"></label>
+      <section><div class="sec-head"><h2 class="sec-title">חומרים</h2></div>
+        <div class="rail bleed" role="group" aria-label="סינון לפי חומר">
+          <button class="mat" data-act="craft" data-v="all" aria-pressed="${S.craft === 'all'}"><span class="all">הכל</span><span class="n">הכל</span></button>
+          ${Object.entries(CRAFTS).map(([k, v]) => `<button class="mat" data-act="craft" data-v="${k}" aria-pressed="${S.craft === k}">${art(MAT[k])}<span class="n">${v}</span></button>`).join('')}</div></section>
+      <section><div class="sec-head"><h2 class="sec-title">מהסדנאות</h2><span class="small muted">${ITEMS.length} יצירות</span></div><div id="works">${worksHTML()}</div></section>
+      <section><div class="sec-head"><h2 class="sec-title">היוצרים</h2><button class="link" data-act="makers" data-v="all">לכל היוצרים</button></div>
+        <div class="rail bleed">${FEATURED.map(id => { const m = MAKERS[id]; return `<button class="maker" data-act="maker" data-v="${id}">${art(m.img)}<span class="shade"></span>
+          <span class="info"><span class="nm">${m.name}</span><span class="sm">${CRAFTS[m.craft]} · ${m.city}</span><span class="stars">★ ${m.rating.toFixed(1)} · ${m.orders} הזמנות</span></span></button>`; }).join('')}</div></section>
+      <section class="band bleed pfx">${art('hero-shop')}<div class="shade"></div><div class="copy g"><q>כל יצירה כאן מתחילה בשיחה אחת.</q><span style="opacity:.88">ומסתיימת אצלכם בבית.</span></div></section>
+      <section><div class="sec-head"><h2 class="sec-title">יוצרים לפי תחום</h2></div>
+        <div class="rail bleed">${Object.entries(CRAFTS).map(([c, cn]) => { const id = ranked(c)[0], m = MAKERS[id]; return `<button class="best-card" data-act="maker" data-v="${id}">${art(m.img)}
+          <span class="label"><span class="craft">${cn}</span><span class="t" style="margin-top:6px">${m.name}</span><span class="m">★ ${m.rating.toFixed(1)} · ${m.orders} הזמנות</span></span></button>`; }).join('')}</div>
+        <button class="link" style="margin-top:14px" data-act="makers" data-v="all">לדירוג המלא בכל תחום</button></section>
+      <section class="how-field bleed g"><h2 class="sec-title">איך זה עובד</h2>
+        <ol class="how"><li><span class="num">1</span><span><b>מתארים</b><span class="small muted">מה תרצו, באיזה חומר ועד מתי. בהזמנה מציעה הערכת מחיר.</span></span></li>
+          <li><span class="num">2</span><span><b>מקבלים הצעות</b><span class="small muted">יוצרים שולחים מחיר וזמן. מדברים איתם, ואז בוחרים.</span></span></li>
+          <li><span class="num">3</span><span><b>רואים את זה נולד</b><span class="small muted">תמונות מהסדנה בכל שלב, עד שזה אצלכם.</span></span></li></ol>
+        <button class="btn" data-act="tab" data-v="post">לתאר בקשה</button></section>
+    </div>`,
+
+  item: ({ id }) => { const it = ITEMS.find(i => i.id === id);
+    return `${head('')}<section class="gallery carwrap"><div class="car" data-car>${it.gal.map(n => `<div class="slide">${art(n)}</div>`).join('')}</div>
+      ${it.gal.length > 1 ? `<span class="count" aria-hidden="true">${it.gal.length} תמונות</span>` : ''}${heart(it.id)}${dotsHTML(it.gal.length)}</section>
+    <div class="stack g">
+      <div style="display:flex;flex-direction:column;gap:12px"><h2 class="display">${it.title}</h2><span class="muted">${CRAFTS[it.craft]} · מאת ${MAKERS[it.maker].name}</span><span class="big-price">${ils(it.price)}</span></div>
+      <dl class="specs"><div><dt>חומר</dt><dd>${it.mat}</dd></div><div><dt>מידות</dt><dd>${it.size}</dd></div><div><dt>זמן הכנה</dt><dd>${it.days}</dd></div><div><dt>יוצר</dt><dd>${MAKERS[it.maker].name}</dd></div></dl>
+      <p>${it.text}</p>
+      ${makerLine(it.maker)}
+      <form class="f" data-form="order" data-v="${it.id}">
+        <div class="field"><span class="lbl">איך זה יגיע אליכם?</span>
+          <label class="opt"><input type="radio" name="del" id="del-pick" value="איסוף עצמי מ${MAKERS[it.maker].city}" checked><span class="grow">איסוף מהסדנה ב${MAKERS[it.maker].city}</span><span>חינם</span></label>
+          <label class="opt"><input type="radio" name="del" id="del-ship" value="משלוח עד הבית"><span class="grow">משלוח עד הבית</span><span>${ils(35)}</span></label></div>
+        <div class="field"><label for="wish">בקשה מיוחדת</label><input class="input" id="wish" name="wish" placeholder="למשל: חריטת השם ״נועם״"></div>
+        <div class="row"><button class="btn block" type="submit">הזמנה</button><button class="btn ghost block" type="button" data-act="chat" data-v="${it.maker}">שאלה ליוצר</button></div>
+      </form>
+    </div>`; },
+
+  maker: ({ id }) => { const m = MAKERS[id], items = itemsOf(id), rank = craftRank(id), f = m.g === 'f', revs = REVIEWS[id] || [];
+    const tabs = [['works', 'עבודות'], ['reviews', 'ביקורות'], ...(m.story ? [['story', 'הסיפור']] : [])];
+    return `${head('')}<section class="banner pfx">${art(m.img)}<div class="shade"></div>
+      <div class="copy g"><h2>${m.name}</h2><span class="where">${CRAFTS[m.craft]} · ${m.city}</span>
+      <span class="tags">${m.verified ? `<span class="tag">${svg(UI.check)} עבודת יד מאומתת</span>` : `<span class="tag">${f ? 'יוצרת חדשה' : 'יוצר חדש'}</span>`}</span></div></section>
+    <div class="stack g">
+      <div class="stats four"><div><strong>★ ${m.rating.toFixed(1)}</strong><span>דירוג</span></div><div><strong data-count="${m.orders}">${m.orders}</strong><span>הזמנות</span></div>
+        <div><strong>${rank ? `#${rank}` : '—'}</strong><span>${rank ? `בדירוג ה${CRAFTS[m.craft]}` : 'עוד בלי דירוג'}</span></div><div><strong>${m.since}</strong><span>${f ? 'יוצרת' : 'יוצר'} מאז</span></div></div>
+      <nav class="ptabs bleed g" aria-label="קפיצה בתוך הפרופיל">${tabs.map(([k, l], i) => `<button data-act="jump" data-v="${k}" ${i ? '' : 'aria-current="true"'}>${l}${k === 'works' ? ` (${items.length})` : k === 'reviews' ? ` (${revs.length})` : ''}</button>`).join('')}</nav>
+      <section id="sec-works"><div class="sec-head"><h2 class="sec-title">עבודות</h2></div>${items.length ? worksGrid(items) : `<p class="muted">עוד אין עבודות בגלריה של ${m.name}. אפשר לשלוח בקשה אישית בכפתור שלמטה.</p>`}</section>
+      <section id="sec-reviews"><div class="sec-head"><h2 class="sec-title">ביקורות</h2><span class="small muted">★ ${m.rating.toFixed(1)} · ${m.orders} הזמנות</span></div>
+        ${revs.length ? `<div class="reviews">${revs.map(r => `<div class="review"><span class="st" aria-label="${r.s} כוכבים">${'★'.repeat(r.s)}${'☆'.repeat(5 - r.s)}</span><q>${esc(r.t)}</q><span class="small muted">${esc(r.w)} · הזמנה ששולמה באפליקציה</span></div>`).join('')}</div>`
+          : `<p class="muted">עוד אין ביקורות. הן יופיעו כאן אחרי ההזמנה הראשונה.</p>`}</section>
+      ${m.story ? `<section id="sec-story"><div class="sec-head"><h2 class="sec-title">הסיפור</h2></div><p class="story">${m.story}</p></section>` : ''}
+      ${rank ? `<button class="link" style="align-self:flex-start" data-act="makers" data-v="${m.craft}">לדירוג היוצרים ב${CRAFTS[m.craft]}</button>` : ''}
+      <button class="btn block" data-act="direct" data-v="${id}">בקשה אישית מ${m.name.split(' ')[0]}</button>
+      <div class="tab-pad" aria-hidden="true"></div>
+    </div>`; },
+
+  makers: () => { const list = ranked(S.makersCraft);
+    return `${head('היוצרים')}
+    <div class="stack g" style="gap:18px">
+      <p class="muted">${S.makersCraft === 'all' ? 'כל היוצרים באפליקציה, לפי הדירוג ומספר ההזמנות.' : `היוצרים ב${CRAFTS[S.makersCraft]}, לפי הדירוג ומספר ההזמנות.`}</p>
+      ${filters('mcraft', S.makersCraft)}
+      <p class="small muted">הסדר נקבע לפי הציון הממוצע ומספר ההזמנות שהושלמו</p>
+      <div class="rank">${list.map((id, i) => makerRow(id, i + 1)).join('')}</div>
+    </div>`; },
+
+  board: () => { const list = S.requests.filter(r => (S.boardCraft === 'all' || r.crafts.includes(S.boardCraft)) && (S.boardTab === 'all' || r.mine));
+    return `${head('לוח בקשות')}
+    <div class="stack g" style="gap:18px">
+      <p class="muted">קונים מתארים מה הם רוצים, יוצרים שולחים הצעות.${S.role === 'maker' ? ' מצאו בקשה שמתאימה לכם.' : ''}</p>
+      <div class="seg"><button data-act="btab" data-v="all" aria-pressed="${S.boardTab === 'all'}">כל הבקשות</button><button data-act="btab" data-v="mine" aria-pressed="${S.boardTab === 'mine'}">הבקשות שלי</button></div>
+      ${filters('bcraft', S.boardCraft)}
+      <div>${list.length ? list.map(r => `<button class="req" data-act="req" data-v="${r.id}">${art(r.v)}
+        <span class="info"><span class="row between">${craftTags(r)}<span class="small muted">${r.ago}</span></span>
+        <span class="t">${esc(r.title)}</span>
+        <span class="meta"><span>${r.budgetSrc === 'app' ? 'הערכה' : 'תקציב משוער'} <b>${esc(r.budget)}</b></span><span>מתי <b>${esc(r.due)}</b></span></span>
+        <span class="meta"><span>${r.offers.length ? `<b>${r.offers.length}</b> הצעות` : 'עוד אין הצעות'}</span>${r.closed ? '<span>· נסגרה הזמנה</span>' : ''}${r.to ? `<span>· ישירות ל${MAKERS[r.to].name}</span>` : ''}</span></span></button>`).join('') : '<p class="empty">אין כאן בקשות עדיין.</p>'}</div>
+    </div>`; },
+
+  req: ({ id }) => { const r = S.requests.find(x => x.id === id), owner = S.role === 'buyer' && r.mine, picked = r.closed && r.offers[r.picked];
+    return `${head('בקשה')}
+    <div class="stack g">
+      <div class="row" style="align-items:flex-start;gap:14px"><div style="width:104px;flex:none">${art(r.v, '', '')}</div>
+        <div style="display:flex;flex-direction:column;gap:6px;min-width:0">${craftTags(r)}<h2 class="display" style="font-size:27px">${esc(r.title)}</h2><span class="small muted">${esc(r.buyer)} · ${esc(r.city)} · ${r.ago}</span></div></div>
+      <p>${esc(r.text)}</p>
+      <dl class="specs"><div><dt>${r.budgetSrc === 'app' ? 'הערכת האפליקציה' : 'תקציב משוער'}</dt><dd>${esc(r.budget)}</dd></div><div><dt>מתי</dt><dd>${esc(r.due)}</dd></div></dl>
+      <section><div class="sec-head" style="margin-bottom:6px"><h2 class="sec-title">${r.offers.length === 1 ? 'הצעה אחת' : r.offers.length ? `${r.offers.length} הצעות` : 'מחכים להצעות'}</h2></div>
+      ${r.offers.length ? `<p class="small muted" style="margin-bottom:14px">${picked ? `נבחרה ההצעה של ${MAKERS[picked.maker].name}. אפשר להמשיך לדבר בתוך ההצעה.` : owner ? 'פתחו הצעה כדי לקרוא אותה ולדבר עם היוצר לפני שבוחרים' : 'לחיצה על הצעה פותחת אותה במלואה.'}</p>` : ''}
+      <div style="display:flex;flex-direction:column;gap:12px">${r.offers.map((o, i) => offerCard(r, o, i)).join('')}
+      ${!r.offers.length ? '<p class="empty">יוצרים מתאימים קיבלו התראה. בדרך כלל ההצעה הראשונה מגיעה תוך יום.</p>' : ''}</div></section>
+      ${S.role === 'maker' && !r.closed ? `<form class="f panel" data-form="offer" data-v="${r.id}"><h2 class="sec-title">שליחת הצעה</h2>
+        <div class="row" style="gap:16px"><div class="field" style="flex:1"><label for="o-price">מחיר (₪)</label><input class="input" id="o-price" name="price" inputmode="numeric" value="200" required></div>
+        <div class="field" style="flex:1"><label for="o-days">ימי עבודה</label><input class="input" id="o-days" name="days" inputmode="numeric" value="14" required></div></div>
+        <div class="field"><label for="o-note">כמה מילים לקונה</label><textarea class="input" id="o-note" name="note">אשמח להכין את זה. אשלח סקיצה לפני שאני מתחיל/ה.</textarea></div>
+        <button class="btn" type="submit">שליחת ההצעה</button></form>` : ''}
+      ${S.role === 'buyer' && !r.mine ? '<p class="note">זו בקשה של קונה אחר. כדי לראות איך שולחים הצעה, עברו למצב ״יוצר״ במסך החשבון.</p>' : ''}
+    </div>`; },
+
+  post: ({ to } = {}) => { const pre = to ? [MAKERS[to].craft] : [];
+    S.est = null;
+    return `${head(to ? `בקשה ל${MAKERS[to].name}` : 'בקשה חדשה')}
+    <div class="stack g">
+      <p class="muted">${to ? `הבקשה תישלח רק אל ${MAKERS[to].name}, שיחזור אליכם עם הצעת מחיר.` : 'הבקשה תופיע בלוח, ויוצרים מתאימים מכל הארץ ישלחו הצעות.'}</p>
+      <form class="f" data-form="post" data-v="${to || ''}">
+        <div class="field"><label for="p-title">מה תרצו שיכינו בשבילכם?</label><input class="input" id="p-title" name="title" required placeholder="למשל: קרש חיתוך עם שמות הילדים" autocomplete="off"></div>
+        <div class="field"><span class="lbl">תחום · אפשר לבחור כמה</span>
+          <div class="picks">${Object.entries(CRAFTS).map(([k, v]) => `<label class="pick"><input type="checkbox" name="crafts" value="${k}" id="pc-${k}" ${pre.includes(k) ? 'checked' : ''}><span>${v}</span></label>`).join('')}
+            <label class="pick"><input type="checkbox" id="pc-other" name="otherOn" value="1"><span>אחר</span></label></div>
+          <input class="input" id="p-other" name="other" placeholder="איזה תחום? למשל: זכוכית, טקסטיל, קליעה" hidden>
+          <span class="hint">עגילים מעץ? בחרו גם ״תכשיטים״ וגם ״עץ״.</span></div>
+        <div class="field"><label for="p-text">פרטים</label><textarea class="input" id="p-text" name="text" placeholder="מידות, צבעים, למי זה מיועד..."></textarea></div>
+        <div class="estimate" id="estimate" aria-live="polite">${estHTML(null)}</div>
+        <div class="field"><label for="p-budget">תקציב משוער <span class="muted" style="font-weight:400">(לא חובה)</span></label><input class="input" id="p-budget" name="budget" placeholder="לדוגמה: 200–300 ₪"><span class="hint">אם תשאירו ריק, היוצרים יראו את הערכת האפליקציה.</span></div>
+        <div class="field"><label for="p-due">עד מתי?</label><input class="input" id="p-due" name="due" placeholder="למשל: לפני יום ההולדת, 12.12"></div>
+        <div class="field"><span class="lbl">תמונות השראה</span><div class="photos" id="photos"><button type="button" class="add-photo" data-act="addphoto" aria-label="הוספת תמונה">+</button></div><span class="hint">בהדגמה, לחיצה על + מוסיפה תמונה לדוגמה.</span></div>
+        <button class="btn block" type="submit">${to ? 'שליחה ליוצר' : 'פרסום בלוח'}</button>
+      </form>
+    </div>`; },
+
+  /* every conversation in one list: offer conversations (labelled with the request) and direct chats */
+  chats: () => { const rows = [];
+    S.requests.forEach(r => r.offers.forEach((o, i) => { const side = sideFor(r, o), th = o.thread; if (!side || !th.length) return; const last = th[th.length - 1], un = unreadOf(r, o);
+      rows.push(`<button class="item" data-act="offer" data-v="${r.id}|${i}">${side === 'buyer' ? avatar(o.maker) : buyerAv(r.buyer)}<span class="info"><span class="row between" style="gap:8px"><b>${side === 'buyer' ? MAKERS[o.maker].name : esc(r.buyer)}</b><span class="tag">הצעה</span></span>
+        <div class="about">על: ${esc(r.title)}</div><div class="last">${last.by === side ? 'את/ה: ' : ''}${esc(last.t)}</div></span>${un ? '<span class="udot" aria-label="הודעה חדשה"></span>' : ''}</button>`); }));
+    Object.keys(S.chats).forEach(id => { const m = MAKERS[id], last = S.chats[id][S.chats[id].length - 1];
+      rows.push(`<button class="item" data-act="chat" data-v="${id}">${avatar(id)}<span class="info"><b>${m.name}</b><div class="last">${last ? `${last.me ? 'את/ה: ' : ''}${esc(last.t)}` : 'שיחה חדשה'}</div></span></button>`); });
+    return `${head('הודעות')}<div class="g chat-list">${rows.join('') || '<p class="empty">עוד אין שיחות.</p>'}</div>`; },
+
+  /* the composer lives inside the chat layout; sending only appends a bubble, it never rebuilds the screen */
+  chat: ({ id }) => { const m = MAKERS[id];
+    return chatShell({ key: 'c:' + id, title: m.name, plain: true, extra: `<button class="link" data-act="maker" data-v="${id}">לפרופיל</button>`,
+      intro: '<p class="note">כשסוגרים הזמנה כאן, המקדמה שמורה והביקורת נספרת בפרופיל.</p>' }); },
+
+  /* one offer: the full offer on top, then the conversation about THIS offer, then "choose" above the composer */
+  offer: ({ v }) => { const { r, o } = offerAt(v), m = MAKERS[o.maker], side = sideFor(r, o), first = m.name.split(' ')[0], works = itemsOf(o.maker).slice(0, 2);
+    if (side) o.seen = o.thread.length;
+    const canChoose = side === 'buyer' && !r.closed, isPicked = r.closed && r.offers[r.picked] === o;
+    const intro = `<div class="offer-full">
+        <p class="otitle">${esc(r.title)}</p>
+        ${makerLine(o.maker)}
+        <div class="onums"><span><span class="k">מחיר</span><span class="v">${ils(o.price)}</span></span><span><span class="k">זמן הכנה</span><span class="v">${o.days} ימים</span></span></div>
+        <p>${esc(o.note)}</p>
+        ${works.length ? `<div class="strip">${works.map(it => `<button class="work-open" data-act="item" data-v="${it.id}" aria-label="${it.title}">${art(it.v, '', it.title)}</button>`).join('')}</div>` : ''}
+        ${isPicked ? '<span class="tag solid" style="align-self:flex-start">ההצעה שבחרתם</span>' : ''}</div>
+      <div class="thread-sep">${side === 'buyer' ? `השיחה שלכם עם ${first}` : side === 'maker' ? `השיחה עם ${esc(r.buyer)}` : 'השיחה פרטית'}</div>
+      ${side ? '' : `<p class="note">השיחה על ההצעה הזאת פרטית, בין ${esc(r.buyer)} ל${m.name}. בבקשות שלכם אפשר לדבר כאן עם כל יוצר לפני שבוחרים.</p>`}`;
+    const foot = canChoose ? `<div class="choose-bar g"><button class="btn block" data-act="pickoffer" data-v="${v}">בחירת ההצעה הזאת</button></div>`
+      : side === 'buyer' && r.closed ? `<div class="choose-bar g"><p class="small muted" style="padding-bottom:2px">${isPicked ? 'בחרתם את ההצעה הזאת. ההזמנה מופיעה בלשונית ״הזמנות״.' : 'כבר נבחרה הצעה אחרת לבקשה הזאת.'}</p></div>` : '';
+    return chatShell({ key: 'o:' + v, title: side === 'maker' ? 'ההצעה שלך' : `ההצעה של ${first}`, intro, foot, canWrite: !!side,
+      empty: side === 'buyer' ? `אפשר לשאול את ${first} כל דבר לפני שבוחרים: צבע, מידה, זמנים.` : 'אפשר לכתוב לקונה כאן, למשל שאלה על צבע או מידה.' }); },
+
+  orders: () => `${head('הזמנות')}<div class="g">${S.orders.map(o => `<button class="req" data-act="order" data-v="${o.id}">${art(o.v)}
+      <span class="info"><span class="t">${esc(o.title)}</span><span class="small muted">${MAKERS[o.maker].name} · ${ils(o.price)}</span>
+      <span class="small"><b>${o.stage >= STAGES.length ? 'הושלמה' : STAGES[o.stage][0]}</b></span>
+      <span class="progress" aria-hidden="true"><i style="width:${Math.min(100, o.stage / STAGES.length * 100)}%"></i></span></span></button>`).join('')}</div>`,
+
+  order: ({ id }) => { const o = S.orders.find(x => x.id === id);
+    return `${head('מעקב הזמנה')}
+    <div class="stack g">
+      <div class="row" style="gap:14px"><div style="width:92px;flex:none">${art(o.v)}</div><div style="min-width:0"><h2 class="display" style="font-size:26px">${esc(o.title)}</h2><span class="small muted">${MAKERS[o.maker].name} · ${ils(o.price)} · ${esc(o.delivery)}</span></div></div>
+      ${makerLine(o.maker)}
+      <ol class="steps">${STAGES.map(([t, d], i) => { const st = i < o.stage ? 'done' : i === o.stage ? 'now' : ''; let x = '';
+        if (i === 1) x = `<p class="note" style="margin-top:6px">בתקופת ההשקה משלמים ישירות ליוצר (ביט / פייבוקס). בהמשך האפליקציה תשמור את המקדמה.</p>`;
+        if (i === 2 && o.photos.length && o.stage >= 2) x = `<div class="strip">${o.photos.map(([c, v]) => art(v, '', c)).join('')}</div>`;
+        if (i === 5 && o.stage === 5) x = `<div class="rate" role="group" aria-label="דירוג">${[1, 2, 3, 4, 5].map(n => `<button data-act="rate" data-v="${o.id}|${n}" aria-label="${n} כוכבים">${n}★</button>`).join('')}</div>`;
+        if (i === 5 && o.stage > 5) x = `<p class="small">דירגתם ${o.rating} כוכבים. תודה!</p>`;
+        return `<li class="step ${st}"><span class="dot">${st === 'done' ? svg(UI.check) : i + 1}</span><div><div class="st">${t}</div>${d ? `<div class="sd">${d}</div>` : ''}${x}</div></li>`; }).join('')}</ol>
+      ${o.stage < 5 ? `<button class="btn ghost block" data-act="advance" data-v="${o.id}">קידום לשלב הבא (רק בהדגמה)</button>` : ''}
+      <button class="btn block" data-act="chat" data-v="${o.maker}">צ׳אט עם ${MAKERS[o.maker].name}</button>
+    </div>`; },
+
+  profile: () => { const waiting = S.pending.filter(p => p.status === 'pending').length, saved = ITEMS.filter(i => S.saved.has(i.id));
+    return `${head('החשבון שלי')}
+    <div class="stack g">
+      <section style="display:flex;flex-direction:column;gap:10px"><span class="lbl" style="font-weight:600">איך משתמשים באפליקציה עכשיו?</span>
+        <div class="seg"><button data-act="role" data-v="buyer" aria-pressed="${S.role === 'buyer'}">אני קונה</button><button data-act="role" data-v="maker" aria-pressed="${S.role === 'maker'}">אני יוצר/ת</button></div>
+        <p class="small muted">${S.role === 'buyer' ? 'כקונים: מפרסמים בקשות, מדברים עם היוצרים ובוחרים הצעה.' : 'כיוצרים: עוברים על לוח הבקשות ושולחים הצעות מחיר.'}</p></section>
+      <section><div class="sec-head"><h2 class="sec-title">שמרתי</h2><span class="small muted">${saved.length}</span></div>
+        ${saved.length ? worksGrid(saved) : '<p class="muted small">לחיצה על הלב בכל עבודה שומרת אותה כאן.</p>'}</section>
+      <button class="req" data-act="go" data-v="admin"><span class="info"><span class="t">ניהול: אישור יוצרים חדשים</span><span class="small muted">רק לך, כבעלים של האפליקציה</span></span>${waiting ? `<span class="tag warn">${waiting} ממתינים</span>` : ''}</button>
+      <section class="panel"><h2 class="sec-title">על בהזמנה</h2><p class="small">חינם לגמרי בתקופת ההשקה, לקונים וליוצרים. בהמשך תיגבה עמלה קטנה רק על הזמנות ששולמו באפליקציה, עם מקדמה מוגנת ותשלום בשלבים.</p></section>
+    </div>`; },
+
+  admin: () => `${head('אישור יוצרים')}
+    <div class="stack g"><p class="muted">כל יוצר חדש נבדק לפני שהוא מופיע: האם אלה באמת עבודות יד שלו?</p>
+      ${S.pending.map(p => `<section class="panel">
+        <div><b style="font-size:17px">${esc(p.name)}</b><div class="small muted">${CRAFTS[p.craft]} · ${p.city}</div><div class="small muted" dir="ltr" style="text-align:end;overflow-wrap:anywhere">${esc(p.email)}</div></div>
+        <div class="strip" style="grid-template-columns:repeat(3,1fr)">${p.v.map(v => art(v)).join('')}</div>
+        <p class="small">${p.flag ? '<span class="tag warn">שימו לב</span> ' : ''}${p.note}</p>
+        ${p.status === 'pending' ? `<div class="row"><button class="btn small" data-act="approve" data-v="${p.id}">אישור</button><button class="btn small danger" data-act="reject" data-v="${p.id}">דחייה</button></div>`
+          : p.status === 'approved' ? '<span class="tag solid" style="align-self:flex-start">אושר ויופיע באפליקציה</span>'
+          : `<span class="tag warn done-tag">נדחה · ההודעה שלך נשלחה ${p.msg.mail && p.msg.app ? 'במייל ובאפליקציה' : p.msg.mail ? 'במייל' : 'באפליקציה'}</span>
+            <details class="sent"><summary class="link"><span class="o">הצגת ההודעה</span><span class="c">הסתרת ההודעה</span></summary>
+              <div class="sent-box">${p.msg.mail ? `<span class="small muted">נושא: ${esc(p.msg.subject)}</span>` : ''}<p class="txt">${esc(p.msg.text)}</p></div></details>`}</section>`).join('')}
+    </div>`
+};
+
+const NAV = [['home', 'בית', UI.home], ['board', 'בקשות', UI.board], ['post', 'בקשה', UI.plus], ['chats', 'הודעות', UI.chat], ['orders', 'הזמנות', UI.box]];
+const root = document.documentElement;
+function measureComposer() { const c = document.querySelector('.composer'); if (c) root.style.setProperty('--composer-h', c.offsetHeight + 'px'); }
+function render(scroll) {
+  const c = cur(), view = document.getElementById('view');
+  view.innerHTML = SCREENS[c.s](c);
+  const first = S.stack[0].s;
+  document.getElementById('nav').innerHTML = NAV.map(([k, label, icon]) => k === 'post'
+    ? `<button class="plus" data-act="tab" data-v="post" ${first === k ? 'aria-current="page"' : ''}><span class="c">${svg(icon)}</span>${label}</button>`
+    : `<button data-act="tab" data-v="${k}" ${first === k ? 'aria-current="page"' : ''}>${svg(icon)}${label}${k === 'orders' && S.orders.some(o => o.stage === 5) ? '<span class="badge">1</span>' : ''}</button>`).join('');
+  const isChat = c.s === 'chat' || c.s === 'offer';
+  document.body.classList.toggle('chat-mode', isChat);
+  /* chat screens are fixed to the screen, so they animate themselves (a moving #view would drag a fixed child with it) */
+  view.classList.remove('in-fwd', 'in-back', 'in-fade');
+  if (S.anim) { const el = isChat ? view.querySelector('.chat-shell') : view; void el.offsetWidth; el.classList.add('in-' + S.anim); S.anim = null; }
+  if (scroll || isChat) window.scrollTo(0, 0);
+  if (RO) RO.disconnect();
+  if (isChat) {
+    measureComposer(); vvUpdate();
+    /* a chat opens at the newest message; an offer opens at the top, so the offer itself is read first */
+    CHAT.stick = c.s === 'chat';
+    if (CHAT.stick) toBottom();
+    if (RO) { RO.observe(document.getElementById('thread')); RO.observe(document.getElementById('bubbles')); }
+  }
+  if (c.s === 'maker') {
+    fitTabPad();
+    if (c.at) { const at = c.at, t0 = Date.now(); delete c.at;
+      /* wait for the new screen to lay out, then again once the fonts are in, unless the person has started scrolling */
+      requestAnimationFrame(() => requestAnimationFrame(() => jumpTo(at, false)));
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (cur() === c && userScrollAt < t0) { fitTabPad(); jumpTo(at, false); } });
+    }
+  }
+  onScroll();
+  motionFor(c);
+  if (c.s === 'home') S.introDone = true;
+}
+
+/* ---------- profile tabs: land each section's heading just below the sticky header + tabs ---------- */
+let jumpLock = null, jumpT, userScrollAt = 0;
+const tabsBottom = () => { const t = document.querySelector('.ptabs'); return t ? parseFloat(getComputedStyle(t).top) + t.offsetHeight + 6 : 0; };
+/* the last section must be able to reach the top too: add just enough empty space after it (with room for a collapsing browser bar) */
+function fitTabPad() {
+  const pad = document.querySelector('.tab-pad'), btns = document.querySelectorAll('.ptabs button'); if (!pad || !btns.length) return;
+  pad.style.height = '0px';
+  const last = document.getElementById('sec-' + btns[btns.length - 1].dataset.v); if (!last) return;
+  const lastTop = last.getBoundingClientRect().top + window.scrollY;
+  const maxScroll = document.documentElement.scrollHeight - (window.innerHeight + 100);
+  pad.style.height = Math.max(0, Math.ceil(lastTop - tabsBottom() - maxScroll)) + 'px';
+}
+function jumpTo(sec, smooth) {
+  const el = document.getElementById('sec-' + sec); if (!el) return;
+  const anim = smooth && motionOK(), y = Math.max(0, Math.round(el.getBoundingClientRect().top + window.scrollY - tabsBottom()));
+  jumpLock = sec; markTab(sec); clearTimeout(jumpT);
+  window.scrollTo({ top: y, behavior: anim ? 'smooth' : 'auto' });
+  jumpT = setTimeout(() => { jumpLock = null; }, anim ? 900 : 60);
+}
+function markTab(sec) { document.querySelectorAll('.ptabs button').forEach(b => b.setAttribute('aria-current', String(b.dataset.v === sec))); }
+['touchstart', 'wheel', 'keydown'].forEach(ev => window.addEventListener(ev, e => { if (ev === 'keydown' && !/Arrow|Page|Home|End| /.test(e.key)) return; userScrollAt = Date.now(); if (ev !== 'keydown' || !e.target.closest('.ptabs')) jumpLock = null; }, { passive: true }));
+window.addEventListener('resize', () => { if (cur().s === 'maker') fitTabPad(); });
+
+/* ---------- chat scrolling: follow the newest message ---------- */
+const CHAT = { stick: true };
+const threadEl = () => document.getElementById('thread');
+const distBottom = l => l.scrollHeight - l.scrollTop - l.clientHeight;
+function toBottom() {
+  const l = threadEl(); if (!l) return;
+  l.scrollTop = l.scrollHeight; pill(false);
+  requestAnimationFrame(() => { const l2 = threadEl(); if (l2) l2.scrollTop = l2.scrollHeight; });
+}
+function pill(on) { const p = document.getElementById('newpill'); if (p) p.hidden = !on; }
+/* when the list or the keyboard changes size, stay at the bottom if that is where the reader was */
+const RO = window.ResizeObserver ? new ResizeObserver(() => { if (CHAT.stick) toBottom(); }) : null;
+function updateEstimate() {
+  const f = document.querySelector('form[data-form="post"]'); if (!f) return;
+  S.est = estimate(document.getElementById('p-title').value, new FormData(f).getAll('crafts'));
+  document.getElementById('estimate').innerHTML = estHTML(S.est);
+}
+/* chat: add one bubble without rebuilding the screen, so the input (and the phone keyboard) stay put */
+/* my own message always scrolls to the bottom; a reply does too, unless the reader has scrolled up to read (then a pill offers it) */
+function appendBubble(key, b, mine) {
+  const box = document.getElementById('bubbles'), list = threadEl(); if (!box || !list || list.dataset.thread !== key) return false;
+  const far = distBottom(list) > 150;
+  const empty = box.querySelector('.empty'); if (empty) empty.remove();
+  if (mine || !far) CHAT.stick = true;
+  box.insertAdjacentHTML('beforeend', bubbleHTML(b, mine, true));
+  if (mine || !far) toBottom(); else { CHAT.stick = false; pill(true); }
+  return true;
+}
+/* carousels: keep the dots in step with the swipe */
+function syncDots(car) {
+  const wrap = car.closest('.carwrap'); if (!wrap) return;
+  const i = Math.round(Math.abs(car.scrollLeft) / Math.max(1, car.clientWidth));
+  wrap.querySelectorAll('.dots button').forEach((d, k) => d.setAttribute('aria-current', String(k === i)));
+}
+
+const ACT = {
+  back, tab: v => tab(v), go: v => go(v),
+  item: v => go('item', { id: v }), maker: v => go('maker', { id: v }), req: v => go('req', { id: v }), order: v => go('order', { id: v }), chat: v => go('chat', { id: v }),
+  makerat: v => { const [id, at] = v.split('|'); go('maker', { id, at }); },
+  jump: v => jumpTo(v, true),
+  dot: (v, btn) => { const car = btn.closest('.carwrap').querySelector('[data-car]'), sign = getComputedStyle(car).direction === 'rtl' ? -1 : 1;
+    car.scrollTo({ left: sign * Number(v) * car.clientWidth, behavior: motionOK() ? 'smooth' : 'auto' }); },
+  save: (v, btn) => { const on = !S.saved.has(v); on ? S.saved.add(v) : S.saved.delete(v);
+    document.querySelectorAll(`.heart[data-v="${v}"]`).forEach(b => b.setAttribute('aria-pressed', String(on)));
+    btn.classList.remove('pop'); void btn.offsetWidth; if (on) btn.classList.add('pop');
+    toast(on ? 'נשמר. אפשר למצוא את זה בחשבון שלך' : 'הוסר מהרשימה'); },
+  direct: v => go('post', { to: v }),
+  /* a material only filters the works below: update the tiles and the list in place, so the hero (slide, drift, parallax) and the scroll stay exactly where they are */
+  craft: v => { if (S.craft === v) return; S.craft = v;
+    document.querySelectorAll('.mat[data-act="craft"]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+    refreshWorks(true); },
+  bcraft: v => { S.boardCraft = v; render(); },
+  makers: v => { S.makersCraft = v || 'all'; go('makers'); },
+  mcraft: v => { S.makersCraft = v; render(); },
+  btab: v => { S.boardTab = v; render(); },
+  role: v => { S.role = v; render(); toast(v === 'maker' ? 'עברתם למצב יוצר' : 'עברתם למצב קונה'); },
+  useest: () => { if (S.est) { document.getElementById('p-budget').value = `${S.est.lo}–${S.est.hi} ₪`; toast('ההערכה נכנסה לתקציב'); } },
+  addphoto: (v, btn) => { const box = document.getElementById('photos'); if (box.querySelectorAll('.art').length >= 4) return; const n = box.querySelectorAll('.art').length, kinds = ['wood', 'leather', 'ceramic', 'jewelry']; btn.insertAdjacentHTML('beforebegin', art(MAT[kinds[n]])); },
+  offer: v => go('offer', { v }),
+  tobottom: () => { CHAT.stick = true; toBottom(); },
+  pickoffer: v => openSheet(chooseSheet(v), 'אישור בחירת ההצעה'),
+  closesheet: () => closeSheet(),
+  /* quick start: only when tapped, puts one short opening line at the top of the message */
+  qs: v => { const st = rjState(); if (!st) return; const p = S.pending.find(x => x.id === st.f.dataset.v), line = QUICK[+v](p.greet), ta = st.f.querySelector('#rj-text');
+    if (!ta.value.startsWith(line)) ta.value = line + '\n' + ta.value.replace(/^\s+/, '');
+    ta.focus({ preventScroll: true }); ta.setSelectionRange(line.length + 1, line.length + 1); rjCheck(); },
+  choose: v => { closeSheet(true); const [rid, i] = v.split('|'), r = S.requests.find(x => x.id === rid), o = r.offers[+i]; if (r.closed) return; r.closed = true; r.picked = +i;
+    const order = { id: 'o' + Date.now(), title: r.title, maker: o.maker, price: o.price, stage: 0, delivery: 'ייקבע בצ׳אט', v: r.v, photos: [] };
+    S.orders.unshift(order); S.stack = [{ s: 'orders' }, { s: 'order', id: order.id }]; S.anim = 'fwd'; render(true); toast(`ההזמנה אצל ${MAKERS[o.maker].name} סוכמה!`); },
+  advance: v => { const o = S.orders.find(x => x.id === v); o.stage++;
+    if (o.stage === 3 && !o.photos.length) o.photos = [['יום 6: כמעט מוכן', o.v]];
+    render(); toast(`שלב חדש: ${STAGES[o.stage][0]}`); },
+  rate: v => { const [oid, n] = v.split('|'), o = S.orders.find(x => x.id === oid); o.rating = +n; o.stage = 6;
+    (REVIEWS[o.maker] = REVIEWS[o.maker] || []).unshift({ w: 'רון מ.', s: +n, t: `דירוג ${n} כוכבים להזמנה ״${o.title}״.` });
+    render(); toast('תודה! הביקורת פורסמה בפרופיל היוצר'); },
+  approve: v => { S.pending.find(p => p.id === v).status = 'approved'; render(); toast('היוצר אושר'); },
+  /* rejecting never happens in one tap: it opens a message the owner writes, and sends only from there */
+  reject: v => { const p = S.pending.find(x => x.id === v); if (p.status !== 'pending') return; openSheet(rejectSheet(p), `דחיית ההרשמה של ${p.name}`); rjCheck(); }
+};
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !document.getElementById('sheet').hidden) closeSheet(); });
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]'); if (!t) return;
+  e.preventDefault(); ACT[t.dataset.act](t.dataset.v, t);
+});
+/* tapping "שליחה" must not steal focus from the message box (that is what closed the keyboard) */
+document.addEventListener('mousedown', e => { if (e.target.closest('.composer button')) e.preventDefault(); });
+document.addEventListener('input', e => {
+  if (e.target.id === 'q') { S.q = e.target.value; refreshWorks(false); }
+  if (e.target.id === 'p-title') updateEstimate();
+  if (e.target.closest('form[data-form="reject"]')) rjCheck();
+});
+document.addEventListener('change', e => {
+  if (e.target.closest('form[data-form="reject"]')) rjCheck();
+  if (e.target.id === 'pc-other') { const o = document.getElementById('p-other'); o.hidden = !e.target.checked; if (e.target.checked) o.focus(); }
+  if (e.target.name === 'crafts') updateEstimate();
+});
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target, kind = f.dataset.form, v = f.dataset.v, fd = new FormData(f), d = Object.fromEntries(fd);
+  if (kind === 'msg') {
+    const input = f.querySelector('input'), text = (d.msg || '').trim();
+    input.focus({ preventScroll: true });
+    if (!text) return;
+    const key = v, off = key.startsWith('o:'), ctx = off ? offerAt(key.slice(2)) : null, side = off ? sideFor(ctx.r, ctx.o) : null;
+    if (off && !side) return;
+    const th = threadOf(key), b = off ? { by: side, t: text } : { me: true, t: text };
+    th.push(b); if (off) ctx.o.seen = th.length;
+    appendBubble(key, b, true);
+    input.value = ''; input.focus({ preventScroll: true });
+    setTimeout(() => {
+      const t = off && side === 'maker' ? buyerReply() : makerReply(text);
+      const rb = off ? { by: side === 'buyer' ? 'maker' : 'buyer', t } : { me: false, t };
+      th.push(rb);
+      if (appendBubble(key, rb, false) && off) ctx.o.seen = th.length;
+    }, 1300);
+    return;
+  }
+  if (kind === 'reject') {
+    const st = rjState(), p = S.pending.find(x => x.id === v);
+    if (!st || !st.ok || p.status !== 'pending') { rjCheck(); toast(st && !st.text ? 'כתבו הודעה לפני שליחה' : 'בחרו איך לשלוח את ההודעה'); return; }
+    p.status = 'rejected'; p.msg = { mail: st.mail, app: st.app, subject: st.subject, text: st.text };
+    closeSheet(true); render();
+    toast(`ההודעה נשלחה ${st.mail && st.app ? 'במייל ובאפליקציה' : st.mail ? 'במייל' : 'באפליקציה'}`);
+    return;
+  }
+  if (kind === 'order') {
+    const it = ITEMS.find(i => i.id === v), ship = d.del === 'משלוח עד הבית';
+    const order = { id: 'o' + Date.now(), title: it.title + (d.wish ? ` (${d.wish})` : ''), maker: it.maker, price: it.price + (ship ? 35 : 0), stage: 0, delivery: d.del, v: it.v, photos: [] };
+    S.orders.unshift(order); S.stack = [{ s: 'orders' }, { s: 'order', id: order.id }]; S.anim = 'fwd'; render(true); toast('ההזמנה נשלחה ליוצר');
+  }
+  if (kind === 'post') {
+    const crafts = fd.getAll('crafts'), other = d.otherOn ? (d.other || '').trim() : '';
+    if (!crafts.length && !other) { toast('בחרו לפחות תחום אחד, או ״אחר״'); return; }
+    const est = estimate(d.title, crafts), mine = (d.budget || '').trim();
+    const budget = mine || (est ? `₪${est.lo}–${est.hi}` : 'פתוח להצעות'), budgetSrc = mine ? 'buyer' : est ? 'app' : 'none';
+    const vis = MAT[crafts[0]] || 'mat-wood';
+    const r = { id: 'r' + Date.now(), title: d.title, crafts, other, v: vis, budget, budgetSrc, due: d.due || 'גמיש', buyer: 'רון מ.', city: 'מודיעין', ago: 'עכשיו', mine: true, text: d.text || 'אין פרטים נוספים.', offers: [], to: v || null };
+    S.requests.unshift(r); S.role = 'buyer';
+    S.stack = [{ s: 'board' }, { s: 'req', id: r.id }]; S.anim = 'fwd'; render(true);
+    toast(v ? `הבקשה נשלחה אל ${MAKERS[v].name}` : 'הבקשה פורסמה. יוצרים יקבלו התראה.');
+  }
+  if (kind === 'offer') {
+    const r = S.requests.find(x => x.id === v);
+    r.offers.push({ maker: 'me', price: +d.price || 0, days: +d.days || 0, note: d.note, thread: [], seen: 0 });
+    render(); toast('ההצעה נשלחה. אפשר לפתוח אותה ולדבר עם הקונה');
+  }
+});
+
+/* ---------- keyboard: hide the tab bar while typing, lift the composer above the keyboard ---------- */
+const COARSE = window.matchMedia('(pointer: coarse)');
+const isTextField = el => !!el && el.matches && el.matches('textarea, input:not([type=checkbox]):not([type=radio]):not([type=submit]):not([type=button]):not([type=range]):not([type=file])');
+let kbFocus = false, kbVV = false, kbT;
+function setKb() { document.body.classList.toggle('kb-open', kbVV || (kbFocus && COARSE.matches)); measureComposer(); }
+document.addEventListener('focusin', e => { if (isTextField(e.target)) { clearTimeout(kbT); kbFocus = true; setKb(); } });
+document.addEventListener('focusout', () => { clearTimeout(kbT); kbT = setTimeout(() => { kbFocus = isTextField(document.activeElement); setKb(); }, 150); });
+/* the chat layout and sheets are sized to the VISIBLE part of the screen (above the keyboard), and follow it when iOS shifts it */
+function vvUpdate() {
+  const vv = window.visualViewport;
+  if (!vv) { root.style.setProperty('--vvh', window.innerHeight + 'px'); root.style.setProperty('--vvt', '0px'); return; }
+  root.style.setProperty('--vvh', vv.height + 'px');
+  root.style.setProperty('--vvt', Math.max(0, vv.offsetTop) + 'px');
+  kbVV = window.innerHeight - vv.height > 120;
+  const kb = kbVV ? Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop)) : 0;
+  root.style.setProperty('--kb', kb + 'px');
+  setKb();
+}
+let lastVVH = 0;
+function vvResize() {
+  vvUpdate();
+  const h = window.visualViewport ? visualViewport.height : window.innerHeight, changed = Math.abs(h - lastVVH) > 1; lastVVH = h;
+  /* keyboard opened or closed: keep the newest message in view (if the reader is at the bottom or is typing) */
+  if (changed && threadEl() && (CHAT.stick || document.activeElement?.id === 'msg')) { CHAT.stick = true; toBottom(); }
+}
+if (window.visualViewport) { visualViewport.addEventListener('resize', vvResize); visualViewport.addEventListener('scroll', vvUpdate); }
+window.addEventListener('resize', vvResize);
+/* tapping into the message box means "I'm writing": go to the newest message */
+document.addEventListener('focusin', e => { if (e.target.id === 'msg' && threadEl()) { CHAT.stick = true; toBottom(); } });
+/* the reader's position decides whether replies may pull the list down */
+document.addEventListener('scroll', e => { const t = e.target; if (t && t.id === 'thread') { const d = distBottom(t); CHAT.stick = d < 150; if (d < 40) pill(false); } }, { capture: true, passive: true });
+vvUpdate();
+
+/* ---------- scroll: profile tabs, carousel dots ---------- */
+let ticking = false;
+function onScroll() {
+  const tabs = document.querySelector('.ptabs');
+  /* the highlighted tab is the last section whose heading has reached the bar; while a tap-scroll is running, the tapped tab stays lit */
+  if (tabs && !jumpLock) { let on = tabs.querySelector('button')?.dataset.v; const line = tabsBottom() + 40;
+    tabs.querySelectorAll('button').forEach(b => { const s = document.getElementById('sec-' + b.dataset.v); if (s && s.getBoundingClientRect().top < line) on = b.dataset.v; });
+    markTab(on); }
+}
+window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; onScroll(); }); } }, { passive: true });
+document.addEventListener('scroll', e => { const t = e.target; if (t && t.matches && t.matches('[data-car]')) syncDots(t); }, { capture: true, passive: true });
+/* photographs have no fade of their own: they arrive once, together with the card that holds them (see show() below).
+   Until a photo is in, its sand-coloured mat shows; no sheen, no second fade. */
+
+/* ---------- motion (GSAP from cdnjs): slow and sure, never needed to see anything ----------
+   Everything is fully visible without this block. It only runs when GSAP loaded and the person hasn't asked for less motion.
+   - the hero headline rises word by word out of its own mask, then the sentence and the button follow (first visit only)
+   - the hero photographs drift slowly (paused when the hero is off screen) and sink a little as you scroll past
+   - large photographs (the quote band, a maker's portrait) move at a slightly different pace than the page
+   - cards and headings below the fold rise softly into place as they arrive, a few at a time
+   - a maker's order count counts up once
+   - on a mouse, the main buttons lean gently toward the pointer */
+const GS = window.gsap && window.ScrollTrigger ? window.gsap : null;
+if (GS) { gsap.registerPlugin(ScrollTrigger); ScrollTrigger.config({ ignoreMobileResize: true }); }
+let MM = null, WORKS_ST = [];
+/* the works list (#works) keeps its own reveal triggers, so it can be redrawn alone without touching the rest of the screen */
+const killWorksST = () => { WORKS_ST.forEach(t => t.kill()); WORKS_ST = []; };
+function revealWorks(now) {
+  killWorksST();
+  const box = document.getElementById('works'); if (!GS || !box || !motionOK()) return;
+  const els = [...box.querySelectorAll(REVEAL)];
+  const below = els.filter(isBelow), seen = els.filter(el => !below.includes(el));
+  if (now && seen.length) rise(seen, { y: 14, stagger: .06 });
+  WORKS_ST = arrive(below);
+}
+/* redraw only the works list (search and the material filter); animate = cards already on screen rise in too */
+function refreshWorks(animate) {
+  const box = document.getElementById('works'); if (!box) return;
+  const h = document.documentElement.scrollHeight, y = window.scrollY;
+  killWorksST();
+  box.innerHTML = worksHTML();
+  if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
+  if (GS && document.documentElement.scrollHeight !== h) ScrollTrigger.refresh();
+  revealWorks(animate);
+}
+const REVEAL = '.sec-head, .works > .work, .rank-row, .req, .review, .offer-card, .how-field .sec-title, .how-field li, .how-field .btn, .band .copy > *, .story, .steps .step';
+/* THE FLICKER FIX.
+   Before: cards below the screen were fully visible, and only when one was already peeking in (top at 94%) did gsap.from()
+   snap it to transparent and fade it back (blink 1). Its lazy photo then often finished loading during that fade and ran its
+   own CSS fade from 0 (blink 2). Now: anything wholly below the screen is set to its start state once, up front (gsap.set),
+   so it is never seen and then hidden; when it scrolls in, its photos are fetched/decoded first (max 0.6s) and the card
+   arrives in ONE tween with its photo already inside. Without GSAP or with reduced motion none of this runs: all visible. */
+const isBelow = el => el.getBoundingClientRect().top > window.innerHeight;
+const FROM = { autoAlpha: 0, y: 16 };
+function photosReady(els) {
+  const imgs = els.flatMap(el => [...el.querySelectorAll('img')]).filter(i => !(i.complete && i.naturalWidth));
+  if (!imgs.length) return Promise.resolve();
+  imgs.forEach(i => { i.loading = 'eager'; });
+  const all = Promise.all(imgs.map(i => (i.decode ? i.decode() : Promise.resolve()).catch(() => {})));
+  return Promise.race([all, new Promise(r => setTimeout(r, 600))]);
+}
+function show(els, vars = {}) {
+  els = [...els]; if (!els.length) return;
+  els.forEach(el => { el.style.transition = 'none'; });
+  photosReady(els).then(() => gsap.to(els, { autoAlpha: 1, y: 0, duration: 1, ease: 'expo.out', stagger: .08, overwrite: true, ...vars,
+    clearProps: 'opacity,visibility,transform', onComplete: () => els.forEach(el => { el.style.transition = ''; }) }));
+}
+/* hide now, show once on arrival; returns the triggers so a redraw can kill them */
+function arrive(els, vars) {
+  els = [...els]; if (!els.length) return [];
+  gsap.set(els, FROM);
+  return ScrollTrigger.batch(els, { start: 'top bottom', once: true, interval: .08, batchMax: 6, onEnter: batch => show(batch, vars) });
+}
+/* rise: for fresh content drawn on screen (search results); it never was visible before, so a from() cannot blink */
+function rise(els, vars = {}) {
+  els = [...els]; if (!els.length) return;
+  els.forEach(el => { el.style.transition = 'none'; });
+  gsap.from(els, { opacity: 0, y: 16, duration: 1, ease: 'expo.out', stagger: .07, clearProps: 'opacity,transform', ...vars,
+    onComplete: () => els.forEach(el => { el.style.transition = ''; }) });
+}
+function motionFor(c) {
+  if (MM) { MM.revert(); MM = null; }
+  killWorksST();
+  if (!GS || c.s === 'chat' || c.s === 'offer') return;
+  const view = document.getElementById('view');
+  MM = gsap.matchMedia();
+  MM.add('(prefers-reduced-motion: no-preference)', () => {
+    const hero = view.querySelector('.hero');
+    if (hero) {
+      const imgs = [...hero.querySelectorAll('.art img')];
+      const drift = gsap.timeline({ repeat: -1, yoyo: true, defaults: { duration: 16, ease: 'sine.inOut' } });
+      imgs.forEach((img, i) => drift.fromTo(img, { scale: 1.08, xPercent: 0, yPercent: 0 }, { scale: 1.17, xPercent: i % 2 ? 2.2 : -2.2, yPercent: -1.2 }, 0));
+      ScrollTrigger.create({ trigger: hero, start: 'top bottom', end: 'bottom top', onToggle: self => self.isActive ? drift.resume() : drift.pause() });
+      gsap.to(imgs, { y: () => hero.offsetHeight * .16, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: .6 } });
+      if (hero.classList.contains('intro')) {
+        const copy = hero.querySelector('.copy'), words = copy.querySelectorAll('h1 .w > span'), rest = copy.querySelectorAll(':scope > p, :scope > .btn, :scope > .dots');
+        rest.forEach(el => { el.style.transition = 'none'; });
+        const intro = gsap.timeline({ delay: .2, onComplete: () => rest.forEach(el => { el.style.transition = ''; }) });
+        setTimeout(() => { if (intro.progress() < 1) intro.progress(1); }, 6000); /* if the page was opened in the background, never leave words hidden */
+        intro
+          .from(imgs[0], { opacity: 0, duration: 1.8, ease: 'power2.out' }, 0)
+          .from(words, { yPercent: 118, duration: 1.6, ease: 'expo.out', stagger: .085 }, .25)
+          .from(rest, { opacity: 0, y: 18, duration: 1.4, ease: 'expo.out', stagger: .13, clearProps: 'opacity,transform' }, '-=1.15')
+          .from(hero.querySelector('.credit'), { opacity: 0, duration: 1.4 }, '<');
+      }
+    }
+    view.querySelectorAll('.pfx .art img').forEach(img => gsap.fromTo(img, { yPercent: -6, scale: 1.14 }, { yPercent: 6, scale: 1.14, ease: 'none',
+      scrollTrigger: { trigger: img.closest('.pfx'), start: 'top bottom', end: 'bottom top', scrub: .6 } }));
+    const targets = [...view.querySelectorAll(REVEAL)].filter(el => isBelow(el) && !el.closest('#works'));
+    revealWorks(false);
+    arrive(targets);
+    /* a rail arrives as one row: hidden up front, its cards come in together, in order */
+    view.querySelectorAll('.rail').forEach(rail => { if (!isBelow(rail)) return; const kids = [...rail.children];
+      gsap.set(kids, FROM);
+      ScrollTrigger.create({ trigger: rail, start: 'top bottom', once: true, onEnter: () => show(kids, { stagger: .09 }) }); });
+    const counts = view.querySelectorAll('[data-count]');
+    counts.forEach(el => { const n = +el.dataset.count; if (!n) return; const o = { v: 0 };
+      gsap.to(o, { v: n, duration: 2, ease: 'power3.out', delay: .3, onUpdate: () => { el.textContent = Math.round(o.v); } }); });
+    return () => { killWorksST(); counts.forEach(el => { el.textContent = el.dataset.count; }); };
+  });
+}
+if (GS) {
+  /* magnetic primary buttons: only with a mouse; they lean a few pixels toward the pointer and settle back slowly */
+  const fine = window.matchMedia('(prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine)');
+  let mag = null;
+  const settle = el => gsap.to(el, { '--mx': '0px', '--my': '0px', duration: 1.1, ease: 'expo.out', overwrite: 'auto' });
+  document.addEventListener('pointermove', e => {
+    if (!fine.matches) return;
+    const b = e.target.closest ? e.target.closest('.btn:not(:disabled), .nav .plus .c') : null;
+    if (mag && mag !== b) { settle(mag); mag = null; }
+    if (!b) return;
+    mag = b; const r = b.getBoundingClientRect();
+    gsap.to(b, { '--mx': ((e.clientX - r.left) / r.width - .5) * 10 + 'px', '--my': ((e.clientY - r.top) / r.height - .5) * 8 + 'px', duration: .9, ease: 'expo.out', overwrite: 'auto' });
+  }, { passive: true });
+  document.addEventListener('pointerleave', () => { if (mag) { settle(mag); mag = null; } });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => ScrollTrigger.refresh());
+}
+document.getElementById('view').addEventListener('animationend', e => { if (e.target.id === 'view' || e.target.classList.contains('chat-shell')) e.target.classList.remove('in-fwd', 'in-back', 'in-fade'); });
+render();
+</script>
+</body>
+</html>

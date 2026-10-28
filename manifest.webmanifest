@@ -1,0 +1,16 @@
+{
+  "name": "בהזמנה · יצירה בעבודת יד בהזמנה אישית",
+  "short_name": "בהזמנה",
+  "description": "גרסת הדגמה של בהזמנה: מזמינים יצירה בעבודת יד ישירות מהאומן.",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#f3ebdd",
+  "theme_color": "#f3ebdd",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
