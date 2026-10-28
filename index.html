@@ -146,6 +146,31 @@ p { margin: 0; }
 .search:focus-within { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
 .search svg { width: 18px; height: 18px; stroke: var(--ink); fill: none; stroke-width: 1.8; flex: none; }
 .search input { border: 0; background: none; outline: none; flex: 1; min-width: 0; height: 100%; font-size: 16px; }
+/* on home the search box is a door: tapping it opens the search screen, so nothing on home ever moves while typing */
+.search-entry { width: 100%; color: #766555; font-size: 16px; text-align: start; }
+.search-entry span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* search screen */
+.top .sq { flex: 1; min-width: 0; height: 50px; padding-inline: 16px; }
+.top .sq input { font-size: 18px; }
+.top .sq input::-webkit-search-decoration, .top .sq input::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
+.sq-clear { width: 32px; height: 32px; margin-inline-end: -8px; border: 0; border-radius: 50%; background: var(--stone); color: var(--ink); display: grid; place-items: center; padding: 0; flex: none; }
+.sq-clear svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+.sq-body { gap: 30px; padding-top: 14px; }
+.sq-status:empty { display: none; }
+.sgroup { display: flex; flex-direction: column; }
+.sgroup > .sub-title { display: flex; align-items: baseline; gap: 8px; margin-bottom: 14px; }
+.sgroup > .sub-title .n { font-family: var(--body); font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.sgroup .rank-row:first-child, .sgroup .req:first-child { padding-top: 4px; }
+.sgroup .works { gap: 26px 14px; }
+.sgroup .snip { font-size: 13.5px; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips .chip { padding: 8px 15px; font-size: 14.5px; font-weight: 400; }
+.s-empty { display: flex; flex-direction: column; gap: 16px; padding: 22px 20px; background: var(--stone); border-radius: var(--r-panel); }
+.s-empty .say { font-family: var(--display); font-size: 25px; line-height: 1.25; margin: 0; }
+.s-empty .btn { align-self: stretch; white-space: normal; text-align: center; }
+mark { background: var(--accent-soft); color: inherit; border-radius: 3px; padding-inline: 1px; box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 40%, transparent); }
+.maker mark, .banner mark { background: none; box-shadow: none; }
 
 .rail { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x mandatory; padding-left: var(--gl); padding-right: var(--gr); scroll-padding-inline: var(--gr); }
 .rail::-webkit-scrollbar { display: none; }
@@ -236,6 +261,10 @@ p { margin: 0; }
 .specs div:nth-child(odd) { padding-inline-end: 12px; }
 .specs dt { font-size: 13px; color: var(--muted); }
 .specs dd { margin: 0; font-weight: 500; }
+/* a single fact: one row, label and value on the same line */
+.specs.one { grid-template-columns: 1fr; }
+.specs.one div { flex-direction: row; align-items: baseline; justify-content: space-between; gap: 12px; padding-inline-end: 0; }
+.specs.one dd { text-align: end; }
 .big-price { font-family: var(--display); font-size: 32px; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums; }
 .maker-line { display: flex; align-items: center; gap: 12px; background: none; border: 0; padding: 0; text-align: start; }
 .av { width: 46px; height: 46px; border-radius: 50%; overflow: hidden; flex: none; position: relative; }
@@ -298,10 +327,6 @@ textarea.input { min-height: 96px; resize: vertical; border: 1px solid var(--lin
 .pick span { display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; border-radius: 999px; padding: 8px 17px; font-size: 14.5px; background: var(--stone); }
 .pick input:checked + span { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 .pick input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
-.estimate { background: var(--accent-soft); border-radius: var(--r-panel); padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
-.estimate .eyebrow { color: var(--accent); font-weight: 500; }
-.estimate .val { font-family: var(--display); font-size: 40px; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--ink); }
-.estimate .link { align-self: flex-start; margin-top: 2px; }
 .opt { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line); }
 .opt input { accent-color: var(--accent); width: 18px; height: 18px; }
 .opt .grow { flex: 1; }
@@ -562,31 +587,22 @@ const ITEMS = [
   { id: 'i15', title: 'ארנק כיס מעור משומן', maker: 'hevel', craft: 'leather', price: 210, days: '10 ימים', mat: 'עור משומן', size: '10×8 ס״מ', text: 'ארנק קטן לכיס הקדמי, מעור משומן שמקבל גוון עמוק עם הזמן.' }
 ];
 
-/* completed deals the price estimate learns from (examples) */
-const PAST = [
-  ['ארנק עור', ['leather'], 190], ['ארנק עם ראשי תיבות', ['leather'], 230], ['מחזיק מפתחות מעור', ['leather'], 80], ['תיק עור', ['leather'], 620], ['חגורת עור', ['leather'], 260], ['כיסוי למחברת מעור', ['leather'], 210],
-  ['ספל קרמיקה', ['ceramic'], 110], ['סט ספלים', ['ceramic'], 400], ['קערה', ['ceramic'], 240], ['סט צלחות', ['ceramic'], 520], ['אגרטל', ['ceramic'], 300],
-  ['קרש חיתוך', ['wood'], 210], ['קרש חיתוך עם חריטה', ['wood'], 250], ['שולחן קפה', ['wood'], 2300], ['שולחן אוכל', ['wood'], 5200], ['מדף קיר', ['wood'], 650], ['צעצוע עץ', ['wood'], 150],
-  ['טבעת כסף', ['jewelry'], 360], ['טבעת אירוסין', ['jewelry'], 1400], ['שרשרת שם', ['jewelry'], 300], ['עגילי כסף', ['jewelry'], 240], ['עגילים מעץ', ['jewelry', 'wood'], 170], ['תליון מעץ זית', ['jewelry', 'wood'], 190],
-  ['סכין שף', ['metal'], 850], ['פמוטים', ['metal'], 480], ['מתלה מתכת', ['metal'], 390]
-];
-
 const S = {
-  role: 'buyer', stack: [{ s: 'home' }], craft: 'all', makersCraft: 'all', boardCraft: 'all', boardTab: 'all', q: '', est: null, saved: new Set(), anim: null,
+  role: 'buyer', stack: [{ s: 'home' }], craft: 'all', makersCraft: 'all', boardCraft: 'all', boardTab: 'all', sq: '', saved: new Set(), anim: null,
   requests: [
-    { id: 'r1', title: 'ארנק עור לאבא, עם ראשי התיבות שלו', crafts: ['leather'], other: '', budget: '₪150–250', budgetSrc: 'buyer', due: 'לפני חנוכה (4.12)', buyer: 'רון מ.', city: 'מודיעין', ago: 'לפני שעתיים', mine: true, text: 'אבא שלי בן 60. מחפש ארנק דק בחום כהה, עם ראשי התיבות מ.ש. חשוב שיגיע עד תחילת חנוכה.',
+    { id: 'r1', title: 'ארנק עור לאבא, עם ראשי התיבות שלו', crafts: ['leather'], other: '', due: 'לפני חנוכה (4.12)', buyer: 'רון מ.', city: 'מודיעין', ago: 'לפני שעתיים', mine: true, text: 'אבא שלי בן 60. מחפש ארנק דק בחום כהה, עם ראשי התיבות מ.ש. חשוב שיגיע עד תחילת חנוכה.',
       offers: [
         { maker: 'maya', price: 220, days: 12, note: 'עור בעיבוד צמחי, תפירה ביד, הטבעת אותיות בחום. אשלח סקיצה לפני שאני מתחילה, ואפשר לבחור את צבע החוט. הארנק מגיע עטוף בנייר ועם כרטיס קטן לטיפול בעור.', seen: 2,
           thread: [{ by: 'maker', t: 'היי רון, תודה על הבקשה! איזה גוון חום אבא שלך אוהב? יש לי חום שוקולד, חום דבש וכמעט שחור.' }, { by: 'buyer', t: 'כהה, כמעט שוקולד.' }, { by: 'maker', t: 'מעולה. ואת ראשי התיבות להטביע בחזית, או בפנים ליד התאים?' }] },
         { maker: 'amit', price: 170, days: 21, note: 'ארנק קלאסי עם 6 תאים לכרטיסים. ראשי תיבות בהטבעה.', thread: [] },
         { maker: 'hevel', price: 250, days: 9, note: 'כולל קופסת מתנה ופתק בכתב יד. אפשר לבחור בין עור משומן בחום עמוק לבין עור שחור חלק.',
           thread: [{ by: 'buyer', t: 'קופסת המתנה כלולה במחיר?' }, { by: 'maker', t: 'כן, הקופסה והפתק כלולים. אפשר גם לבחור צבע חוט.' }, { by: 'buyer', t: 'מעולה, תודה!' }] }] },
-    { id: 'r5', title: 'עגילים מעץ זית עם וו מכסף', crafts: ['jewelry', 'wood'], other: '', budget: '₪150–200', budgetSrc: 'app', due: 'עד סוף החודש', buyer: 'הדר א.', city: 'נצרת', ago: 'לפני שעה', mine: false, text: 'עגילים קטנים בצורת טיפה, מעץ זית, לאמא שלי. משהו עדין.', offers: [] },
-    { id: 'r3', title: 'סט 4 ספלים לחתונה של חברה, עם התאריך חרוט', crafts: ['ceramic'], other: '', budget: '₪300–450', budgetSrc: 'buyer', due: 'עד 20.12', buyer: 'ליאור ב.', city: 'רמת גן', ago: 'אתמול', mine: false, text: 'ארבעה ספלים בגוון תכלת-ירוק, על כל אחד התאריך 03.01.27 בתחתית.',
+    { id: 'r5', title: 'עגילים מעץ זית עם וו מכסף', crafts: ['jewelry', 'wood'], other: '', due: 'עד סוף החודש', buyer: 'הדר א.', city: 'נצרת', ago: 'לפני שעה', mine: false, text: 'עגילים קטנים בצורת טיפה, מעץ זית, לאמא שלי. משהו עדין.', offers: [] },
+    { id: 'r3', title: 'סט 4 ספלים לחתונה של חברה, עם התאריך חרוט', crafts: ['ceramic'], other: '', due: 'עד 20.12', buyer: 'ליאור ב.', city: 'רמת גן', ago: 'אתמול', mine: false, text: 'ארבעה ספלים בגוון תכלת-ירוק, על כל אחד התאריך 03.01.27 בתחתית.',
       offers: [{ maker: 'noa', price: 380, days: 18, note: 'אשמח! אפשר לבחור בין שלושה גווני זיגוג, אשלח דוגמאות.' }] },
-    { id: 'r2', title: 'שולחן אוכל מעץ ל-6 סועדים, 180 ס״מ', crafts: ['wood'], other: '', budget: '₪4,000–6,000', budgetSrc: 'buyer', due: 'תוך חודשיים', buyer: 'שני ו.', city: 'קריית טבעון', ago: 'לפני 3 ימים', mine: false, text: 'שולחן מעץ מלא, רגליים ישרות, גימור טבעי מט. רוחב 90 ס״מ.',
+    { id: 'r2', title: 'שולחן אוכל מעץ ל-6 סועדים, 180 ס״מ', crafts: ['wood'], other: '', due: 'תוך חודשיים', buyer: 'שני ו.', city: 'קריית טבעון', ago: 'לפני 3 ימים', mine: false, text: 'שולחן מעץ מלא, רגליים ישרות, גימור טבעי מט. רוחב 90 ס״מ.',
       offers: [{ maker: 'itay', price: 5400, days: 45, note: 'אלון אמריקאי מלא, כולל הובלה והרכבה בבית.' }, { maker: 'dana', price: 4200, days: 60, note: 'אורן מלא בגימור שמן. אפשר לבוא לראות דוגמאות בסדנה.' }] },
-    { id: 'r4', title: 'טבעת אירוסין מכסף עם אבן כחולה', crafts: ['jewelry'], other: '', budget: '₪800–1,200', budgetSrc: 'buyer', due: 'אין לחץ', buyer: 'אביב ש.', city: 'ירושלים', ago: 'לפני שבוע', mine: false, text: 'עיצוב עדין עם אבן כחולה במרכז, מוקפת אבנים קטנות. מידה 6.',
+    { id: 'r4', title: 'טבעת אירוסין מכסף עם אבן כחולה', crafts: ['jewelry'], other: '', due: 'אין לחץ', buyer: 'אביב ש.', city: 'ירושלים', ago: 'לפני שבוע', mine: false, text: 'עיצוב עדין עם אבן כחולה במרכז, מוקפת אבנים קטנות. מידה 6.',
       offers: [{ maker: 'yoni', price: 1100, days: 25, note: 'ספיר כחול בשיבוץ שיניים. נקבע פגישה בסדנה למדידה.' }] }
   ],
   orders: [
@@ -622,42 +638,6 @@ S.pending[0].v = ['mat-ceramic', 'pr-wheel', 'pr-bowl'];
 S.pending[1].v = ['rq-ring', 'mat-jewelry', 'rq-mugs'];
 const STAGES = [['ההזמנה סוכמה', 'הפרטים נסגרו בצ׳אט'], ['מקדמה 30%', 'נשמרת עד המסירה'], ['בעבודה', 'היוצר מעלה תמונות מהסדנה'], ['תשלום סופי 70%', 'כשהעבודה מוכנה'], ['איסוף או משלוח', ''], ['ביקורת', 'מדרגים את היוצר']];
 
-/* ---------- price estimate from similar deals ---------- */
-/* material and filler words: the craft checkboxes already carry the material, so only the object's name ("ארנק", "עגילים") is matched */
-const STOP = new Set(['עם', 'של', 'בשביל', 'לאבא', 'לאמא', 'עץ', 'מעץ', 'עור', 'מעור', 'כסף', 'מכסף', 'זהב', 'מזהב', 'זית', 'אגוז', 'מאגוז', 'אלון', 'מאלון', 'צמחי', 'קרמיקה', 'מקרמיקה', 'מתכת', 'ממתכת', 'קטן', 'קטנים', 'גדול', 'ידני', 'חרוט', 'חריטה']);
-const words = t => t.replace(/[^֐-׿a-zA-Z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length >= 3 && !STOP.has(w)).map(w => w.length > 3 && 'הלבומש'.includes(w[0]) && !ITEMWORDS.has(w) ? w.slice(1) : w);
-let ITEMWORDS = new Set();
-function dataPoints() {
-  const pts = PAST.map(([t, c, p]) => ({ t, c, p }));
-  ITEMS.forEach(i => pts.push({ t: i.title, c: [i.craft], p: i.price }));
-  S.requests.forEach(r => r.offers.forEach(o => pts.push({ t: r.title, c: r.crafts, p: o.price })));
-  return pts;
-}
-ITEMWORDS = new Set(dataPoints().flatMap(p => p.t.split(/\s+/)));
-function estimate(title, crafts) {
-  const tw = words(title || ''); if (!tw.length && !crafts.length) return null;
-  const pts = dataPoints().map(p => {
-    const pw = words(p.t);
-    const kw = tw.some(a => pw.some(b => a.includes(b) || b.includes(a)));
-    const cr = crafts.some(c => p.c.includes(c));
-    return { ...p, kw, cr };
-  });
-  let pick = pts.filter(p => p.kw && (p.cr || !crafts.length));
-  if (pick.length < 2) pick = pts.filter(p => p.kw);
-  if (pick.length < 2 && crafts.length) pick = pts.filter(p => p.cr);
-  if (pick.length < 2) return null;
-  const ps = pick.map(p => p.p).sort((a, b) => a - b), q = f => ps[Math.min(ps.length - 1, Math.floor(f * (ps.length - 1) + .5))];
-  const round = n => n >= 1000 ? Math.round(n / 100) * 100 : Math.round(n / 10) * 10;
-  let lo = round(q(.25)), hi = round(q(.75));
-  if (lo === hi) { lo = round(lo * .85); hi = round(hi * 1.15); }
-  return { lo, hi, n: pick.length };
-}
-const estHTML = e => e
-  ? `<span class="eyebrow">הערכת המחיר של בהזמנה</span><span class="val">${ils(e.lo)}–${Number(e.hi).toLocaleString('he-IL')}</span>
-     <p class="small">לפי ${e.n} עסקאות דומות שנעשו באפליקציה. המחיר הסופי נקבע בהצעות של היוצרים.</p>
-     <button type="button" class="link" data-act="useest">להשתמש בהערכה הזאת</button>`
-  : `<span class="eyebrow">הערכת המחיר של בהזמנה</span><p class="small">כתבו מה תרצו ובחרו תחום, ונראה לכם כמה עלו דברים דומים באפליקציה.</p>`;
-
 /* ---------- screens ---------- */
 const MOTION = window.matchMedia('(prefers-reduced-motion: no-preference)');
 const motionOK = () => MOTION.matches;
@@ -667,7 +647,10 @@ function back() { if (S.stack.length > 1) S.stack.pop(); S.anim = 'back'; render
 function tab(s) { S.stack = [{ s }]; S.anim = 'fade'; render(true); }
 function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2400); }
 
-const head = (title, extra = '') => `<header class="top g">${S.stack.length > 1 ? `<button class="round" data-act="back" aria-label="חזרה">${svg(UI.back)}</button>` : ''}<h1>${title}</h1>${extra}</header>`;
+/* the magnifier sits in the top bar of every main screen, so search is one tap away from anywhere */
+const FIND_ON = new Set(['board', 'makers', 'chats', 'orders', 'profile', 'item', 'maker', 'req', 'order']);
+const findBtn = () => `<button class="round" data-act="search" aria-label="חיפוש">${svg(UI.search)}</button>`;
+const head = (title, extra = '') => `<header class="top g">${S.stack.length > 1 ? `<button class="round" data-act="back" aria-label="חזרה">${svg(UI.back)}</button>` : ''}<h1>${title}</h1>${extra}${FIND_ON.has(cur().s) ? findBtn() : ''}</header>`;
 const avatar = id => { const m = MAKERS[id]; return `<span class="av">${art(m.img)}<span class="ini">${initials(m.name)}</span></span>`; };
 const makerLine = id => { const m = MAKERS[id]; return `<button class="maker-line" data-act="maker" data-v="${id}">${avatar(id)}<span style="display:flex;flex-direction:column"><b>${m.name}</b><span class="small muted">${CRAFTS[m.craft]} · ${m.city} · ★ ${m.rating.toFixed(1)}</span></span></button>`; };
 const craftTags = r => `<span class="tags">${r.crafts.map(c => `<span class="tag">${CRAFTS[c]}</span>`).join('')}${r.other ? `<span class="tag">${esc(r.other)}</span>` : ''}</span>`;
@@ -684,20 +667,164 @@ const ranked = (craft = 'all') => Object.keys(MAKERS).filter(id => id !== 'me' &
 const craftRank = id => ranked(MAKERS[id].craft).indexOf(id) + 1;
 const itemsOf = id => ITEMS.filter(i => i.maker === id);
 /* a row in the makers list: rank, photo, rating and orders, plus quick buttons to the maker's works and reviews */
-const makerRow = (id, n) => { const m = MAKERS[id];
-  return `<div class="rank-row ${n ? '' : 'nonum'}"><button class="rank-main" data-act="maker" data-v="${id}">${n ? `<span class="num">${n}</span>` : ''}${avatar(id)}<span class="info"><span class="nm">${m.name}</span>
-    <span class="sub">${CRAFTS[m.craft]} · ${m.city}</span><span class="sub"><span class="stars">★ ${m.rating.toFixed(1)}</span> · ${m.orders} הזמנות</span></span></button>
+const makerRow = (id, n, hl = s => s, extra = '') => { const m = MAKERS[id];
+  return `<div class="rank-row ${n ? '' : 'nonum'}"><button class="rank-main" data-act="maker" data-v="${id}">${n ? `<span class="num">${n}</span>` : ''}${avatar(id)}<span class="info"><span class="nm">${hl(m.name)}</span>
+    <span class="sub">${hl(CRAFTS[m.craft])} · ${hl(m.city)}</span>${extra}<span class="sub"><span class="stars">★ ${m.rating.toFixed(1)}</span> · ${m.orders} הזמנות</span></span></button>
     <div class="rank-links"><button class="chip" data-act="makerat" data-v="${id}|works">עבודות (${itemsOf(id).length})</button><button class="chip" data-act="makerat" data-v="${id}|reviews">ביקורות (${REVIEWS[id].length})</button></div></div>`; };
 function worksHTML() {
-  const q = S.q.trim();
-  const list = ITEMS.filter(i => (S.craft === 'all' || i.craft === S.craft) && (!q || i.title.includes(q) || i.mat.includes(q) || CRAFTS[i.craft].includes(q) || MAKERS[i.maker].name.includes(q)));
-  const works = list.length ? worksGrid(list) : '';
-  if (!q) return works || `<p class="empty">לא מצאנו עבודה כזאת. אפשר לתאר אותה בבקשה, ויוצרים יציעו לבנות.</p>`;
-  const people = ranked().filter(id => { const m = MAKERS[id]; return m.name.includes(q) || m.city.includes(q) || CRAFTS[m.craft].includes(q); });
-  if (!people.length && !list.length) return `<p class="empty">לא מצאנו יוצרים או עבודות שמתאימים ל״${esc(q)}״. נסו מילה אחרת, או תארו מה תרצו בבקשה, ויוצרים יציעו לבנות.</p>`;
-  return `${people.length ? `<div class="found"><h3 class="sub-title">יוצרים</h3><div class="rank">${people.map(id => makerRow(id)).join('')}</div></div>` : ''}
-    ${list.length ? `<h3 class="sub-title" style="margin-bottom:14px">עבודות</h3>${works}` : ''}`;
+  const list = ITEMS.filter(i => S.craft === 'all' || i.craft === S.craft);
+  return list.length ? worksGrid(list) : `<p class="empty">לא מצאנו עבודה כזאת. אפשר לתאר אותה בבקשה, ויוצרים יציעו לבנות.</p>`;
 }
+/* ---------- search: free words across works, makers and open requests ----------
+   Forgiving in Hebrew: niqqud, punctuation and final letters are ignored; a leading ה/ו/ב/ל/מ/ש/כ (and pairs like וה, שה) may be dropped;
+   plurals in ים/ות meet their singular; everyday and English words reach the Hebrew ones through a small synonyms map.
+   Every word that means something must be found (in any field) for a result to show. */
+const FINAL = { 'ך': 'כ', 'ם': 'מ', 'ן': 'נ', 'ף': 'פ', 'ץ': 'צ' };
+const norm = s => String(s).toLowerCase().replace(/[־\-–_/]/g, ' ').replace(/[֑-ׇ]/g, '').replace(/[׳״'"`]/g, '')
+  .replace(/[ךםןףץ]/g, c => FINAL[c]).replace(/[^א-תa-z0-9]+/g, ' ').trim();
+const toks = s => norm(s).split(' ').filter(Boolean);
+const PREFIXES = ['וכש', 'וה', 'וש', 'וב', 'ול', 'ומ', 'וכ', 'שה', 'שב', 'של', 'שמ', 'מה', 'בה', 'לה', 'כה', 'כש', 'ה', 'ו', 'ב', 'ל', 'מ', 'ש', 'כ'];
+const isHe = w => /[א-ת]/.test(w);
+/* singular forms of one word: ספלים → ספל, כוסות → כוס, טבעות → טבעת, קערות → קערה, שרשראות → שרשרת, wallets → wallet */
+function sing(w) {
+  const out = [w];
+  if (!isHe(w)) { if (w.length > 3 && w.endsWith('s')) out.push(w.slice(0, -1)); return out; }
+  if (w.length >= 4 && w.endsWith('ימ')) out.push(w.slice(0, -2));
+  if (w.length >= 4 && w.endsWith('ות')) { const b = w.slice(0, -2); out.push(b, b + 'ה', b + 'ת'); if (b.endsWith('א')) out.push(b.slice(0, -1) + 'ת'); }
+  return out;
+}
+/* every way a written word may be meant: as is, without a leading prefix, and in the singular */
+function forms(w) {
+  const base = [w];
+  if (isHe(w)) PREFIXES.forEach(p => { if (w.startsWith(p) && w.length - p.length >= 2) base.push(w.slice(p.length)); });
+  return new Set(base.flatMap(sing));
+}
+/* words that carry no meaning in a search ("עם", "של", "מתנה": anything here can be a gift) */
+const STOPW = new Set(['עם', 'של', 'את', 'או', 'גם', 'על', 'בשביל', 'עבור', 'לי', 'שלי', 'מתנה', 'מתנות', 'for', 'with', 'the', 'a', 'an', 'of', 'and', 'gift'].map(norm));
+/* synonyms: [words people type] → [words found in the gallery], plus the craft that most likely makes it */
+const SYN = [
+  [['כוס', 'מאג', 'ספל', 'mug', 'cup', 'coffee', 'tea'], ['ספל', 'כוס'], 'ceramic'],
+  [['תכשיט', 'jewelry', 'jewellery', 'jewel'], ['תכשיט', 'טבעת', 'שרשרת', 'עגיל', 'תליון', 'צמיד'], 'jewelry'],
+  [['טבעת', 'ring'], ['טבעת'], 'jewelry'],
+  [['שרשרת', 'תליון', 'necklace', 'pendant'], ['שרשרת', 'תליון'], 'jewelry'],
+  [['עגיל', 'earring'], ['עגיל'], 'jewelry'],
+  [['צמיד', 'bracelet'], ['צמיד'], 'jewelry'],
+  [['סכין', 'להב', 'knife', 'blade'], ['סכין', 'להב'], 'metal'],
+  [['שולחן', 'table'], ['שולחן'], 'wood'],
+  [['תיק', 'bag', 'purse'], ['תיק', 'ארנק'], 'leather'],
+  [['ארנק', 'wallet'], ['ארנק'], 'leather'],
+  [['צלחת', 'קערה', 'קערית', 'bowl', 'plate', 'dish'], ['צלחת', 'קערה', 'קערית'], 'ceramic'],
+  [['צעצוע', 'משחק', 'toy', 'game'], ['צעצוע', 'משחק'], 'wood'],
+  [['רצועה', 'רצועת', 'גיטרה', 'חגורה', 'strap', 'guitar', 'belt'], [], 'leather'],
+  [['עור', 'leather'], ['עור'], 'leather'],
+  [['עץ', 'wood', 'wooden'], ['עץ'], 'wood'],
+  [['קרש', 'board'], ['קרש'], 'wood'],
+  [['כסף', 'silver'], ['כסף'], 'jewelry'],
+  [['זהב', 'gold'], ['זהב'], 'jewelry'],
+  [['קרמיקה', 'חרס', 'חימר', 'ceramic', 'clay', 'pottery'], ['קרמיקה', 'חימר', 'אבניים'], 'ceramic'],
+  [['מתכת', 'ברזל', 'פלדה', 'metal', 'iron', 'steel'], ['מתכת', 'ברזל', 'פלדה'], 'metal'],
+  [['חתונה', 'אירוסין', 'wedding'], ['חתונה', 'אירוסין'], null]
+];
+const SYNMAP = new Map();
+SYN.forEach(([from, to, craft]) => from.forEach(w => SYNMAP.set(norm(w), { to: to.map(norm), craft })));
+/* the query, word by word; the last word may still be half typed, so it also matches the start of a word ("ארנ" → ארנק) */
+function parseQuery(q) {
+  const ws = toks(q).filter(w => !STOPW.has(w) && w.length >= 2);
+  return ws.map((w, i) => {
+    const f = forms(w), alts = new Set(f); let craft = null;
+    f.forEach(x => { const g = SYNMAP.get(x); if (g) { craft = craft || g.craft; g.to.forEach(t => forms(t).forEach(a => alts.add(a))); } });
+    /* half-typed: only the word as typed (or without its prefix), never its singular stem, so "טבעות" does not reach "טבעי" */
+    const pre = i === ws.length - 1 ? [w, ...PREFIXES.filter(p => w.startsWith(p) && w.length - p.length >= 3).map(p => w.slice(p.length))] : [];
+    return { w, alts, pre, craft };
+  });
+}
+const wordHit = (term, word) => { const f = forms(word); for (const a of term.alts) if (f.has(a)) return true; return term.pre.some(p => word.startsWith(p)); };
+/* fields: [text, weight]; returns a score (0 = not every word was found) */
+function scoreDoc(terms, fields) {
+  const fw = fields.map(([t, wt]) => [toks(t), wt]);
+  let score = 0;
+  for (const term of terms) { let best = 0; fw.forEach(([ws, wt]) => { if (wt > best && ws.some(w => wordHit(term, w))) best = wt; }); if (!best) return 0; score += best; }
+  return score;
+}
+/* escape every piece of text, then wrap the words that matched in <mark> */
+function hl(text, terms) {
+  if (!terms || !terms.length) return esc(text);
+  return String(text).split(/([א-ת֑-ׇa-zA-Z0-9׳״'"]+)/).map((part, i) => {
+    if (i % 2 === 0) return esc(part);
+    const t = toks(part); return t.length && t.some(w => terms.some(term => wordHit(term, w))) ? `<mark>${esc(part)}</mark>` : esc(part);
+  }).join('');
+}
+/* a short piece of a long text around the first matched word */
+function snip(text, terms, len = 70) {
+  const parts = String(text).split(/\s+/), at = parts.findIndex(p => toks(p).some(w => terms.some(term => wordHit(term, w))));
+  if (at < 0) return '';
+  const from = Math.max(0, at - 3);
+  let out = parts.slice(from, from + 12).join(' '), cut = from + 12 < parts.length;
+  if (out.length > len) { out = out.slice(0, len).replace(/\s+\S*$/, ''); cut = true; }
+  return `${from ? '…' : ''}${hl(out, terms)}${cut ? '…' : ''}`;
+}
+function searchAll(q) {
+  const terms = parseQuery(q);
+  if (!terms.length) return { terms, works: [], makers: [], reqs: [] };
+  const top = list => list.filter(x => x.s).sort((a, b) => b.s - a.s).map(x => x.d);
+  return {
+    terms,
+    works: top(ITEMS.map(d => ({ d, s: scoreDoc(terms, [[d.title, 3], [d.mat, 2], [CRAFTS[d.craft], 2], [MAKERS[d.maker].name, 2], [d.text, 1]]) }))),
+    makers: top(ranked().map(id => { const m = MAKERS[id]; return { d: id, s: scoreDoc(terms, [[m.name, 3], [m.city, 2], [CRAFTS[m.craft], 2], [m.story, 1]]) }; })),
+    reqs: top(S.requests.filter(r => !r.closed).map(d => ({ d, s: scoreDoc(terms, [[d.title, 3], [d.text, 1]]) })))
+  };
+}
+
+/* recent searches: kept on this device only when the browser allows it; the screen works the same without them */
+const RECENT_KEY = 'behazmana.recent';
+let RECENT = (() => { try { const v = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); return Array.isArray(v) ? v.filter(x => typeof x === 'string').slice(0, 5) : []; } catch (e) { return []; } })();
+function saveRecent(q) {
+  q = String(q || '').trim().slice(0, 60); if (!q || !parseQuery(q).length) return;
+  RECENT = [q, ...RECENT.filter(x => norm(x) !== norm(q))].slice(0, 5);
+  try { localStorage.setItem(RECENT_KEY, JSON.stringify(RECENT)); } catch (e) { /* private mode: keep them for this visit only */ }
+}
+function clearRecent() { RECENT = []; try { localStorage.removeItem(RECENT_KEY); } catch (e) { /* nothing stored */ } }
+const POPULAR = ['ארנק עם ראשי תיבות', 'ספל', 'טבעת', 'קרש חיתוך', 'סכין שף', 'מתנה לחתונה'];
+const chipList = list => `<div class="chips">${list.map(t => `<button type="button" class="chip" data-act="sq" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>`;
+
+/* the results, grouped; or, before typing, popular and recent searches; or, when nothing matches, a way to ask a maker for it */
+let sqT;
+function searchHTML() {
+  const q = S.sq.trim(), res = searchAll(q), { terms } = res, h = t => hl(t, terms);
+  if (!terms.length) return `<section class="sgroup"><h2 class="sub-title">חיפושים פופולריים</h2>${chipList(POPULAR)}</section>
+    ${RECENT.length ? `<section class="sgroup"><div class="sec-head" style="margin-bottom:14px"><h2 class="sub-title" style="margin:0">חיפושים אחרונים</h2><button type="button" class="link" data-act="clearrecent">ניקוי</button></div>${chipList(RECENT)}</section>` : ''}
+    <p class="small muted">אפשר לחפש במילים חופשיות: מה תרצו, מאיזה חומר, שם של יוצר או עיר.</p>`;
+  const n = res.works.length + res.makers.length + res.reqs.length;
+  if (!n) {
+    const craft = (terms.find(t => t.craft) || {}).craft, who = craft ? ranked(craft).slice(0, 3) : [];
+    return `<div class="s-empty"><p class="say">עוד אין עבודה כזאת בגלריה, אבל יוצרים יכולים להכין אותה בשבילך.</p>
+        <p class="small muted">מתארים בבקשה קצרה מה תרצו, ויוצרים מתאימים שולחים הצעות.</p>
+        <button type="button" class="btn" data-act="askfor">לבקש: ${esc(q)}</button></div>
+      ${who.length ? `<section class="sgroup"><h2 class="sub-title">יוצרים ב${CRAFTS[craft]} שיכולים להכין את זה</h2><div class="rank">${who.map(id => makerRow(id)).join('')}</div></section>` : ''}`;
+  }
+  const group = (title, list, body) => list.length ? `<section class="sgroup" aria-label="${title}: ${list.length}"><h2 class="sub-title">${title} <span class="n">${list.length}</span></h2>${body}</section>` : '';
+  return group('עבודות', res.works, `<div class="works">${res.works.map(it => `<div class="work"><button class="work-open" data-act="item" data-v="${it.id}">${art(it.v)}<span class="label"><span class="t">${h(it.title)}</span><span class="m">${h(it.mat)} · ${h(MAKERS[it.maker].name)}</span><span class="price">${ils(it.price)}</span></span></button>${heart(it.id)}</div>`).join('')}</div>`)
+    + group('יוצרים', res.makers, `<div class="rank">${res.makers.map(id => { const m = MAKERS[id], direct = [m.name, m.city, CRAFTS[m.craft]].some(t => scoreDoc(terms, [[t, 1]])), s = direct ? '' : snip(m.story, terms);
+        return makerRow(id, 0, h, s ? `<span class="snip">${s}</span>` : ''); }).join('')}</div>`)
+    + group('בקשות פתוחות', res.reqs, `<div>${res.reqs.map(r => `<button class="req" data-act="req" data-v="${r.id}">${art(r.v)}
+        <span class="info"><span class="row between">${craftTags(r)}<span class="small muted">${r.ago}</span></span>
+        <span class="t">${h(r.title)}</span><span class="snip clamp">${h(r.text)}</span>
+        <span class="meta"><span>מתי <b>${esc(r.due)}</b></span><span>${r.offers.length ? `<b>${r.offers.length}</b> הצעות` : 'עוד אין הצעות'}</span></span></span></button>`).join('')}</div>`)
+    + `<button type="button" class="btn ghost block" data-act="askfor" style="white-space:normal">לא בדיוק זה? לבקש: ${esc(q)}</button>`;
+}
+function searchStatus() {
+  const res = searchAll(S.sq.trim()); if (!res.terms.length) return '';
+  const n = res.works.length + res.makers.length + res.reqs.length;
+  return n ? (n === 1 ? 'נמצאה תוצאה אחת' : `נמצאו ${n} תוצאות`) : `לא נמצאו תוצאות ל״${S.sq.trim()}״`;
+}
+/* redraw only the results, so the search box (and the phone keyboard) stay put */
+function runSearch() {
+  const box = document.getElementById('sq-results'); if (!box) return;
+  box.innerHTML = searchHTML();
+  const st = document.getElementById('sq-status'); if (st) st.textContent = searchStatus();
+  if (GS) ScrollTrigger.refresh();
+}
+
 const HERO = [['hero', 'גילוף בעץ'], ['hero-clay', 'על האובניים'], ['hero-jewel', 'בשולחן הצורפת']];
 const HEADLINE = ['יצירות שעוד לא קיימות.', 'עד שתבקשו.'];
 const bubbleHTML = (b, mine, isNew) => `<div class="bubble ${mine ? 'me' : 'them'}${isNew ? ' new' : ''}">${esc(b.t)}</div>`;
@@ -805,14 +932,14 @@ const chooseSheet = v => { const { r, o } = offerAt(v), m = MAKERS[o.maker];
 
 const SCREENS = {
   home: () => `<header class="top g"><div class="wordmark">בהזמנה<small>יצירה בעבודת יד · בהזמנה אישית</small></div>
-      <button class="round me-btn" data-act="go" data-v="profile" aria-label="החשבון שלי">ר</button></header>
+      <button class="round" data-act="search" aria-label="חיפוש">${svg(UI.search)}</button><button class="round me-btn" data-act="go" data-v="profile" aria-label="החשבון שלי">ר</button></header>
     <section class="hero carwrap${S.introDone ? '' : ' intro'}"><div class="car" data-car>${HERO.map(([n, c], i) => `<div class="slide">${art(n, i ? '' : 'eager')}<span class="credit">${c} · צילום לדוגמה</span></div>`).join('')}</div>
       <div class="shade"></div>
       <div class="copy g"><h1>${HEADLINE.map(l => `<span class="ln">${l.split(' ').map(w => `<span class="w"><span>${w}</span></span>`).join(' ')}</span>`).join('')}</h1>
         <p>מתארים את מה שאתם מדמיינים, ויוצרים מכל הארץ מציעים ליצור אותו בשבילכם, ביד.</p>
         <button class="btn on-image" data-act="tab" data-v="post">לתאר בקשה</button>${dotsHTML(HERO.length)}</div></section>
     <div class="stack g">
-      <label class="search">${svg(UI.search)}<input id="q" type="search" placeholder="חיפוש: יוצרים, ארנק, ספל, עץ..." value="${esc(S.q)}" aria-label="חיפוש"></label>
+      <button class="search search-entry" data-act="search" aria-label="חיפוש בעבודות, ביוצרים ובבקשות">${svg(UI.search)}<span>מה תרצו? ארנק, ספל, טבעת, יוצרת...</span></button>
       <section><div class="sec-head"><h2 class="sec-title">חומרים</h2></div>
         <div class="rail bleed" role="group" aria-label="סינון לפי חומר">
           <button class="mat" data-act="craft" data-v="all" aria-pressed="${S.craft === 'all'}"><span class="all">הכל</span><span class="n">הכל</span></button>
@@ -827,7 +954,7 @@ const SCREENS = {
           <span class="label"><span class="craft">${cn}</span><span class="t" style="margin-top:6px">${m.name}</span><span class="m">★ ${m.rating.toFixed(1)} · ${m.orders} הזמנות</span></span></button>`; }).join('')}</div>
         <button class="link" style="margin-top:14px" data-act="makers" data-v="all">לדירוג המלא בכל תחום</button></section>
       <section class="how-field bleed g"><h2 class="sec-title">איך זה עובד</h2>
-        <ol class="how"><li><span class="num">1</span><span><b>מתארים</b><span class="small muted">מה תרצו, באיזה חומר ועד מתי. בהזמנה מציעה הערכת מחיר.</span></span></li>
+        <ol class="how"><li><span class="num">1</span><span><b>מתארים</b><span class="small muted">מה תרצו, באיזה חומר ועד מתי.</span></span></li>
           <li><span class="num">2</span><span><b>מקבלים הצעות</b><span class="small muted">יוצרים שולחים מחיר וזמן. מדברים איתם, ואז בוחרים.</span></span></li>
           <li><span class="num">3</span><span><b>רואים את זה נולד</b><span class="small muted">תמונות מהסדנה בכל שלב, עד שזה אצלכם.</span></span></li></ol>
         <button class="btn" data-act="tab" data-v="post">לתאר בקשה</button></section>
@@ -869,6 +996,10 @@ const SCREENS = {
       <div class="tab-pad" aria-hidden="true"></div>
     </div>`; },
 
+  search: () => `<header class="top g">${S.stack.length > 1 ? `<button class="round" data-act="back" aria-label="חזרה">${svg(UI.back)}</button>` : ''}
+      <form class="search sq" data-form="search" role="search">${svg(UI.search)}<input id="sq" name="q" type="search" value="${esc(S.sq)}" placeholder="מה תרצו? ארנק, ספל, טבעת..." aria-label="חיפוש בעבודות, ביוצרים ובבקשות" aria-describedby="sq-status" aria-controls="sq-results" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button type="button" class="sq-clear" data-act="sqclear" aria-label="ניקוי החיפוש" ${S.sq ? '' : 'hidden'}>${svg('<path d="M6 6l12 12M18 6L6 18"/>')}</button></form></header>
+    <div class="stack g sq-body"><p class="small muted sq-status" id="sq-status" role="status" aria-live="polite">${esc(searchStatus())}</p><div id="sq-results" class="stack" style="padding:0">${searchHTML()}</div></div>`,
+
   makers: () => { const list = ranked(S.makersCraft);
     return `${head('היוצרים')}
     <div class="stack g" style="gap:18px">
@@ -887,8 +1018,7 @@ const SCREENS = {
       <div>${list.length ? list.map(r => `<button class="req" data-act="req" data-v="${r.id}">${art(r.v)}
         <span class="info"><span class="row between">${craftTags(r)}<span class="small muted">${r.ago}</span></span>
         <span class="t">${esc(r.title)}</span>
-        <span class="meta"><span>${r.budgetSrc === 'app' ? 'הערכה' : 'תקציב משוער'} <b>${esc(r.budget)}</b></span><span>מתי <b>${esc(r.due)}</b></span></span>
-        <span class="meta"><span>${r.offers.length ? `<b>${r.offers.length}</b> הצעות` : 'עוד אין הצעות'}</span>${r.closed ? '<span>· נסגרה הזמנה</span>' : ''}${r.to ? `<span>· ישירות ל${MAKERS[r.to].name}</span>` : ''}</span></span></button>`).join('') : '<p class="empty">אין כאן בקשות עדיין.</p>'}</div>
+        <span class="meta"><span>מתי <b>${esc(r.due)}</b></span><span>${r.offers.length ? `<b>${r.offers.length}</b> הצעות` : 'עוד אין הצעות'}</span>${r.closed ? '<span>· נסגרה הזמנה</span>' : ''}${r.to ? `<span>· ישירות ל${MAKERS[r.to].name}</span>` : ''}</span></span></button>`).join('') : '<p class="empty">אין כאן בקשות עדיין.</p>'}</div>
     </div>`; },
 
   req: ({ id }) => { const r = S.requests.find(x => x.id === id), owner = S.role === 'buyer' && r.mine, picked = r.closed && r.offers[r.picked];
@@ -897,7 +1027,7 @@ const SCREENS = {
       <div class="row" style="align-items:flex-start;gap:14px"><div style="width:104px;flex:none">${art(r.v, '', '')}</div>
         <div style="display:flex;flex-direction:column;gap:6px;min-width:0">${craftTags(r)}<h2 class="display" style="font-size:27px">${esc(r.title)}</h2><span class="small muted">${esc(r.buyer)} · ${esc(r.city)} · ${r.ago}</span></div></div>
       <p>${esc(r.text)}</p>
-      <dl class="specs"><div><dt>${r.budgetSrc === 'app' ? 'הערכת האפליקציה' : 'תקציב משוער'}</dt><dd>${esc(r.budget)}</dd></div><div><dt>מתי</dt><dd>${esc(r.due)}</dd></div></dl>
+      <dl class="specs one"><div><dt>מתי</dt><dd>${esc(r.due)}</dd></div></dl>
       <section><div class="sec-head" style="margin-bottom:6px"><h2 class="sec-title">${r.offers.length === 1 ? 'הצעה אחת' : r.offers.length ? `${r.offers.length} הצעות` : 'מחכים להצעות'}</h2></div>
       ${r.offers.length ? `<p class="small muted" style="margin-bottom:14px">${picked ? `נבחרה ההצעה של ${MAKERS[picked.maker].name}. אפשר להמשיך לדבר בתוך ההצעה.` : owner ? 'פתחו הצעה כדי לקרוא אותה ולדבר עם היוצר לפני שבוחרים' : 'לחיצה על הצעה פותחת אותה במלואה.'}</p>` : ''}
       <div style="display:flex;flex-direction:column;gap:12px">${r.offers.map((o, i) => offerCard(r, o, i)).join('')}
@@ -910,21 +1040,18 @@ const SCREENS = {
       ${S.role === 'buyer' && !r.mine ? '<p class="note">זו בקשה של קונה אחר. כדי לראות איך שולחים הצעה, עברו למצב ״יוצר״ במסך החשבון.</p>' : ''}
     </div>`; },
 
-  post: ({ to } = {}) => { const pre = to ? [MAKERS[to].craft] : [];
-    S.est = null;
+  post: ({ to, title = '', hint } = {}) => { const pre = to ? [MAKERS[to].craft] : hint ? [hint] : [];
     return `${head(to ? `בקשה ל${MAKERS[to].name}` : 'בקשה חדשה')}
     <div class="stack g">
       <p class="muted">${to ? `הבקשה תישלח רק אל ${MAKERS[to].name}, שיחזור אליכם עם הצעת מחיר.` : 'הבקשה תופיע בלוח, ויוצרים מתאימים מכל הארץ ישלחו הצעות.'}</p>
       <form class="f" data-form="post" data-v="${to || ''}">
-        <div class="field"><label for="p-title">מה תרצו שיכינו בשבילכם?</label><input class="input" id="p-title" name="title" required placeholder="למשל: קרש חיתוך עם שמות הילדים" autocomplete="off"></div>
+        <div class="field"><label for="p-title">מה תרצו שיכינו בשבילכם?</label><input class="input" id="p-title" name="title" required placeholder="למשל: קרש חיתוך עם שמות הילדים" autocomplete="off" value="${esc(title)}"></div>
         <div class="field"><span class="lbl">תחום · אפשר לבחור כמה</span>
           <div class="picks">${Object.entries(CRAFTS).map(([k, v]) => `<label class="pick"><input type="checkbox" name="crafts" value="${k}" id="pc-${k}" ${pre.includes(k) ? 'checked' : ''}><span>${v}</span></label>`).join('')}
             <label class="pick"><input type="checkbox" id="pc-other" name="otherOn" value="1"><span>אחר</span></label></div>
           <input class="input" id="p-other" name="other" placeholder="איזה תחום? למשל: זכוכית, טקסטיל, קליעה" hidden>
           <span class="hint">עגילים מעץ? בחרו גם ״תכשיטים״ וגם ״עץ״.</span></div>
         <div class="field"><label for="p-text">פרטים</label><textarea class="input" id="p-text" name="text" placeholder="מידות, צבעים, למי זה מיועד..."></textarea></div>
-        <div class="estimate" id="estimate" aria-live="polite">${estHTML(null)}</div>
-        <div class="field"><label for="p-budget">תקציב משוער <span class="muted" style="font-weight:400">(לא חובה)</span></label><input class="input" id="p-budget" name="budget" placeholder="לדוגמה: 200–300 ₪"><span class="hint">אם תשאירו ריק, היוצרים יראו את הערכת האפליקציה.</span></div>
         <div class="field"><label for="p-due">עד מתי?</label><input class="input" id="p-due" name="due" placeholder="למשל: לפני יום ההולדת, 12.12"></div>
         <div class="field"><span class="lbl">תמונות השראה</span><div class="photos" id="photos"><button type="button" class="add-photo" data-act="addphoto" aria-label="הוספת תמונה">+</button></div><span class="hint">בהדגמה, לחיצה על + מוסיפה תמונה לדוגמה.</span></div>
         <button class="btn block" type="submit">${to ? 'שליחה ליוצר' : 'פרסום בלוח'}</button>
@@ -1041,6 +1168,7 @@ function render(scroll) {
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (cur() === c && userScrollAt < t0) { fitTabPad(); jumpTo(at, false); } });
     }
   }
+  if (c.s === 'search' && c.focus) { delete c.focus; const i = document.getElementById('sq'); if (i) { i.focus({ preventScroll: true }); i.setSelectionRange(i.value.length, i.value.length); } }
   onScroll();
   motionFor(c);
   if (c.s === 'home') S.introDone = true;
@@ -1081,11 +1209,6 @@ function toBottom() {
 function pill(on) { const p = document.getElementById('newpill'); if (p) p.hidden = !on; }
 /* when the list or the keyboard changes size, stay at the bottom if that is where the reader was */
 const RO = window.ResizeObserver ? new ResizeObserver(() => { if (CHAT.stick) toBottom(); }) : null;
-function updateEstimate() {
-  const f = document.querySelector('form[data-form="post"]'); if (!f) return;
-  S.est = estimate(document.getElementById('p-title').value, new FormData(f).getAll('crafts'));
-  document.getElementById('estimate').innerHTML = estHTML(S.est);
-}
 /* chat: add one bubble without rebuilding the screen, so the input (and the phone keyboard) stay put */
 /* my own message always scrolls to the bottom; a reply does too, unless the reader has scrolled up to read (then a pill offers it) */
 function appendBubble(key, b, mine) {
@@ -1116,6 +1239,12 @@ const ACT = {
     btn.classList.remove('pop'); void btn.offsetWidth; if (on) btn.classList.add('pop');
     toast(on ? 'נשמר. אפשר למצוא את זה בחשבון שלך' : 'הוסר מהרשימה'); },
   direct: v => go('post', { to: v }),
+  /* search opens fresh (empty, with the keyboard up); coming back to it keeps the words and the results */
+  search: () => { S.sq = ''; go('search', { focus: true }); },
+  sq: v => { const i = document.getElementById('sq'), c = document.querySelector('.sq-clear'); clearTimeout(sqT); S.sq = v; if (c) c.hidden = !v; if (i) { i.value = v; i.blur(); } saveRecent(v); runSearch(); },
+  sqclear: () => { const i = document.getElementById('sq'); clearTimeout(sqT); S.sq = ''; if (i) { i.value = ''; i.focus({ preventScroll: true }); } document.querySelector('.sq-clear').hidden = true; runSearch(); },
+  clearrecent: () => { clearRecent(); runSearch(); const i = document.getElementById('sq'); if (i) i.focus({ preventScroll: true }); },
+  askfor: () => { const q = S.sq.trim(), t = parseQuery(q).find(x => x.craft); saveRecent(q); go('post', { title: q, hint: t ? t.craft : undefined }); },
   /* a material only filters the works below: update the tiles and the list in place, so the hero (slide, drift, parallax) and the scroll stay exactly where they are */
   craft: v => { if (S.craft === v) return; S.craft = v;
     document.querySelectorAll('.mat[data-act="craft"]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
@@ -1125,7 +1254,6 @@ const ACT = {
   mcraft: v => { S.makersCraft = v; render(); },
   btab: v => { S.boardTab = v; render(); },
   role: v => { S.role = v; render(); toast(v === 'maker' ? 'עברתם למצב יוצר' : 'עברתם למצב קונה'); },
-  useest: () => { if (S.est) { document.getElementById('p-budget').value = `${S.est.lo}–${S.est.hi} ₪`; toast('ההערכה נכנסה לתקציב'); } },
   addphoto: (v, btn) => { const box = document.getElementById('photos'); if (box.querySelectorAll('.art').length >= 4) return; const n = box.querySelectorAll('.art').length, kinds = ['wood', 'leather', 'ceramic', 'jewelry']; btn.insertAdjacentHTML('beforebegin', art(MAT[kinds[n]])); },
   offer: v => go('offer', { v }),
   tobottom: () => { CHAT.stick = true; toBottom(); },
@@ -1152,23 +1280,24 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !document.
 
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-act]'); if (!t) return;
-  e.preventDefault(); ACT[t.dataset.act](t.dataset.v, t);
+  e.preventDefault();
+  /* opening a result remembers the search that found it */
+  if (t.closest('#sq-results') && !['sq', 'save', 'clearrecent'].includes(t.dataset.act)) saveRecent(S.sq); ACT[t.dataset.act](t.dataset.v, t);
 });
 /* tapping "שליחה" must not steal focus from the message box (that is what closed the keyboard) */
 document.addEventListener('mousedown', e => { if (e.target.closest('.composer button')) e.preventDefault(); });
 document.addEventListener('input', e => {
-  if (e.target.id === 'q') { S.q = e.target.value; refreshWorks(false); }
-  if (e.target.id === 'p-title') updateEstimate();
+  if (e.target.id === 'sq') { const c = document.querySelector('.sq-clear'); if (c) c.hidden = !e.target.value; clearTimeout(sqT); const val = e.target.value; sqT = setTimeout(() => { S.sq = val; runSearch(); }, 120); }
   if (e.target.closest('form[data-form="reject"]')) rjCheck();
 });
 document.addEventListener('change', e => {
   if (e.target.closest('form[data-form="reject"]')) rjCheck();
   if (e.target.id === 'pc-other') { const o = document.getElementById('p-other'); o.hidden = !e.target.checked; if (e.target.checked) o.focus(); }
-  if (e.target.name === 'crafts') updateEstimate();
 });
 document.addEventListener('submit', e => {
   e.preventDefault();
   const f = e.target, kind = f.dataset.form, v = f.dataset.v, fd = new FormData(f), d = Object.fromEntries(fd);
+  if (kind === 'search') { clearTimeout(sqT); S.sq = d.q || ''; saveRecent(S.sq); runSearch(); f.querySelector('input').blur(); return; }
   if (kind === 'msg') {
     const input = f.querySelector('input'), text = (d.msg || '').trim();
     input.focus({ preventScroll: true });
@@ -1203,10 +1332,8 @@ document.addEventListener('submit', e => {
   if (kind === 'post') {
     const crafts = fd.getAll('crafts'), other = d.otherOn ? (d.other || '').trim() : '';
     if (!crafts.length && !other) { toast('בחרו לפחות תחום אחד, או ״אחר״'); return; }
-    const est = estimate(d.title, crafts), mine = (d.budget || '').trim();
-    const budget = mine || (est ? `₪${est.lo}–${est.hi}` : 'פתוח להצעות'), budgetSrc = mine ? 'buyer' : est ? 'app' : 'none';
     const vis = MAT[crafts[0]] || 'mat-wood';
-    const r = { id: 'r' + Date.now(), title: d.title, crafts, other, v: vis, budget, budgetSrc, due: d.due || 'גמיש', buyer: 'רון מ.', city: 'מודיעין', ago: 'עכשיו', mine: true, text: d.text || 'אין פרטים נוספים.', offers: [], to: v || null };
+    const r = { id: 'r' + Date.now(), title: d.title, crafts, other, v: vis, due: d.due || 'גמיש', buyer: 'רון מ.', city: 'מודיעין', ago: 'עכשיו', mine: true, text: d.text || 'אין פרטים נוספים.', offers: [], to: v || null };
     S.requests.unshift(r); S.role = 'buyer';
     S.stack = [{ s: 'board' }, { s: 'req', id: r.id }]; S.anim = 'fwd'; render(true);
     toast(v ? `הבקשה נשלחה אל ${MAKERS[v].name}` : 'הבקשה פורסמה. יוצרים יקבלו התראה.');
@@ -1286,7 +1413,7 @@ function revealWorks(now) {
   if (now && seen.length) rise(seen, { y: 14, stagger: .06 });
   WORKS_ST = arrive(below);
 }
-/* redraw only the works list (search and the material filter); animate = cards already on screen rise in too */
+/* redraw only the works list (the material filter); animate = cards already on screen rise in too */
 function refreshWorks(animate) {
   const box = document.getElementById('works'); if (!box) return;
   const h = document.documentElement.scrollHeight, y = window.scrollY;
@@ -1359,7 +1486,7 @@ function motionFor(c) {
     }
     view.querySelectorAll('.pfx .art img').forEach(img => gsap.fromTo(img, { yPercent: -6, scale: 1.14 }, { yPercent: 6, scale: 1.14, ease: 'none',
       scrollTrigger: { trigger: img.closest('.pfx'), start: 'top bottom', end: 'bottom top', scrub: .6 } }));
-    const targets = [...view.querySelectorAll(REVEAL)].filter(el => isBelow(el) && !el.closest('#works'));
+    const targets = [...view.querySelectorAll(REVEAL)].filter(el => isBelow(el) && !el.closest('#works') && !el.closest('#sq-results'));
     revealWorks(false);
     arrive(targets);
     /* a rail arrives as one row: hidden up front, its cards come in together, in order */
