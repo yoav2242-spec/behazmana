@@ -5,7 +5,7 @@
 <title>בהזמנה · יצירה בעבודת יד בהזמנה אישית</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="בהזמנה: מזמינים יצירה בעבודת יד בהזמנה אישית, ישירות מאומנים בעץ, עור, קרמיקה, תכשיטים ומתכת. גרסת הדגמה.">
-<meta name="theme-color" content="#3b4630">
+<meta name="theme-color" content="#c9d1b6">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="he_IL">
 <meta property="og:url" content="https://yoav2242-spec.github.io/behazmana/">
@@ -27,17 +27,17 @@
    square corners everywhere, no lines, no resting shadows, no gradients. One move on the whole site: the stamp landing on the order story. */
 :root {
   color-scheme: light;
-  --ground: #e4ded3;      /* Jerusalem stone in shade */
+  --ground: #ece8de;      /* Jerusalem stone in shade */
   --paper: #f2f1ee;       /* stone in sun: slips, fields, sheets */
-  --tone: #d3ccbe;        /* one step darker than the ground: chips, resting buttons, photo mats (ink 10.4:1) */
+  --tone: #ddd7c9;        /* one step darker than the ground: chips, resting buttons, photo mats (ink 10.4:1) */
   --ink: #1f2218;         /* olive-black, 12:1 on the ground */
   --muted: #55554a;       /* 5.6:1 on the ground, 6.8:1 on paper, 4.7:1 on tone */
-  --olive: #3b4630;       /* the one dark field (7.5:1 with paper type) */
-  --on-olive: #f2f1ee;
-  --olive-soft: #d3d9c6;  /* secondary type on olive, 7.6:1 */
+  --olive: #c9d1b6;       /* olive leaf, light sage: the one tinted field (ink 11:1) */
+  --on-olive: #1f2218;
+  --olive-soft: #3a4230;  /* secondary type on sage, 8:1 */
   --clay: #9c4128;        /* Acre clay: hearts, warnings, the closing field (5.9:1 with paper type) */
   --stamp: #2443a0;       /* the signature: stamp ink (7.9:1 with paper type) */
-  --stamp-lift: #a9b9ff;  /* the same blue lifted for dark grounds */
+  --stamp-lift: #2443a0;  /* the same blue lifted for dark grounds */
   --fs-1: 13px; --fs-2: 16px; --fs-3: 20px; --fs-4: 28px; --fs-5: 44px;
   --display: "Karantina", "Arial Narrow", Arial, sans-serif;
   --body: "Miriam Libre", "Assistant", "Segoe UI", Arial, sans-serif;
@@ -76,7 +76,7 @@ img { -webkit-user-drag: none; user-select: none; }
 .corner-mark { display: block; height: 40px; width: auto; flex: none; }
 .top .grow { flex: 1; }
 .round { width: 44px; height: 44px; border: 0; background: var(--tone); display: grid; place-items: center; flex: none; padding: 0; }
-.on-dark .round { background: #4d5a41; color: var(--on-olive); }
+.on-dark .round { background: #b3bd9b; color: var(--on-olive); }
 .round svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .me-btn { background: var(--paper); color: var(--ink); }
 
@@ -98,8 +98,8 @@ b, strong { font-weight: 700; }
 .art { position: relative; overflow: hidden; background: var(--tone); isolation: isolate; width: 100%; max-width: 100%; aspect-ratio: 1; }
 .art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .works .art, .strip .art, .req .art, .gallery .art, .photos .art, .row > div > .art { background: var(--paper); }
-.works .art img, .strip .art img, .req .art img, .gallery .art img, .photos .art img, .row > div > .art img { mix-blend-mode: multiply; }
-.art .cap { position: absolute; inset: auto 0 0 0; z-index: 1; font-size: var(--fs-1); color: var(--on-olive); padding: 6px 12px; background: rgba(31, 34, 24, .86); }
+.works .art img, .strip .art img, .req .art img, .gallery .art img, .photos .art img, .row > div > .art img { filter: brightness(1.08) contrast(1.02); }
+.art .cap { position: absolute; inset: auto 0 0 0; z-index: 1; font-size: var(--fs-1); color: var(--paper); padding: 6px 12px; background: rgba(31, 34, 24, .86); }
 
 /* swipeable carousels (scroll-snap) */
 .carwrap { position: relative; }
@@ -113,11 +113,11 @@ b, strong { font-weight: 700; }
 .carwrap > .dots { position: absolute; inset: auto 0 12px 0; z-index: 2; }
 
 /* the first screen: a dim room, and on it one order slip that carries the letterhead, the headline and the action */
-.hero { position: relative; background: var(--olive); padding-block: 0 0; }
-.hero .photo { position: absolute; inset: 0; }
-.hero .photo .art { aspect-ratio: auto; height: 100%; background: var(--olive); }
-.hero .photo img { filter: brightness(.66); }
-.hero .slip-wrap { position: relative; padding-block: 56px 0; display: flex; flex-direction: column; }
+.hero { position: relative; background: var(--ground); padding-block: 0 0; }
+.hero .photo { position: relative; height: 320px; }
+.hero .photo .art { aspect-ratio: auto; height: 100%; background: var(--tone); }
+.hero .photo img { filter: brightness(1.12) saturate(1.05); object-position: 50% 40%; }
+.hero .slip-wrap { position: relative; margin-top: -72px; padding-block: 0; display: flex; flex-direction: column; }
 .hero .slip { background: var(--paper); padding: 26px 24px 30px; display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
 .hero .logo-big { display: block; width: 168px; height: auto; margin: -10px -14px -6px; }
 .hero h1 { font-family: var(--display); font-size: var(--fs-5); line-height: .98; }
@@ -127,12 +127,12 @@ b, strong { font-weight: 700; }
 .zig { position: relative; }
 /* the torn edge of an order slip is a drawn strip of paper-coloured teeth, not a cut-out */
 .zig::after { content: ""; position: absolute; inset-inline: 0; top: calc(100% - 1px); height: 12px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12' viewBox='0 0 24 12'%3E%3Cpath d='M0 0L12 12L24 0Z' fill='%23f2f1ee'/%3E%3C/svg%3E") repeat-x left top / 24px 12px; }
-.hero .below-slip { position: relative; height: 68px; }
+.hero .below-slip { position: relative; height: 40px; }
 
 .btn { border: 0; padding: 14px 26px; min-height: 48px; font-weight: 700; font-size: var(--fs-2); background: var(--stamp); color: var(--paper); display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; }
 .btn.paper { background: var(--paper); color: var(--ink); }
 .btn.ghost { background: var(--tone); color: var(--ink); }
-.dark .btn.ghost { background: #4d5a41; color: var(--on-olive); }
+.dark .btn.ghost { background: #b3bd9b; color: var(--on-olive); }
 .btn.block { width: 100%; }
 .btn.small { padding: 8px 16px; min-height: 40px; font-size: var(--fs-2); }
 .btn.danger { background: var(--clay); color: var(--paper); }
@@ -173,7 +173,7 @@ mark { background: var(--stamp); color: var(--paper); padding-inline: 2px; }
 .word .w { font-family: var(--display); font-size: var(--fs-4); line-height: 1; }
 .word .n { font-size: var(--fs-1); color: var(--muted); }
 .word[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
-.word[aria-pressed="true"] .n { color: var(--olive-soft); }
+.word[aria-pressed="true"] .n { color: #d3d9c6; }
 
 /* works: 2-column grid; every fifth work runs edge to edge, like a plate in a catalogue */
 .works { display: grid; grid-template-columns: 1fr 1fr; gap: 32px 12px; }
@@ -346,7 +346,7 @@ textarea.input { min-height: 112px; resize: vertical; }
 .banner .copy { background: var(--olive); color: var(--on-olive); padding: 22px var(--gr) 26px var(--gl); display: flex; flex-direction: column; gap: 8px; }
 .banner h2 { font-family: var(--display); font-size: var(--fs-5); line-height: .98; }
 .banner .where { color: var(--olive-soft); }
-.banner .tag { background: #4d5a41; color: var(--on-olive); align-self: flex-start; }
+.banner .tag { background: #b3bd9b; color: var(--on-olive); align-self: flex-start; }
 .ptabs { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 64px); z-index: 18; display: flex; gap: 4px; padding-block: 8px; background: var(--ground); margin-block: -8px; }
 .ptabs button { flex: 1; border: 0; background: var(--tone); padding: 10px 6px; min-height: 44px; font-size: var(--fs-2); font-weight: 700; }
 .ptabs button[aria-current="true"] { background: var(--ink); color: var(--paper); }
@@ -457,7 +457,7 @@ textarea.input.big { min-height: 150px; }
   .btn:not(:disabled):hover { background: #1b3685; }
   .btn.paper:hover { background: var(--tone); }
   .btn.ghost:hover, .round:hover, .chip:hover, .filters button:hover, .ptabs button:hover, .word:hover, .pick:hover span { background: #c5bdae; }
-  .dark .btn.ghost:hover, .on-dark .round:hover { background: #5b694d; }
+  .dark .btn.ghost:hover, .on-dark .round:hover { background: #a5b08b; }
   .mrow:hover, .rank-row:hover, .req:hover, .offer-card:hover, .chat-list .item:hover { background: #fff; }
   .link:hover { text-decoration-thickness: 3px; }
   .nav button:not([aria-current="page"]):hover { background: #4a573d; }
@@ -919,7 +919,7 @@ const SCREENS = {
       <button class="round" data-act="search" aria-label="חיפוש">${svg(UI.search)}</button><button class="round me-btn" data-act="go" data-v="profile" aria-label="החשבון שלי">${svg(UI.user)}</button></header>
     <section class="hero"><div class="photo">${art('hero-clay', 'eager')}</div>
       <div class="slip-wrap g"><div class="slip zig"><img class="logo-big" src="logo/logo-primary-ink.svg" width="168" height="109" alt="בהזמנה, עבודת יד לפי הזמנה">
-        <h1>${headlineHTML()}</h1><p>כותבים מה תרצו, והיוצרים עונים בעצמם. לחצו על השם כדי להכיר אותם.</p>
+        <h1>${headlineHTML()}</h1><p>כותבים מה תרצו, והיוצרים עונים בעצמם. בואו להכיר אותם.</p>
         <button class="btn" data-act="tab" data-v="post">לכתוב בקשה</button></div></div><div class="below-slip"></div></section>
     <div class="stack g">
       <button class="search search-entry" data-act="search" aria-label="חיפוש בעבודות, ביוצרים ובבקשות">${svg(UI.search)}<span>מה תרצו? ארנק, ספל, טבעת, יוצרת...</span></button>
