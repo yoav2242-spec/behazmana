@@ -464,6 +464,21 @@ textarea.input.big { min-height: 150px; }
   .link:hover { text-decoration-thickness: 3px; }
   .nav button:not([aria-current="page"]):hover { background: #4a573d; }
 }
+
+/* soft corners: one radius for everything a thumb touches or a photo sits in; the order slip, the stamps and the logo stay sharp (they are the signature) */
+:root { --r: 12px; }
+.btn, .round, .chip, .tag, .word, .filters button, .seg, .seg button, .ptabs button, .pick span, .input, .search, .composer, .newpill, .toast, .heart, .badge, .to-line, .opt, .step, .req, .stats div, .nav .plus .c, .av, .works .art, .strip .art, .req .art, .photos .art, .row > div > .art { border-radius: var(--r); }
+.badge { border-radius: 10px; }
+.bubble { border-radius: var(--r); }
+.bubble.them { border-end-end-radius: 4px; }
+.bubble.me { border-end-start-radius: 4px; }
+.sheet-panel { border-radius: 20px 20px 0 0; }
+.grab { border-radius: 4px; }
+.nav button[aria-current="page"] { border-radius: var(--r) var(--r) 0 0; }
+.nav .plus[aria-current="page"] { border-radius: 0; }
+.feat-maker .copy, .banner .copy { border-radius: var(--r) var(--r) 0 0; margin-top: -12px; position: relative; }
+.hero .photo .art, .work.feature .art, .hero .slip .btn, .nav .plus .c { border-radius: 0; }
+.demo-note { border-radius: 0; }
 </style>
 </head>
 <body>
