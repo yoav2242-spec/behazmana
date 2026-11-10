@@ -495,7 +495,16 @@ select.input { appearance: auto; }
 a.btn { text-decoration: none; }
 .sheet-panel a:not(.btn) { color: var(--ink); font-weight: 700; text-underline-offset: 4px; }
 .rstory { white-space: pre-wrap; overflow-wrap: anywhere; }
-.thanks { background: var(--paper); padding: 28px 24px 32px; display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
+.field > label .m, .field .lbl .m { font-weight: 400; font-size: var(--fs-1); color: var(--muted); }
+.terms { list-style: disc; padding-inline-start: 22px; display: flex; flex-direction: column; gap: 8px; }
+.links-col { display: flex; flex-direction: column; align-items: flex-start; }
+.face-row { display: flex; gap: 14px; align-items: center; }
+.face-row .av { width: 72px; height: 88px; }
+.face-row .av.big { width: 84px; height: 84px; }
+.photos .chip { align-self: center; }
+.pt-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.form-err .small { display: block; font-weight: 400; color: var(--ink); margin-top: 4px; }
+.thanks {: var(--paper); padding: 28px 24px 32px; display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
 .adm-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
 </style>
 </head>
@@ -978,23 +987,23 @@ function loadBackend() {
     loadReal();
     /* the join or request form was drawn a moment ago in demo form: redraw it now that sending is possible, unless the person already typed in it */
     const f = document.querySelector('#view form[data-form="join"], #view form[data-form="post"]');
-    if (f && !JP.length && [...f.elements].every(el => el.type === 'checkbox' || el.type === 'radio' ? el.checked === el.defaultChecked : el.tagName === 'SELECT' ? el.selectedIndex === 0 : el.value === el.defaultValue)) render();
+    if (f && !JP.length && !JP.portrait && [...f.elements].every(el => el.type === 'checkbox' || el.type === 'radio' ? el.checked === el.defaultChecked : el.tagName === 'SELECT' ? el.selectedIndex === 0 : el.value === el.defaultValue)) render();
   };
   document.head.appendChild(s);
 }
 async function loadReal() {
   try {
-    const { data, error } = await SB.from('public_makers').select('id,name,city,craft,story,photos');
+    const { data, error } = await SB.from('public_makers').select('id,name,city,craft,story,photos,portrait');
     if (error || !Array.isArray(data)) return;
-    REAL.list = data.filter(m => m && m.id && m.name).map(m => ({ id: String(m.id), name: String(m.name), city: String(m.city || ''), craft: String(m.craft || ''), story: String(m.story || ''), photos: Array.isArray(m.photos) ? m.photos.map(String) : [] }));
+    REAL.list = data.filter(m => m && m.id && m.name).map(m => ({ id: String(m.id), name: String(m.name), city: String(m.city || ''), craft: String(m.craft || ''), story: String(m.story || ''), portrait: String(m.portrait || ''), photos: Array.isArray(m.photos) ? m.photos.map(String) : [] }));
     const host = cur().s === 'home' && document.getElementById('h-makers');
     if (host && REAL.list.length && !document.getElementById('h-real')) host.closest('section').insertAdjacentHTML('beforebegin', realSection());
   } catch (e) { /* the section simply stays hidden */ }
 }
-const realAv = m => `<span class="av">${m.photos[0] ? rImg(m.photos[0]) : `<span class="ini">${esc(initials(m.name))}</span>`}</span>`;
+const realAv = m => `<span class="av">${m.portrait || m.photos[0] ? rImg(m.portrait || m.photos[0]) : `<span class="ini">${esc(initials(m.name))}</span>`}</span>`;
 const realSection = () => !REAL.list.length ? '' : `<section aria-labelledby="h-real"><div class="sec-head"><h2 class="sec-title" id="h-real">יוצרים שהצטרפו אלינו</h2><span class="small muted">${REAL.list.length}</span></div>
   <p class="muted" style="margin-bottom:14px">אלה יוצרים שהצטרפו באמת, וכל אחד מהם אושר אצלנו ביד.</p>
-  <div class="mlist">${REAL.list.map(m => `<button class="mrow" data-act="rmaker" data-v="${esc(m.id)}">${realAv(m)}<span class="info"><span class="nm">${esc(m.name)}</span><span class="small muted">${craftName(m.craft)} · ${esc(m.city)}</span><span class="small clamp">${esc(m.story)}</span></span></button>`).join('')}</div></section>`;
+  <div class="mlist">${REAL.list.map(m => `<button class="mrow" data-act="rmaker" data-v="${esc(m.id)}">${realAv(m)}<span class="info"><span class="nm">${esc(m.name)}</span><span class="small muted">${craftName(m.craft)} · ${esc(m.city)}</span>${m.story ? `<span class="small clamp">${esc(m.story)}</span>` : ''}</span></button>`).join('')}</div></section>`;
 
 /* the owner: load what waits for a decision */
 async function adminLoad() {
@@ -1016,8 +1025,8 @@ function mailtoFor(r) {
   const keys = new Set(r.crafts || []), rows = AD.approved.filter(m => keys.has(m.craft));
   const mails = [...new Set(rows.map(m => String(m.email || '').trim()).filter(Boolean))];
   const kinds = (r.crafts || []).map(c => craftName(c).replace(/&amp;|&lt;|&gt;|&quot;|&#39;/g, ' ')).join(', ');
-  const body = ['שלום,', '', 'הגיעה אלינו בקשה שנראית לי מתאימה לעבודה שלך:', '', r.title, ...(r.text ? [String(r.text).slice(0, 1500)] : []), '', `תחום: ${kinds}`, ...(r.due ? [`עד מתי: ${r.due}`] : []), '',
-    'אם זה מעניין אותך, ענו למייל הזה בכמה מילים: בערך מה המחיר, וכמה זמן ההכנה ייקח. ברגע שהקונה יסכים, אחבר ביניכם.', '', 'תודה,', 'בהזמנה'].join('\n');
+  const body = ['שלום,', '', 'הגיעה אלינו בקשה שנראית לנו מתאימה לעבודה שלכם:', '', r.title, ...(r.text ? [String(r.text).slice(0, 1500)] : []), '', `תחום: ${kinds}`, ...(r.due ? [`עד מתי: ${r.due}`] : []), '',
+    'אם זה מעניין אתכם, ענו למייל הזה בכמה מילים: בערך מה המחיר, וכמה זמן ההכנה ייקח. ברגע שהקונה יסכים, נחבר ביניכם.', '', 'תודה,', 'בהזמנה'].join('\n');
   return { mails, noMail: rows.length - rows.filter(m => String(m.email || '').trim()).length,
     href: `mailto:?bcc=${mails.map(encodeURIComponent).join(',')}&subject=${encodeURIComponent('בקשה חדשה מבהזמנה: ' + r.title)}&body=${encodeURIComponent(body)}` };
 }
@@ -1032,7 +1041,7 @@ const radRejectSheet = m => `<div class="grab" aria-hidden="true"></div>
 
 /* joining as a maker: photos are shrunk in the browser before anything is uploaded */
 const JP = [];                                     // picked photos: { blob, url, path }
-const PHOTO_SIDE = 1600, PHOTO_Q = .82, MAX_PHOTOS = 4;
+const PHOTO_SIDE = 1600, PHOTO_Q = .82, MAX_PHOTOS = 10;
 const OKTYPE = /^image\/(jpeg|png|webp)$/;
 function shrinkPhoto(file) {
   return new Promise((ok, no) => {
@@ -1048,10 +1057,15 @@ function shrinkPhoto(file) {
     img.src = url;
   });
 }
-function clearPhotos() { JP.forEach(p => URL.revokeObjectURL(p.url)); JP.length = 0; delete JP.folder; }
+function clearPhotos() { JP.forEach(p => URL.revokeObjectURL(p.url)); if (JP.portrait) URL.revokeObjectURL(JP.portrait.url); JP.length = 0; delete JP.portrait; delete JP.folder; }
 const photosHTML = () => JP.map((p, i) => `<div class="art"><img src="${p.url}" alt="תמונה ${i + 1} שבחרתם"><button type="button" class="rm" data-act="jrm" data-v="${i}" aria-label="הסרת תמונה ${i + 1}">${svg('<path d="M6 6l12 12M18 6L6 18"/>')}</button></div>`).join('')
-    + (JP.length < MAX_PHOTOS ? `<button type="button" class="add-photo" data-act="jpick" aria-label="הוספת תמונה">+</button>` : '');
+    + (JP.length < MAX_PHOTOS ? `<button type="button" class="add-photo" data-act="jpick" id="j-pick" aria-label="הוספת תמונה של העבודות">+</button>` : '');
+const portraitHTML = () => JP.portrait
+  ? `<div class="art"><img src="${JP.portrait.url}" alt="התמונה שלכם"><button type="button" class="rm" data-act="jprm" aria-label="הסרת התמונה שלכם">${svg('<path d="M6 6l12 12M18 6L6 18"/>')}</button></div><button type="button" class="chip" data-act="jppick">החלפת תמונה</button>`
+  : `<button type="button" class="add-photo" data-act="jppick" id="j-portrait" aria-label="הוספת תמונה שלכם">+</button>`;
+const photoCount = () => `${JP.length} מתוך ${MAX_PHOTOS} תמונות`;
 function drawPhotos() { const box = document.getElementById('photos'); if (box) box.innerHTML = photosHTML(); }
+function drawPortrait() { const box = document.getElementById('portrait'); if (box) box.innerHTML = portraitHTML(); }
 async function addPhotos(files) {
   const msg = document.getElementById('j-pmsg'); let note = '';
   for (const f of files) {
@@ -1059,44 +1073,91 @@ async function addPhotos(files) {
     if (!OKTYPE.test(f.type) || f.size > 30e6) { note = 'הוספנו רק תמונות (jpg, png או webp). קבצים אחרים לא נכנסו.'; continue; }
     try { const blob = await shrinkPhoto(f); JP.push({ blob, url: URL.createObjectURL(blob) }); } catch (e) { note = 'לא הצלחנו לקרוא אחת התמונות, אפשר לנסות אחרת.'; }
   }
-  drawPhotos(); if (msg) msg.textContent = note;
+  drawPhotos(); if (msg) msg.textContent = note || (JP.length ? photoCount() : '');
+}
+async function addPortrait(f) {
+  const msg = document.getElementById('j-prmsg'); if (!f) return;
+  if (!OKTYPE.test(f.type) || f.size > 30e6) { if (msg) msg.textContent = 'אפשר רק תמונה (jpg, png או webp).'; return; }
+  try {
+    const blob = await shrinkPhoto(f); if (JP.portrait) URL.revokeObjectURL(JP.portrait.url);
+    JP.portrait = { blob, url: URL.createObjectURL(blob) }; if (msg) msg.textContent = '';   /* a replaced portrait has no path yet, so it uploads again */
+  } catch (e) { if (msg) msg.textContent = 'לא הצלחנו לקרוא את התמונה, אפשר לנסות אחרת.'; }
+  drawPortrait(); const b = document.querySelector('#portrait .chip, #portrait .add-photo'); if (b) b.focus();
 }
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const phoneOK = s => /^[0-9+\-\s().]{7,25}$/.test(s) && s.replace(/\D/g, '').length >= 7;
+const mailLink = subj => (CONFIG.ADMIN_EMAIL || '').trim() ? `<a href="mailto:${esc(CONFIG.ADMIN_EMAIL.trim())}?subject=${encodeURIComponent(subj)}" dir="ltr">${esc(CONFIG.ADMIN_EMAIL.trim())}</a>` : 'במייל';
+const STAR = '<span aria-hidden="true">*</span>';
 const privacySheet = () => `<div class="grab" aria-hidden="true"></div><div class="sheet-body">
-  <h2 class="sec-title">איך אנחנו שומרים את הפרטים שלך</h2>
-  <div class="field"><span class="lbl">מה נשמר</span><p>השם, העיר, התחום והסיפור שכתבת, התמונות שהעלית, והמייל או הטלפון שהשארת.</p></div>
-  <div class="field"><span class="lbl">למה</span><p>כדי לבדוק את ההרשמה בעצמי, ואחר כך להעביר אליך בקשות של קונים שמתאימות לעבודה שלך.</p></div>
-  <div class="field"><span class="lbl">מי רואה</span><p>אחרי שאישרתי אותך, אלה יופיעו באתר לכולם: השם, העיר, התחום, הסיפור והתמונות. המייל והטלפון פרטיים: רק הבעלים של בהזמנה רואה אותם. כשאני שולח בקשה לכמה יוצרים, זה בעותק מוסתר, כך שאף יוצר אחר לא רואה את המייל שלך.</p></div>
-  <div class="field"><span class="lbl">איך מבקשים למחוק</span><p>${(CONFIG.ADMIN_EMAIL || '').trim() ? `כתבו לי ל<a href="mailto:${esc(CONFIG.ADMIN_EMAIL.trim())}?subject=${encodeURIComponent('בקשת מחיקה מבהזמנה')}" dir="ltr">${esc(CONFIG.ADMIN_EMAIL.trim())}</a>` : 'כתבו לנו במייל'} ואמחק את כל הפרטים והתמונות שלך. בלי שאלות.</p></div>
+  <h2 class="sec-title">איך אנחנו שומרים על הפרטים שלכם</h2>
+  <div class="field"><span class="lbl">מה נשמר</span><p>השם, העיר, התחום והסיפור שכתבתם, התמונה שלכם, תמונות העבודות, והמייל והטלפון שהשארתם.</p></div>
+  <div class="field"><span class="lbl">למה</span><p>כדי לבדוק את ההרשמה בעצמנו, ואחר כך להעביר אליכם בקשות של קונים שמתאימות לעבודה שלכם.</p></div>
+  <div class="field"><span class="lbl">מי רואה</span><p>אחרי שאישרנו אתכם, אלה יופיעו באתר לכולם: השם, העיר, התחום, הסיפור, התמונה שלכם ותמונות העבודות. המייל והטלפון פרטיים: רק הבעלים של בהזמנה רואים אותם. כששולחים בקשה לכמה יוצרים, זה בעותק מוסתר, כך שאף יוצר אחר לא רואה את המייל שלכם.</p></div>
+  <div class="field"><span class="lbl">איך אנחנו שומרים עליכם ועל האתר</span><p>הפרטים הפרטיים נראים רק לבעלים של האתר. בטופס יש שדה נסתר שנועד לעצור בוטים אוטומטיים (אין קוד אימות, רק המלכודת הזאת). שום דבר לא מוצג באתר לפני שאישרנו אותו, ואפשר לבקש מחיקה בכל זמן.</p></div>
+  <div class="field"><span class="lbl">איך מבקשים למחוק</span><p>כתבו לנו ${mailLink('בקשת מחיקה מבהזמנה')} ונמחק את כל הפרטים והתמונות שלכם. בלי שאלות.</p></div>
   <button type="button" class="btn block" data-act="closesheet">הבנתי</button></div>`;
+const termsSheet = () => `<div class="grab" aria-hidden="true"></div><div class="sheet-body">
+  <h2 class="sec-title">תנאי השימוש</h2>
+  <ul class="terms">
+    <li>בהזמנה היא מקום מפגש בין יוצרים לקונים. היא לא חנות, ואינה צד לעסקה ביניהם.</li>
+    <li>היוצרים אחראים לעבודה שלהם, למחירים ולמסירה, ולכך שיש להם זכות להשתמש בתמונות שהם מעלים.</li>
+    <li>בהצטרפות אתם מאשרים שנציג באתר, אחרי שנאשר אתכם, את השם, העיר, התחום, הסיפור והתמונות שלכם.</li>
+    <li>אנחנו יכולים לאשר פרופיל, לסרב לו או להסיר אותו.</li>
+    <li>כרגע לא עוברים תשלומים דרך האתר. היוצר והקונה מסכמים ביניהם.</li>
+    <li>האתר הוא גרסת הדגמה ראשונה, והוא עשוי להשתנות.</li>
+    <li>אפשר לבקש למחוק את הפרופיל בכל זמן: כתבו לנו ${mailLink('בקשת מחיקה מבהזמנה')}.</li>
+    <li>אסור להעלות תוכן שאינו שלכם, או תוכן פוגעני.</li>
+    <li>המייל והטלפון שלכם פרטיים, ואנחנו שומרים אותם כמתואר במדיניות הפרטיות.</li>
+  </ul>
+  <p class="small muted">טיוטה ראשונה, לפני פרסום רשמי עוברת בדיקה משפטית.</p>
+  <button type="button" class="btn block" data-act="closesheet">הבנתי</button></div>`;
+/* a kind second line for the submit error: the reason, when we can tell it from the Supabase code or message */
+function joinWhy(e) {
+  const msg = String((e && (e.message || e.error_description || e.error)) || ''), code = String((e && (e.code || e.statusCode || e.status)) || '');
+  if (!navigator.onLine || /failed to fetch|networkerror|network request failed|load failed|timed? ?out/i.test(msg)) return 'נראה שיש בעיית רשת. כדאי לבדוק את החיבור ולנסות שוב.';
+  if (/^(401|403|42501)$/.test(code) || /row-level security|policy|permission|not authorized|unauthorized|jwt/i.test(msg)) return 'אין לנו הרשאה לשמור כרגע (שגיאת הרשאות בשרת). אנחנו נבדוק את זה.';
+  if (code === '413' || /too large|exceed|payload/i.test(msg)) return 'אחת התמונות גדולה מדי.';
+  if (/mime|invalid.*type|not supported/i.test(msg)) return 'אחת התמונות היא בסוג קובץ שלא נתמך.';
+  if (/^(23514|22001)$/.test(code) || /violates check|too long/i.test(msg)) return 'אחד הפרטים ארוך מדי או לא תקין.';
+  if (/^(PGRST204|42703|42P01|404)$/.test(code) || /column|schema cache|bucket not found/i.test(msg)) return 'השרת עוד לא מוכן לקבל הרשמות (חסר עדכון בהגדרות).';
+  if (/^5\d\d$/.test(code)) return 'בעיה זמנית בשרת, כדאי לנסות שוב בעוד כמה דקות.';
+  return '';
+}
+const showJoinErr = (el, reason, code) => { el.innerHTML = 'משהו השתבש בשליחה. מה שמילאתם נשאר כאן, אפשר לנסות שוב בעוד רגע.' + (reason ? `<span class="small">${esc(reason)}${code && code.length <= 20 ? ` <span dir="ltr">(${esc(code)})</span>` : ''}</span>` : ''); el.hidden = false; };
 async function submitJoin(f) {
   const d = Object.fromEntries(new FormData(f)), live = (f.dataset.live === '1' || CFG_ON) && !!SB, err = f.querySelector('#j-err'), btn = f.querySelector('button[type="submit"]');
   const v = k => String(d[k] || '').trim(), name = v('name'), city = v('city'), craft = v('craft'), story = v('story'), email = v('email'), phone = v('phone');
   if (d.hp_site) { S.stack = [{ s: 'home' }, { s: 'joined', name: name.split(' ')[0], demo: false }]; S.anim = 'fwd'; render(true); return; } /* a bot filled the hidden field: look like success, send nothing */
   f.querySelectorAll('[aria-invalid]').forEach(x => x.removeAttribute('aria-invalid'));
   const bad = !name ? ['j-name', 'כתבו את השם שלכם.'] : !city ? ['j-city', 'כתבו באיזו עיר אתם.'] : !CRAFTS[craft] ? ['j-craft', 'בחרו את התחום שלכם.']
-    : !email && !phone ? ['j-email', 'השאירו מייל או טלפון, לפחות אחד מהם.'] : email && !EMAIL_RE.test(email) ? ['j-email', 'המייל לא נראה תקין, אפשר לבדוק שוב.']
-    : phone && !phoneOK(phone) ? ['j-phone', 'הטלפון לא נראה תקין, אפשר לבדוק שוב.'] : !d.consent ? ['j-consent', 'כדי להמשיך צריך לאשר את שמירת הפרטים.'] : null;
-  if (bad) { const el = f.querySelector('#' + bad[0]); if (el.type !== 'checkbox') el.setAttribute('aria-invalid', 'true'); err.textContent = bad[1]; err.hidden = false; el.focus(); return; }
+    : !email ? ['j-email', 'כתבו כתובת מייל.'] : !EMAIL_RE.test(email) ? ['j-email', 'המייל לא נראה תקין, אפשר לבדוק שוב.']
+    : !phone ? ['j-phone', 'כתבו מספר טלפון.'] : !phoneOK(phone) ? ['j-phone', 'הטלפון לא נראה תקין, אפשר לבדוק שוב.']
+    : !JP.portrait ? ['j-portrait', 'הוסיפו תמונה שלכם.'] : !JP.length ? ['j-pick', 'הוסיפו לפחות תמונה אחת של העבודות.']
+    : !d.consent ? ['j-consent', 'כדי להמשיך צריך לאשר את תנאי השימוש ואת מדיניות הפרטיות.'] : null;
+  if (bad) { const el = f.querySelector('#' + bad[0]); if (el.classList.contains('input')) el.setAttribute('aria-invalid', 'true'); err.textContent = bad[1]; err.hidden = false; el.focus(); return; }
   err.hidden = true;
   if (!live && CFG_ON) { err.textContent = 'החיבור עדיין נטען או שיש בעיית רשת. נסו שוב בעוד רגע, כדי שההרשמה תישמר באמת.'; err.hidden = false; return; }
   if (!live) { S.stack = [{ s: 'home' }, { s: 'joined', name: name.split(' ')[0], demo: true }]; S.anim = 'fwd'; clearPhotos(); render(true); return; }
   btn.disabled = true; btn.textContent = 'שולחים...';
+  let stage = '';
   try {
     JP.folder = JP.folder || (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2));
-    for (let i = 0; i < JP.length; i++) {
-      if (JP[i].path) continue; /* already uploaded on an earlier try */
-      const path = `${JP.folder}/${i + 1}-${Math.random().toString(36).slice(2, 7)}.jpg`;
-      const { error } = await SB.storage.from(BUCKET).upload(path, JP[i].blob, { contentType: 'image/jpeg', cacheControl: '31536000', upsert: false });
-      if (error) throw error; JP[i].path = path;
+    const jobs = [JP.portrait, ...JP];   /* one at a time, so ten photos on a phone connection do not time out */
+    for (let i = 0; i < jobs.length; i++) {
+      if (jobs[i].path) continue; /* already uploaded on an earlier try */
+      stage = `תמונה ${i + 1} מתוך ${jobs.length} לא עלתה.`; btn.textContent = `מעלים תמונה ${i + 1} מתוך ${jobs.length}`;
+      const path = `${JP.folder}/${i ? i : 'portrait'}-${Math.random().toString(36).slice(2, 7)}.jpg`;
+      const { error } = await SB.storage.from(BUCKET).upload(path, jobs[i].blob, { contentType: 'image/jpeg', cacheControl: '31536000', upsert: false });
+      if (error) throw error; jobs[i].path = path;
     }
-    const { error } = await SB.from('makers').insert({ name, city, craft, story, email: email || null, phone: phone || null, photos: JP.map(p => p.path), status: 'pending' });
+    stage = ''; btn.textContent = 'שומרים את ההרשמה...';
+    const { error } = await SB.from('makers').insert({ name, city, craft, story, email, phone, portrait: JP.portrait.path, photos: JP.map(p => p.path), status: 'pending' });
     if (error) throw error;
     clearPhotos(); S.stack = [{ s: 'home' }, { s: 'joined', name: name.split(' ')[0], demo: false }]; S.anim = 'fwd'; render(true);
   } catch (e) {
-    console.warn(e);
-    err.textContent = 'משהו השתבש בשליחה. מה שמילאתם נשאר כאן, אפשר לנסות שוב בעוד רגע.'; err.hidden = false;
+    console.error('join failed', e);
+    const code = e && (e.code || e.statusCode || e.status) ? String(e.code || e.statusCode || e.status) : '';
+    showJoinErr(err, [stage, joinWhy(e) || (stage ? '' : 'לא הצלחנו לשמור את ההרשמה.')].filter(Boolean).join(' '), code);
     btn.disabled = false; btn.textContent = 'שליחת ההרשמה';
   }
 }
@@ -1329,20 +1390,25 @@ const SCREENS = {
   join: () => { const live = !!SB;
     return `${head('להצטרף כיוצרים')}
     <div class="stack g">
-      <p class="muted">מכינים דברים בעבודת יד ומוכנים לקבל הזמנות אישיות? ספרו לנו על עצמכם. אני עובר על כל הרשמה בעצמי.</p>
+      <p class="muted">מכינים דברים בעבודת יד ומוכנים לקבל הזמנות אישיות? ספרו לנו על עצמכם. אנחנו עוברים על כל הרשמה בעצמנו ונחזור אליכם תוך כמה ימים.</p>
       ${live ? '' : '<p class="note" role="note">זו גרסת הדגמה: אפשר למלא את הטופס ולראות איך זה עובד, אבל שום דבר לא נשלח ולא נשמר.</p>'}
       <form class="f" data-form="join" data-live="${live ? 1 : 0}" novalidate>
-        <div class="field"><label for="j-name">שם</label><input class="input" id="j-name" name="name" maxlength="80" autocomplete="name" aria-required="true"></div>
-        <div class="field"><label for="j-city">עיר</label><input class="input" id="j-city" name="city" maxlength="60" autocomplete="address-level2" aria-required="true"></div>
-        <div class="field"><label for="j-craft">תחום</label><select class="input" id="j-craft" name="craft" aria-required="true"><option value="">בחרו תחום</option>${Object.entries(CRAFTS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>
-        <div class="field"><label for="j-story">הסיפור שלכם</label><textarea class="input" id="j-story" name="story" rows="3" maxlength="1000" aria-describedby="j-story-h"></textarea><span class="hint" id="j-story-h">שלוש שורות מספיקות: מה אתם יוצרים, איך התחלתם, ומה אתם אוהבים להכין בהזמנה.</span></div>
-        <div class="field"><label for="j-email">מייל</label><input class="input" id="j-email" name="email" type="email" dir="ltr" maxlength="120" autocomplete="email" inputmode="email" aria-describedby="j-contact-h"></div>
-        <div class="field"><label for="j-phone">טלפון</label><input class="input" id="j-phone" name="phone" type="tel" dir="ltr" maxlength="30" autocomplete="tel" inputmode="tel" aria-describedby="j-contact-h"><span class="hint" id="j-contact-h">מספיק אחד מהשניים. הפרטים האלה פרטיים: רק אני רואה אותם.</span></div>
-        <div class="field"><span class="lbl" id="j-ph-l">תמונות מהעבודה שלכם</span><div class="photos big" id="photos" role="group" aria-labelledby="j-ph-l">${photosHTML()}</div>
-          <input type="file" id="j-file" accept="image/jpeg,image/png,image/webp" multiple hidden aria-label="בחירת תמונות">
-          <span class="hint">עד ${MAX_PHOTOS} תמונות, עדיף בצילום ליד חלון על רקע אחד. אנחנו מקטינים אותן לפני השליחה.</span><span class="hint" id="j-pmsg" role="status" aria-live="polite"></span></div>
-        <div class="field"><label class="opt"><input type="checkbox" id="j-consent" name="consent" aria-required="true"><span class="grow">קראתי ומאשר/ת לשמור את הפרטים שלי כמתואר. השם, העיר, התחום, הסיפור והתמונות יוצגו באתר אחרי שאאשר אותם.</span></label>
-          <button type="button" class="link tap" style="align-self:flex-start" data-act="privacy">איך אנחנו שומרים את הפרטים שלך</button></div>
+        <p class="hint">שדה עם כוכבית (<span aria-hidden="true">*</span><span class="sr">כוכבית</span>) הוא חובה. רק הסיפור לא חובה.</p>
+        <div class="field"><label for="j-name">שם ${STAR}</label><input class="input" id="j-name" name="name" maxlength="80" autocomplete="name" aria-required="true"></div>
+        <div class="field"><label for="j-city">עיר ${STAR}</label><input class="input" id="j-city" name="city" maxlength="60" autocomplete="address-level2" aria-required="true"></div>
+        <div class="field"><label for="j-craft">תחום ${STAR}</label><select class="input" id="j-craft" name="craft" aria-required="true"><option value="">בחרו תחום</option>${Object.entries(CRAFTS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>
+        <div class="field"><label for="j-email">מייל ${STAR}</label><input class="input" id="j-email" name="email" type="email" dir="ltr" maxlength="120" autocomplete="email" inputmode="email" aria-required="true"></div>
+        <div class="field"><label for="j-phone">טלפון ${STAR}</label><input class="input" id="j-phone" name="phone" type="tel" dir="ltr" maxlength="30" autocomplete="tel" inputmode="tel" aria-required="true" aria-describedby="j-contact-h"><span class="hint" id="j-contact-h">המייל והטלפון פרטיים: רק אנחנו רואים אותם.</span></div>
+        <div class="field"><span class="lbl" id="j-pr-l">תמונה שלכם ${STAR}<span class="sr">, חובה</span></span><div class="pt-row"><div class="photos big" id="portrait" role="group" aria-labelledby="j-pr-l">${portraitHTML()}</div></div>
+          <input type="file" id="j-pfile" accept="image/jpeg,image/png,image/webp" hidden aria-label="בחירת תמונה שלכם">
+          <span class="hint">כדי שהקונים יראו מי מכין להם את היצירה: תמונה שלכם, בסדנה או ליד העבודה. אנשים מזמינים מאנשים.</span><span class="hint" id="j-prmsg" role="status" aria-live="polite"></span></div>
+        <div class="field"><span class="lbl" id="j-ph-l">תמונות של העבודות שלכם ${STAR}<span class="sr">, חובה</span></span><div class="photos big" id="photos" role="group" aria-labelledby="j-ph-l">${photosHTML()}</div>
+          <input type="file" id="j-file" accept="image/jpeg,image/png,image/webp" multiple hidden aria-label="בחירת תמונות של העבודות">
+          <span class="hint">מה שהכנתם בפועל. לפחות תמונה אחת ועד ${MAX_PHOTOS}, עדיף בצילום ליד חלון על רקע אחד. אנחנו מקטינים אותן לפני השליחה.</span><span class="hint" id="j-pmsg" role="status" aria-live="polite">${JP.length ? photoCount() : ''}</span></div>
+        <div class="field"><label for="j-story">הסיפור שלכם <span class="m">(לא חובה)</span></label><textarea class="input" id="j-story" name="story" rows="3" maxlength="1000" aria-describedby="j-story-h"></textarea><span class="hint" id="j-story-h">לא חובה. אם בא לכם: מה אתם יוצרים, איך התחלתם, ומה אתם אוהבים להכין בהזמנה.</span></div>
+        <div class="field"><label class="opt"><input type="checkbox" id="j-consent" name="consent" aria-required="true"><span class="grow">קראתי ואני מאשר/ת את תנאי השימוש ואת מדיניות הפרטיות ${STAR}</span></label>
+          <div class="links-col"><button type="button" class="link tap" data-act="terms">תנאי השימוש</button>
+          <button type="button" class="link tap" data-act="privacy">אנחנו שומרים על הפרטים שלכם ועל האתר מפני בוטים</button></div></div>
         <div class="hp" aria-hidden="true"><label for="j-hp">אל תמלאו את השדה הזה</label><input id="j-hp" name="hp_site" type="text" tabindex="-1" autocomplete="off"></div>
         <p class="form-err" id="j-err" role="alert" hidden></p>
         <button class="btn block" type="submit">שליחת ההרשמה</button>
@@ -1351,19 +1417,20 @@ const SCREENS = {
 
   joined: ({ name = '', demo }) => `${head('<span class="sr">תודה</span>')}
     <div class="stack g"><div class="thanks zig"><span class="stamp">התקבל</span><h2 class="display">תודה${name ? `, ${esc(name)}` : ''}.</h2>
-      <p>אני עובר על כל בקשה בעצמי ואחזור אליך תוך כמה ימים.</p>
+      <p>אנחנו עוברים על כל הרשמה בעצמנו ונחזור אליכם תוך כמה ימים.</p>
       ${demo ? '<p class="small muted">זו הייתה גרסת הדגמה, אז שום דבר לא נשלח.</p>' : ''}
       <button class="btn" data-act="tab" data-v="home">חזרה לדף הבית</button></div></div>`,
 
   /* a real maker (approved, from public_makers): full story and photos. Every field goes through esc(). */
   rmaker: ({ id }) => { const m = REAL.list.find(x => x.id === id);
     if (!m) return `${head('יוצר')}<div class="stack g"><p class="empty">לא מצאנו את היוצר הזה.</p></div>`;
-    return `${head(`<span class="sr">${esc(m.name)}</span>`)}<section class="banner">${m.photos[0] ? rImg(m.photos[0], `תמונה של ${m.name}`) : ''}
+    const face = m.portrait || m.photos[0], works = m.portrait ? m.photos : m.photos.slice(1);   /* old rows have no portrait: their first photo stands in */
+    return `${head(`<span class="sr">${esc(m.name)}</span>`)}<section class="banner">${face ? rImg(face, `תמונה של ${m.name}`) : ''}
       <div class="copy g"><h2>${esc(m.name)}</h2><span class="where">${craftName(m.craft)} · ${esc(m.city)}</span></div></section>
     <div class="stack g">
       ${m.story ? `<section><div class="sec-head"><h2 class="sec-title">הסיפור</h2></div><p class="rstory">${esc(m.story)}</p></section>` : ''}
-      ${m.photos.length > 1 ? `<section><div class="sec-head"><h2 class="sec-title">מהסדנה</h2></div><div class="strip">${m.photos.slice(1).map((p, i) => rImg(p, `תמונה ${i + 2} מהעבודה של ${m.name}`)).join('')}</div></section>` : ''}
-      <p class="note">רוצים שיכינו לכם משהו? כתבו בקשה, ואני אעביר אותה ליוצרים שמתאימים.</p>
+      ${works.length ? `<section><div class="sec-head"><h2 class="sec-title">מהסדנה</h2></div><div class="strip">${works.map((p, i) => rImg(p, `תמונה ${i + 1} מהעבודה של ${m.name}`)).join('')}</div></section>` : ''}
+      <p class="note">רוצים שיכינו לכם משהו? כתבו בקשה, ואנחנו נעביר אותה ליוצרים שמתאימים.</p>
       <button class="btn block" data-act="tab" data-v="post">לכתוב בקשה</button>
     </div>`; },
 
@@ -1379,7 +1446,7 @@ const SCREENS = {
       ${AD.err ? `<p class="form-err" role="alert">${esc(AD.err)}</p>` : ''}
       <section aria-labelledby="a-mk"><div class="sec-head"><h2 class="sec-title" id="a-mk">יוצרים שמחכים לאישור</h2></div>
         <div style="display:flex;flex-direction:column;gap:12px">${AD.makers.map(m => `<article class="panel">
-          <div><b>${esc(m.name)}</b><div class="small muted">${craftName(m.craft)} · ${esc(m.city)} · ${esc(adminDate(m.created_at))}</div></div>
+          <div class="face-row">${m.portrait ? `<a class="av" href="${esc(photoURL(m.portrait))}" target="_blank" rel="noopener" aria-label="התמונה האישית של ${esc(m.name)} בגודל מלא">${rImg(m.portrait)}</a>` : `<span class="av"><span class="ini">${esc(initials(m.name))}</span></span>`}<div><b>${esc(m.name)}</b><div class="small muted">${craftName(m.craft)} · ${esc(m.city)} · ${esc(adminDate(m.created_at))}</div>${m.portrait ? '' : '<div class="small muted">בלי תמונה אישית</div>'}</div></div>
           <dl class="specs one" style="overflow-wrap:anywhere">${m.email ? `<div><dt>מייל</dt><dd dir="ltr">${esc(m.email)}</dd></div>` : ''}${m.phone ? `<div><dt>טלפון</dt><dd dir="ltr">${esc(m.phone)}</dd></div>` : ''}</dl>
           ${m.story ? `<p class="small rstory">${esc(m.story)}</p>` : ''}
           ${(m.photos || []).length ? `<div class="strip" style="grid-template-columns:repeat(3,1fr)">${m.photos.map((p, i) => `<a href="${esc(photoURL(p))}" target="_blank" rel="noopener" aria-label="תמונה ${i + 1} של ${esc(m.name)} בגודל מלא">${rImg(p)}</a>`).join('')}</div>` : '<p class="small muted">לא הועלו תמונות.</p>'}
@@ -1533,7 +1600,10 @@ const ACT = {
     render(); toast('תודה! הביקורת פורסמה בפרופיל היוצר'); },
   approve: v => { S.pending.find(p => p.id === v).status = 'approved'; render(); toast('היוצר אושר'); },
   join: () => { clearPhotos(); go('join'); },
-  privacy: () => openSheet(privacySheet(), 'איך אנחנו שומרים את הפרטים שלך'),
+  privacy: () => openSheet(privacySheet(), 'איך אנחנו שומרים על הפרטים שלכם'),
+  terms: () => openSheet(termsSheet(), 'תנאי השימוש'),
+  jppick: () => { const i = document.getElementById('j-pfile'); if (i) i.click(); },
+  jprm: () => { if (JP.portrait) URL.revokeObjectURL(JP.portrait.url); delete JP.portrait; drawPortrait(); const b = document.getElementById('j-portrait'); if (b) b.focus(); },
   jpick: () => { const i = document.getElementById('j-file'); if (i) i.click(); },
   jrm: v => { const p = JP.splice(+v, 1)[0]; if (p) URL.revokeObjectURL(p.url); drawPhotos(); const b = document.querySelector('#photos .add-photo'); if (b) b.focus(); },
   rmaker: v => go('rmaker', { id: v }),
@@ -1568,6 +1638,7 @@ document.addEventListener('input', e => {
   if (e.target.closest('form[data-form="reject"]')) rjCheck();
 });
 document.addEventListener('change', e => {
+  if (e.target.id === 'j-pfile') { addPortrait(e.target.files[0]).then(() => { e.target.value = ''; }); return; }
   if (e.target.id === 'j-file') { addPhotos([...e.target.files]).then(() => { e.target.value = ''; }); return; }
   if (e.target.closest('form[data-form="reject"]')) rjCheck();
   if (e.target.id === 'pc-other') { const o = document.getElementById('p-other'); o.hidden = !e.target.checked; if (e.target.checked) o.focus(); }

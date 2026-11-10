@@ -33,7 +33,8 @@ create table if not exists public.makers (
   story       text not null default '',
   email       text,
   phone       text,
-  photos      text[] not null default '{}',          -- paths inside the storage bucket "maker-photos"
+  photos      text[] not null default '{}',          -- paths inside the storage bucket "maker-photos" (the work photos, up to 10)
+  portrait    text,                                  -- path of the maker's own photo in the same bucket
   status      text not null default 'pending',
   admin_note  text,                                  -- why a request was rejected (only the owner sees it)
   -- length checks: the public key is public, so these limit what a spammer can store
@@ -45,7 +46,7 @@ create table if not exists public.makers (
   constraint makers_email_ck   check (email is null or (char_length(email) between 5 and 120 and email like '%_@_%._%')),
   constraint makers_phone_ck   check (phone is null or char_length(phone) between 7 and 30),
   constraint makers_contact_ck check (email is not null or phone is not null),   -- at least one way to reach them
-  constraint makers_photos_ck  check (coalesce(array_length(photos, 1), 0) <= 4),
+  constraint makers_photos_ck  check (coalesce(array_length(photos, 1), 0) <= 10),
   constraint makers_note_ck    check (admin_note is null or char_length(admin_note) <= 300)
 );
 
@@ -67,6 +68,11 @@ create table if not exists public.requests (
   constraint requests_crafts_ck  check (coalesce(array_length(crafts, 1), 0) <= 6)
 );
 
+-- For a database made with an older version of this file: add the portrait column and raise the photo limit to 10.
+alter table public.makers add column if not exists portrait text;
+alter table public.makers drop constraint if exists makers_photos_ck;
+alter table public.makers add constraint makers_photos_ck check (coalesce(array_length(photos, 1), 0) <= 10);
+
 create index if not exists makers_status_idx   on public.makers (status, created_at);
 create index if not exists requests_status_idx on public.requests (status, created_at);
 
@@ -82,8 +88,8 @@ revoke all on public.requests from anon, authenticated;
 
 -- Visitors (anon, the public key in index.html): may only ADD rows, and only these columns.
 -- They cannot choose the id, the date or the admin note, and they cannot read anything back.
-grant insert (name, city, craft, story, email, phone, photos, status) on public.makers   to anon;
-grant insert (title, crafts, "text", due, contact, consent, status)   on public.requests to anon;
+grant insert (name, city, craft, story, email, phone, portrait, photos, status) on public.makers   to anon, authenticated;
+grant insert (title, crafts, "text", due, contact, consent, status)   on public.requests to anon, authenticated;
 
 -- The owner (signed in by magic link): full access, but the policies below still check the email.
 grant select, update, delete on public.makers   to authenticated;
@@ -92,7 +98,7 @@ grant select, update, delete on public.requests to authenticated;
 -- ---- makers ----
 drop policy if exists "anon adds a pending maker" on public.makers;
 create policy "anon adds a pending maker" on public.makers
-  for insert to anon
+  for insert to anon, authenticated   -- authenticated too: the owner may be signed in on the phone she signs up from
   with check (status = 'pending');
 
 drop policy if exists "owner reads makers" on public.makers;
@@ -114,7 +120,7 @@ create policy "owner deletes makers" on public.makers
 -- ---- requests ----
 drop policy if exists "anon adds a request with consent" on public.requests;
 create policy "anon adds a request with consent" on public.requests
-  for insert to anon
+  for insert to anon, authenticated
   with check (consent = true and status = 'new');
 
 drop policy if exists "owner reads requests" on public.requests;
@@ -136,7 +142,7 @@ create policy "owner deletes requests" on public.requests
 -- ---------------------------------------------------------------------
 -- The public list of approved makers.
 -- Visitors must NOT read the makers table (it holds emails and phones), so they read this VIEW instead.
--- It shows only approved rows and only the public columns: id, name, city, craft, story, photos.
+-- It shows only approved rows and only the public columns: id, name, city, craft, story, photos, portrait.
 -- security_invoker = false means: "run as the view's owner", so the view can read makers even though
 -- visitors cannot. That is safe and intended here, because the view itself decides which rows and
 -- columns come out. (Supabase's security linter may mention this; it is expected for this view.)
@@ -144,7 +150,7 @@ create policy "owner deletes requests" on public.requests
 create or replace view public.public_makers
   with (security_invoker = false)
 as
-  select id, name, city, craft, story, photos
+  select id, name, city, craft, story, photos, portrait
   from public.makers
   where status = 'approved';
 
@@ -163,7 +169,7 @@ on conflict (id) do update
 -- Visitors may upload (insert) images into this bucket, one folder level deep (the site uses a random folder per signup).
 drop policy if exists "anon uploads maker photos" on storage.objects;
 create policy "anon uploads maker photos" on storage.objects
-  for insert to anon
+  for insert to anon, authenticated
   with check (
     bucket_id = 'maker-photos'
     and lower(storage.extension(name)) in ('jpg', 'jpeg', 'png', 'webp')
