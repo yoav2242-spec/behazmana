@@ -987,7 +987,7 @@ function loadBackend() {
     loadReal();
     /* the join or request form was drawn a moment ago in demo form: redraw it now that sending is possible, unless the person already typed in it */
     const f = document.querySelector('#view form[data-form="join"], #view form[data-form="post"]');
-    if (f && !JP.length && !JP.portrait && [...f.elements].every(el => el.type === 'checkbox' || el.type === 'radio' ? el.checked === el.defaultChecked : el.tagName === 'SELECT' ? el.selectedIndex === 0 : el.value === el.defaultValue)) render();
+    if (f && !JP.length && !JP.portrait && [...f.elements].filter(el => el.tagName !== 'BUTTON' && el.tagName !== 'FIELDSET').every(el => el.type === 'checkbox' || el.type === 'radio' ? el.checked === el.defaultChecked : el.tagName === 'SELECT' ? el.selectedIndex === 0 : el.value === el.defaultValue)) render();
   };
   document.head.appendChild(s);
 }
