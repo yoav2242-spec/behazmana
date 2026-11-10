@@ -3,22 +3,25 @@
 -- Paste this WHOLE file into Supabase > SQL Editor > New query, and press Run.
 -- It is safe to run again (it drops and recreates the policies).
 --
--- BEFORE YOU RUN IT: replace OWNER_EMAIL_HERE below with the owner's email
--- (the same one you put in ADMIN_EMAIL inside index.html). It appears ONCE.
+-- This file matches what is live in the database (synced 10.11.2026).
+-- For a NEW project: replace the owner's user id and email in is_owner() below with your own
+-- (Authentication > Users shows the id; the email is the one in ADMIN_EMAIL inside index.html).
 -- =====================================================================
 
 -- ---------------------------------------------------------------------
--- Who is the owner?  -- CHANGE THIS EMAIL
--- Every "admin" rule below asks this one function, so the email lives in one place.
--- The email comes from the login token (JWT) Supabase hands out after a magic-link login,
--- and Supabase only issues it to someone who really opened the link in that mailbox.
+-- Who is the owner?
+-- Every "admin" rule below asks this one function, so the owner lives in one place.
+-- Both must match: the user id of the owner's account AND the email in the login token (JWT).
+-- So even if someone managed to sign up with the same email, they would not be the owner.
 -- ---------------------------------------------------------------------
 create or replace function public.is_owner()
 returns boolean
 language sql
 stable
+set search_path = ''
 as $$
-  select lower(coalesce(auth.jwt() ->> 'email', '')) = lower('OWNER_EMAIL_HERE')  -- CHANGE THIS EMAIL
+  select coalesce(auth.uid() = 'eb1b1f1b-a6ad-42ba-81ae-582565094aa5'::uuid, false)
+     and lower(coalesce(auth.jwt() ->> 'email','')) = 'behazmana1@gmail.com'
 $$;
 
 -- ---------------------------------------------------------------------
@@ -184,6 +187,38 @@ drop policy if exists "owner deletes maker photos" on storage.objects;
 create policy "owner deletes maker photos" on storage.objects
   for delete to authenticated
   using (bucket_id = 'maker-photos' and public.is_owner());
+
+-- ---------------------------------------------------------------------
+-- Flood guard: the public key is public, so cap how many rows anyone can add in an hour, overall.
+-- At most 30 new makers and 60 new requests per hour. Above that, the insert fails with
+-- 'busy, try again later' (code P0001), and the site shows "יש עומס כרגע, נסו שוב בעוד כמה דקות".
+-- ---------------------------------------------------------------------
+create or replace function public.throttle_inserts()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare n int;
+begin
+  if tg_table_name = 'makers' then
+    select count(*) into n from public.makers where created_at > now() - interval '1 hour';
+    if n >= 30 then raise exception 'busy, try again later' using errcode = 'P0001'; end if;
+  else
+    select count(*) into n from public.requests where created_at > now() - interval '1 hour';
+    if n >= 60 then raise exception 'busy, try again later' using errcode = 'P0001'; end if;
+  end if;
+  return new;
+end
+$$;
+
+drop trigger if exists makers_throttle on public.makers;
+create trigger makers_throttle before insert on public.makers
+  for each row execute function public.throttle_inserts();
+
+drop trigger if exists requests_throttle on public.requests;
+create trigger requests_throttle before insert on public.requests
+  for each row execute function public.throttle_inserts();
 
 -- Done. Quick check, run these two lines on their own: the first should say 2 rows (makers, requests) with rowsecurity = true.
 --   select tablename, rowsecurity from pg_tables where schemaname = 'public' and tablename in ('makers', 'requests');

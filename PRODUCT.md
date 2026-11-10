@@ -14,7 +14,7 @@ web
 
 ## Product Purpose
 
-בהזמנה ("made to order") turns a buyer's description into offers from real makers. The buyer writes a request in their own words, picks one or more crafts (or "other"), sets a date and never a budget. Makers reply with a price, a time and a note, and each offer is a conversation. The buyer talks with them and then chooses one. Success: a buyer holds a piece that was made for them by someone whose name they know.
+בהזמנה ("made to order") turns a buyer's description into a conversation with a real maker. The buyer writes a request in their own words, picks one or more crafts (or "other"), sets a date and never a budget, and leaves an email or phone. The owner reads each request and passes it by hand to approved makers who fit it; buyer and maker then talk directly. Success: a buyer holds a piece that was made for them by someone whose name they know.
 
 ## Positioning
 
@@ -23,22 +23,21 @@ Not a shop of finished goods. The piece starts as a conversation with a named ma
 ## Operating Context
 
 - Phone first, Hebrew, right-to-left. A proper desktop layout comes later.
-- Order lifecycle: agreed in chat → 30% deposit held until delivery → in work (photos from the workshop) → final 70% → pickup or delivery → review.
-- Today it is a clickable demo with fictional makers, requests and orders, published free on GitHub Pages. Everything must stay at ₪0.
+- Payments: no money goes through the site. Buyer and maker agree on price, time and payment between themselves (for example bit or a bank transfer). The site holds no deposits and takes no commission; no copy may suggest otherwise.
+- Real data only, starting from zero: makers appear only after the owner approved them by hand (Supabase `public_makers`). There are no invented makers, works, reviews, orders or numbers anywhere. Published free on GitHub Pages; everything must stay at ₪0.
 
 ## Capabilities and Constraints
 
 Features that must keep working in every redesign:
-- free-word search (Hebrew prefixes, plurals, synonyms), its empty state and the "לבקש" button
-- request form: multi-select crafts + "אחר", no budget field
-- offers as conversations, with the choose sheet
-- chat that auto-scrolls; composer above the on-screen keyboard (visualViewport); tab bar hidden while typing
-- maker profiles with tabs that land on their sections
-- admin: approve, or reject with a message the owner writes
-- hearts (saved), galleries, orders with stage tracking, buyer/maker role switch
-- material filter on home without the page jumping
+- free-word search over the makers who joined (Hebrew prefixes, plurals, craft words, one-letter typos), its empty state and the "לבקש" button
+- request form: multi-select crafts + "אחר", no budget field, contact + consent; never says "sent" unless the row was saved
+- "שלי": the requests sent from this device (titles and dates, localStorage only)
+- join form (portrait + work photos, shrunk in the browser); arriving by `#join` is a gate until the form is sent
+- real maker list and profiles, with empty states for zero makers
+- admin at `#admin`: approve, or reject with a note the owner writes; requests with mailto routing; 200 rows per page
+- the phone's back button follows the in-app trail (History API) and closes sheets first; tab bar hidden while typing
 
-Technical: one static `index.html` with inline CSS/JS, images in `img/`, GSAP from cdnjs. User text always passes through `esc()`. Motion only under `prefers-reduced-motion: no-preference`. No horizontal scroll at 375px.
+Technical: one static `index.html` with inline CSS/JS, images in `img/`, GSAP from cdnjs (with SRI), a CSP meta tag. User and database text always passes through `esc()`. Motion only under `prefers-reduced-motion: no-preference`. No horizontal scroll at 320px.
 
 ## Brand Commitments
 
@@ -53,13 +52,13 @@ Confirmed by the owner (28.10.2026, `behazmana-notes/owner-decisions.md`):
 
 ## Evidence on Hand
 
-- `img/`: free Unsplash photos (not of these makers). They stay until 2–3 real makers the owner knows photograph their work (guide: `behazmana-notes/photo-guide-for-makers.md`). They must never be captioned as a specific maker's own work in a live product.
-- All makers, reviews, requests, prices and order counts are fictional demo data. No real testimonials, press or statistics exist; none may be invented as real.
+- `img/`: free Unsplash photos used only as atmosphere (the home hero). They are never shown as a maker's own work. Makers' photos come only from their own signup.
+- No testimonials, press, reviews or statistics exist yet; none may be invented.
 
 ## Product Principles
 
-1. **A person, not a catalogue.** Every screen leads to a named maker and a conversation.
-2. **Show the making.** The process (sketch, workshop, finished piece) is the proof, not stars or scores.
+1. **A person, not a catalogue.** Every screen leads to a request or to a real, named maker.
+2. **Show the making.** The maker's own workshop photos are the proof, not stars or scores.
 3. **The buyer's words first.** Requests are written in plain language; nothing asks for a budget.
 4. **Local and specific.** Cities, materials and workshops are named; nothing is "from anywhere".
 

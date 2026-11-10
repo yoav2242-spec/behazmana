@@ -26,32 +26,30 @@ All text pairs pass 4.5:1 (axe-core: 0 violations on 15 screen states).
 
 - **Display: Karantina 700** (Google Fonts, free): names and headlines only. Its digits read poorly (7 looks like 3), so **every number, price and date is set in the text face**.
 - **Text: Miriam Libre 400/700**: everything else.
-- **Exactly five sizes: 13 / 16 / 20 / 28 / 44 px.** Nothing under 13px. Body 16px / 1.55.
+- **Exactly five sizes: 13 / 16 / 20 / 28 / 44 px** (written in rem, so they follow the reader's font size). Nothing under 13px. Body 16px / 1.55.
 
 ## Components
 
 - **Square corners everywhere** (avatars and photos included). No resting shadows, no gradients, no hairlines or outlined boxes: surfaces separate by a step in tone (ground → paper → tone).
-- **Slip**: paper-coloured block with a drawn zig-zag tear edge (`.zig`, SVG strip, not clip-path). Used for the hero card and the order story.
-- **Stamp**: small stamp-blue label tilted −3°, one per stage of the order story.
-- **Word wall**: materials as big words (`.word`), selected = ink fill.
-- **Tab bar**: a plain olive bar at the foot, current tab = paper tab. Hidden while typing.
-- **Makers** show orders and response time ("58 הזמנות · עונה תוך שעות"), never star scores.
+- **Slip**: paper-coloured block with a drawn zig-zag tear edge (`.zig`, SVG strip, not clip-path). Used for the hero card, "how it works" and the thank-you screens.
+- **Stamp**: small stamp-blue label tilted −3°, one per line of "how it works" and on each thank-you.
+- **Tab bar**: a plain olive bar at the foot (בית / יוצרים / בקשה / שלי), current tab = paper tab. Hidden while typing and on the join screens.
+- **Sheets**: a close button at the top, Escape and the phone's back button close them, focus stays inside.
+- **Makers** show only what they wrote themselves (name, city, craft, story, photos). No scores, counts or response times.
+- Forced-colours mode adds real borders to controls; text links have a 44px tap area.
 - **Logo kit** (`logo/`): wordmark (Karantina outlines + slanted saddle-stitch in stamp blue), primary with tagline "עבודת יד · לפי הזמנה", slip mark "בה" for corners and favicons, app icon.
 
 ## Home, section by section (each a different shape)
 
-1. **Card over a dim room**: photo + one paper slip with logo, headline, sentence, one button.
-2. **Search door** (opens the search screen).
-3. **Word wall** of materials (filters the works below without moving the page).
-4. **Works grid**: two columns, every fifth full-bleed.
-5. **One maker, told properly** (Yossi from Acre) + a plain list of five more.
-6. **The order story** on olive: "הארנק של אבא של רון", five slips with stamps.
-7. **Reply card** on clay, then the **back of the card** (footer).
+1. **Card over a workshop photo**: photo (height `clamp(180px, 34vh, 320px)`, shorter on short phones) + one paper slip with logo, one honest headline, sentence, the "לכתוב בקשה" button and a "להצטרף" link.
+2. **How it works**: one slip, three lines, a stamp on each (no numbers, no story).
+3. **יוצרים שהצטרפו אלינו**: the real approved makers, or an empty state inviting the first ones to join.
+4. **Reply card** on clay, then the **back of the card** (footer: contact, privacy, terms).
 
 ## Motion
 
-One move: the stamp that lands on each order-story stage as it scrolls into view (GSAP + ScrollTrigger, once, under `prefers-reduced-motion: no-preference` only). Everything else is visible from the first frame. Controls change colour on press and hover; nothing else moves.
+One move: the stamp that lands on each "how it works" line as it scrolls into view (GSAP + ScrollTrigger, once, under `prefers-reduced-motion: no-preference` only). Everything else is visible from the first frame. Controls change colour on press and hover; nothing else moves.
 
 ## Photography
 
-Current photos stay until real makers photograph their work (guide: `behazmana-notes/photo-guide-for-makers.md`): window light, one background, faces, hands, workshop. No AI images.
+The only stock photo is the hero (hands carving wood, no face), as atmosphere. Makers' photos come only from their own signup (guide: `behazmana-notes/photo-guide-for-makers.md`): window light, one background, faces, hands, workshop. No AI images.
