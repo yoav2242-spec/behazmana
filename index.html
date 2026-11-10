@@ -91,6 +91,7 @@ b, strong { font-weight: 700; }
 .stack.tight { gap: 22px; }
 .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .sec-title { font-family: var(--display); font-size: var(--fs-4); line-height: 1.05; }
+.sec-title.small { font-size: var(--fs-3); margin: 28px 0 12px; }
 /* text links: the underline is what you see, the tap area is at least 44px tall */
 .link { background: none; border: 0; padding: 0; color: var(--ink); font-size: var(--fs-2); font-weight: 700; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 2px; min-height: 44px; display: inline-flex; align-items: center; text-align: start; }
 .muted { color: var(--muted); }
@@ -523,13 +524,21 @@ const CRAFT_WORDS = {
 };
 function parseQuery(q) {
   const ws = toks(q).filter(w => !STOPW.has(w) && w.length >= 2);
-  return ws.map((w, i) => ({ w, alts: forms(w), pre: i === ws.length - 1 ? [w, ...PREFIXES.filter(p => w.startsWith(p) && w.length - p.length >= 3).map(p => w.slice(p.length))] : [] }));
+  return ws.map((w, i) => ({ w, alts: forms(w), fz: new Set(sing(w)), pre: i === ws.length - 1 ? [w, ...PREFIXES.filter(p => w.startsWith(p) && w.length - p.length >= 3).map(p => w.slice(p.length))] : [] }));
 }
 const wordHit = (term, word) => {
   const f = forms(word);
-  for (const a of term.alts) { if (f.has(a)) return true; if (a.length >= 4) for (const y of f) if (y.length >= 4 && near(a, y)) return true; }
-  return term.pre.some(p => word.startsWith(p));
+  for (const a of term.alts) if (f.has(a)) return true;
+  /* one-letter slips are forgiven only between the whole words (or their singulars), never between prefix-stripped fragments: "מנורה" must not find "נועה" */
+  const fs = sing(word);
+  for (const a of term.fz) if (a.length >= 4) for (const y of fs) if (y.length >= 4 && near(a, y)) return true;
+  return term.pre.some(p => p.length >= 4 && word.startsWith(p));
 };
+/* the best weight each query word reaches in a maker's fields (0 = that word is not found) */
+function termScores(terms, fields) {
+  const fw = fields.map(([t, wt]) => [toks(t), wt]);
+  return terms.map(term => { let best = 0; fw.forEach(([ws, wt]) => { if (wt > best && ws.some(w => wordHit(term, w))) best = wt; }); return best; });
+}
 function scoreDoc(terms, fields) {
   const fw = fields.map(([t, wt]) => [toks(t), wt]);
   let score = 0;
@@ -545,10 +554,13 @@ function hl(text, terms) {
 }
 function searchMakers(q) {
   const terms = parseQuery(q);
-  if (!terms.length) return { terms, list: [] };
-  const list = REAL.list.map(m => ({ m, s: scoreDoc(terms, [[m.name, 3], [m.city, 2], [craftName(m.craft) + ' ' + (CRAFT_WORDS[m.craft] || ''), 2], [m.story, 1]]) }))
-    .filter(x => x.s).sort((a, b) => b.s - a.s).map(x => x.m);
-  return { terms, list };
+  if (!terms.length) return { terms, list: [], partial: [] };
+  const scored = REAL.list.map(m => ({ m, ts: termScores(terms, [[m.name, 3], [m.city, 2], [craftName(m.craft) + ' ' + (CRAFT_WORDS[m.craft] || ''), 2], [m.story, 1]]) }));
+  const sum = x => x.ts.reduce((a, b) => a + b, 0);
+  const list = scored.filter(x => x.ts.every(Boolean)).sort((a, b) => sum(b) - sum(a)).map(x => x.m);
+  /* "שולחן אוכל": nobody wrote both words, but the carpenter who makes tables is still the closest answer */
+  const partial = terms.length > 1 ? scored.filter(x => !x.ts.every(Boolean) && x.ts.some(Boolean)).sort((a, b) => sum(b) - sum(a)).map(x => x.m) : [];
+  return { terms, list, partial };
 }
 
 /* ---------- the backend ---------- */
@@ -1041,27 +1053,39 @@ const SCREENS = {
 /* search results: the makers who joined, or a way to ask for it */
 let sqT;
 function searchHTML() {
-  const q = S.sq.trim(), { terms, list } = searchMakers(q), h = t => hl(t, terms);
+  const q = S.sq.trim(), { terms, list, partial } = searchMakers(q), h = t => hl(t, terms);
   if (realState() === 'loading') return '<p class="muted" role="status">טוענים את היוצרים</p>';
-  if (!REAL.list.length) return emptyMakers();
+  if (!REAL.list.length) {
+    if (!terms.length) return emptyMakers();
+    /* nobody has joined yet, but a buyer who searched should still be able to ask: the search words become the request */
+    return `<div class="s-empty"><p class="say">עוד אין כאן יוצרים, האתר חדש.</p>
+      <p class="small muted">כתבו מה אתם מחפשים, ואנחנו נעביר את הבקשה ליוצרים שמתאימים.</p>
+      <button type="button" class="btn" data-act="askfor">לבקש: ${esc(q)}</button>
+      <p class="small muted">מכינים דברים בידיים? <button type="button" class="link" data-act="join">אפשר להצטרף</button></p></div>`;
+  }
   if (!terms.length) return '<p class="small muted">אפשר לחפש שם, עיר או חפץ: ארנק, ספל, טבעת.</p>';
-  if (!list.length) return `<div class="s-empty"><p class="say">לא מצאנו יוצר שמתאים לזה.</p>
+  const rows = ms => ms.map(m => { const direct = [m.name, m.city, craftName(m.craft)].some(t => scoreDoc(terms, [[t, 1]]));
+      return realRow(m, h, !direct && m.story && termScores(terms, [[m.story, 1]]).some(Boolean) ? `<span class="small clamp">${h(m.story)}</span>` : ''); }).join('');
+  if (!list.length && !partial.length) return `<div class="s-empty"><p class="say">לא מצאנו יוצר שמתאים לזה.</p>
       <p class="small muted">כתבו בקשה ואנחנו נעביר אותה ליוצרים שמתאימים.</p>
       <button type="button" class="btn" data-act="askfor">לבקש: ${esc(q)}</button></div>`;
-  return `<div class="mlist">${list.map(m => { const direct = [m.name, m.city, craftName(m.craft)].some(t => scoreDoc(terms, [[t, 1]]));
-      return realRow(m, h, !direct && m.story && scoreDoc(terms, [[m.story, 1]]) ? `<span class="small clamp">${h(m.story)}</span>` : ''); }).join('')}</div>
+  return `${list.length ? `<div class="mlist">${rows(list)}</div>` : ''}
+    ${partial.length ? `<h2 class="sec-title small">${list.length ? 'אולי גם' : 'הכי קרוב למה שחיפשתם'}</h2><div class="mlist">${rows(partial)}</div>` : ''}
     <button type="button" class="btn ghost block" data-act="askfor">לא בדיוק זה? לבקש: ${esc(q)}</button>`;
 }
 function searchStatus() {
-  const q = S.sq.trim(), { terms, list } = searchMakers(q); if (!terms.length || !REAL.list.length) return '';
-  return list.length ? (list.length === 1 ? 'נמצא יוצר אחד' : `נמצאו ${list.length} יוצרים`) : `לא נמצאו יוצרים ל״${q}״`;
+  const q = S.sq.trim(), { terms, list, partial } = searchMakers(q); if (!terms.length || !REAL.list.length) return '';
+  const n = list.length, k = partial.length;
+  if (!n && !k) return `לא נמצאו יוצרים ל״${q}״`;
+  const part = n === 1 ? 'נמצא יוצר אחד' : `נמצאו ${n} יוצרים`;
+  return n ? (k ? `${part}, ועוד ${k} קרובים` : part) : (k === 1 ? 'נמצא יוצר אחד קרוב' : `נמצאו ${k} יוצרים קרובים`);
 }
 function runSearch() {
   const box = document.getElementById('sq-results'); if (!box) return;
   box.innerHTML = searchHTML();
   const st = document.getElementById('sq-status'); if (st) st.textContent = searchStatus();
 }
-const craftOf = q => { const ws = toks(q); for (const [c, words] of Object.entries(CRAFT_WORDS)) { const t = toks(words); if (ws.some(w => t.some(x => wordHit({ alts: forms(w), pre: [] }, x)))) return c; } return undefined; };
+const craftOf = q => { const ws = toks(q); for (const [c, words] of Object.entries(CRAFT_WORDS)) { const t = toks(words); if (ws.some(w => t.some(x => wordHit({ alts: forms(w), fz: new Set(sing(w)), pre: [] }, x)))) return c; } return undefined; };
 
 const NAV = [['home', 'בית', UI.home], ['makers', 'יוצרים', UI.users], ['post', 'בקשה', UI.plus], ['mine', 'שלי', UI.user]];
 const NAVKEYS = NAV.map(n => n[0]);
