@@ -1071,7 +1071,7 @@ const privacySheet = () => `<div class="grab" aria-hidden="true"></div><div clas
   <div class="field"><span class="lbl">איך מבקשים למחוק</span><p>${(CONFIG.ADMIN_EMAIL || '').trim() ? `כתבו לי ל<a href="mailto:${esc(CONFIG.ADMIN_EMAIL.trim())}?subject=${encodeURIComponent('בקשת מחיקה מבהזמנה')}" dir="ltr">${esc(CONFIG.ADMIN_EMAIL.trim())}</a>` : 'כתבו לנו במייל'} ואמחק את כל הפרטים והתמונות שלך. בלי שאלות.</p></div>
   <button type="button" class="btn block" data-act="closesheet">הבנתי</button></div>`;
 async function submitJoin(f) {
-  const d = Object.fromEntries(new FormData(f)), live = f.dataset.live === '1' && !!SB, err = f.querySelector('#j-err'), btn = f.querySelector('button[type="submit"]');
+  const d = Object.fromEntries(new FormData(f)), live = (f.dataset.live === '1' || CFG_ON) && !!SB, err = f.querySelector('#j-err'), btn = f.querySelector('button[type="submit"]');
   const v = k => String(d[k] || '').trim(), name = v('name'), city = v('city'), craft = v('craft'), story = v('story'), email = v('email'), phone = v('phone');
   if (d.hp_site) { S.stack = [{ s: 'home' }, { s: 'joined', name: name.split(' ')[0], demo: false }]; S.anim = 'fwd'; render(true); return; } /* a bot filled the hidden field: look like success, send nothing */
   f.querySelectorAll('[aria-invalid]').forEach(x => x.removeAttribute('aria-invalid'));
@@ -1080,6 +1080,7 @@ async function submitJoin(f) {
     : phone && !phoneOK(phone) ? ['j-phone', 'הטלפון לא נראה תקין, אפשר לבדוק שוב.'] : !d.consent ? ['j-consent', 'כדי להמשיך צריך לאשר את שמירת הפרטים.'] : null;
   if (bad) { const el = f.querySelector('#' + bad[0]); if (el.type !== 'checkbox') el.setAttribute('aria-invalid', 'true'); err.textContent = bad[1]; err.hidden = false; el.focus(); return; }
   err.hidden = true;
+  if (!live && CFG_ON) { err.textContent = 'החיבור עדיין נטען או שיש בעיית רשת. נסו שוב בעוד רגע, כדי שההרשמה תישמר באמת.'; err.hidden = false; return; }
   if (!live) { S.stack = [{ s: 'home' }, { s: 'joined', name: name.split(' ')[0], demo: true }]; S.anim = 'fwd'; clearPhotos(); render(true); return; }
   btn.disabled = true; btn.textContent = 'שולחים...';
   try {
@@ -1711,6 +1712,10 @@ function motionFor(c) {
 if (GS && document.fonts && document.fonts.ready) document.fonts.ready.then(() => ScrollTrigger.refresh());
 /* the owner's screen lives at #admin (configured mode only; in demo mode the address does nothing) */
 if (CFG_ON && adminUrl()) S.stack = [{ s: 'radmin' }];
+/* a direct link for makers: .../behazmana/#join opens the signup form (back goes to home) */
+const joinUrl = () => location.hash === '#join';
+if (joinUrl() && !adminUrl()) S.stack = [{ s: 'home' }, { s: 'join' }];
+window.addEventListener('hashchange', () => { if (joinUrl() && cur().s !== 'join') { S.stack = [{ s: 'home' }, { s: 'join' }]; S.anim = 'fade'; render(true); } });
 window.addEventListener('hashchange', () => { if (CFG_ON && adminUrl() && cur().s !== 'radmin') { S.stack = [{ s: 'radmin' }]; S.anim = 'fade'; render(true); if (isOwner() && !AD.loaded) adminLoad(); } });
 document.getElementById('view').addEventListener('animationend', e => { if (e.target.id === 'view' || e.target.classList.contains('chat-shell')) e.target.classList.remove('in-fwd', 'in-back', 'in-fade'); });
 render();
