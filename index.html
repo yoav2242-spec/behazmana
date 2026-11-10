@@ -479,6 +479,24 @@ textarea.input.big { min-height: 150px; }
 .feat-maker .copy, .banner .copy { border-radius: var(--r) var(--r) 0 0; margin-top: -12px; position: relative; }
 .hero .photo .art, .work.feature .art, .hero .slip .btn, .nav .plus .c { border-radius: 0; }
 .demo-note { border-radius: 0; }
+
+/* joining as a maker, the thank-you slip and the owner's admin screen */
+select.input { appearance: auto; }
+.hp { position: absolute; inset-inline-start: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; } /* honeypot: off-screen, not display:none, so bots still fill it */
+.form-err { background: var(--paper); color: var(--clay); font-weight: 700; padding: 12px 14px; border-radius: var(--r); }
+.form-ok { background: var(--paper); padding: 12px 14px; border-radius: var(--r); }
+.input[aria-invalid="true"] { outline: 3px solid var(--clay); outline-offset: 0; }
+.input[aria-invalid="true"]:focus { outline-color: var(--stamp); }
+.photos.big .art, .photos.big .add-photo { width: 84px; height: 84px; }
+.photos .art .rm { position: absolute; top: 4px; inset-inline-end: 4px; z-index: 2; width: 32px; height: 32px; border: 0; padding: 0; display: grid; place-items: center; background: var(--paper); color: var(--ink); border-radius: var(--r); }
+.photos .art .rm svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+.add-photo { border-radius: var(--r); }
+.link.tap { padding-block: 10px; display: inline-block; }
+a.btn { text-decoration: none; }
+.sheet-panel a:not(.btn) { color: var(--ink); font-weight: 700; text-underline-offset: 4px; }
+.rstory { white-space: pre-wrap; overflow-wrap: anywhere; }
+.thanks { background: var(--paper); padding: 28px 24px 32px; display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
+.adm-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
 </style>
 </head>
 <body>
@@ -495,6 +513,12 @@ textarea.input.big { min-height: 150px; }
 </div>
 
 <script>
+/* ---------- the real backend (Supabase, free plan) ----------
+   Leave SUPABASE_URL empty and the site is a pure demo: no network calls, nothing is sent anywhere.
+   Fill in the three values (see SETUP-HE.md) and makers can join, requests are saved, and #admin opens the owner's screen.
+   Only the public "anon" key belongs here. Never paste a secret / service_role key into this file. */
+const CONFIG = { SUPABASE_URL: 'https://gyvsealqcdducgquomlq.supabase.co', SUPABASE_ANON_KEY: 'sb_publishable_fE9Nd7VuGeHnGsUAz_Mk4A_96LC9gkz', ADMIN_EMAIL: 'behazmana1@gmail.com' };
+
 /* ---------- data (all examples) ---------- */
 const CRAFTS = { wood: 'עץ', leather: 'עור', ceramic: 'קרמיקה', jewelry: 'תכשיטים', metal: 'מתכת' };
 const MAT = { wood: 'mat-wood', leather: 'mat-leather', ceramic: 'mat-ceramic', jewelry: 'mat-jewelry', metal: 'mat-metal' };
@@ -925,6 +949,165 @@ const chooseSheet = v => { const { r, o } = offerAt(v), m = MAKERS[o.maker];
       <ol class="how"><li><b>סיכום פרטים בצ׳אט</b><span class="small muted">סוגרים יחד צבע, מידות ואיך זה מגיע אליכם.</span></li><li><b>מקדמה 30%</b><span class="small muted">והשאר רק כשהעבודה מוכנה.</span></li><li><b>תמונות מהסדנה</b><span class="small muted">רואים את זה נולד, שלב אחרי שלב.</span></li></ol></div>
     <div class="row"><button type="button" class="btn ghost block" data-act="closesheet">עוד לא</button><button type="button" class="btn block" data-act="choose" data-v="${v}">כן, בוחרים</button></div></div>`; };
 
+/* ---------- real backend: makers who join, saved requests, the owner's screen ---------- */
+const CFG_ON = !!(CONFIG.SUPABASE_URL || '').trim() && !!(CONFIG.SUPABASE_ANON_KEY || '').trim();
+const SUPA_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
+const BUCKET = 'maker-photos';
+let SB = null;                                     // the Supabase client; stays null in demo mode (or if the library cannot load)
+const REAL = { list: [] };                         // approved makers: kept apart from the fictional demo makers, never ranked with them
+const AD = { session: null, makers: [], approved: [], requests: [], loading: false, loaded: false, err: '', msg: '', busy: false, failed: false };
+const photoURL = p => `${CONFIG.SUPABASE_URL.trim().replace(/\/+$/, '')}/storage/v1/object/public/${BUCKET}/${String(p).split('/').map(encodeURIComponent).join('/')}`;
+const rImg = (p, alt = '') => `<div class="art"><img src="${esc(photoURL(p))}" alt="${esc(alt)}" loading="lazy" decoding="async" draggable="false"></div>`;
+const craftName = c => CRAFTS[c] || (c === 'other' ? 'אחר' : esc(c));
+const isOwner = () => !!(AD.session && AD.session.user && (CONFIG.ADMIN_EMAIL || '').trim() && String(AD.session.user.email || '').toLowerCase() === CONFIG.ADMIN_EMAIL.trim().toLowerCase());
+/* the owner's screen is at #admin; the magic link comes back with ?admin=1 and the login tokens in the hash */
+const adminUrl = () => /(^#admin)|[?&]admin=1|access_token=/.test(location.hash + location.search);
+const redrawAdmin = () => { if (cur().s === 'radmin') render(); };
+
+function loadBackend() {
+  if (!CFG_ON) return;
+  const s = document.createElement('script');
+  s.src = SUPA_JS; s.integrity = 'sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug'; s.crossOrigin = 'anonymous'; s.async = true;
+  /* if the library cannot load, the site quietly stays a demo (only the owner's screen says so) */
+  const fail = () => { SB = null; AD.failed = true; redrawAdmin(); };
+  s.onerror = fail;
+  s.onload = () => {
+    try { SB = window.supabase.createClient(CONFIG.SUPABASE_URL.trim(), CONFIG.SUPABASE_ANON_KEY.trim()); } catch (e) { return fail(); }
+    SB.auth.onAuthStateChange((ev, session) => setTimeout(() => { AD.session = session; if (!session) { AD.loaded = false; } if (cur().s === 'radmin') { if (isOwner() && !AD.loaded) adminLoad(); else render(); } }, 0));
+    SB.auth.getSession().then(({ data }) => { AD.session = data && data.session; if (adminUrl() && location.hash !== '#admin') history.replaceState(null, '', location.pathname + '#admin'); if (cur().s === 'radmin') { if (isOwner() && !AD.loaded) adminLoad(); else render(); } });
+    loadReal();
+    /* the join or request form was drawn a moment ago in demo form: redraw it now that sending is possible, unless the person already typed in it */
+    const f = document.querySelector('#view form[data-form="join"], #view form[data-form="post"]');
+    if (f && !JP.length && [...f.elements].every(el => el.type === 'checkbox' || el.type === 'radio' ? el.checked === el.defaultChecked : el.tagName === 'SELECT' ? el.selectedIndex === 0 : el.value === el.defaultValue)) render();
+  };
+  document.head.appendChild(s);
+}
+async function loadReal() {
+  try {
+    const { data, error } = await SB.from('public_makers').select('id,name,city,craft,story,photos');
+    if (error || !Array.isArray(data)) return;
+    REAL.list = data.filter(m => m && m.id && m.name).map(m => ({ id: String(m.id), name: String(m.name), city: String(m.city || ''), craft: String(m.craft || ''), story: String(m.story || ''), photos: Array.isArray(m.photos) ? m.photos.map(String) : [] }));
+    const host = cur().s === 'home' && document.getElementById('h-makers');
+    if (host && REAL.list.length && !document.getElementById('h-real')) host.closest('section').insertAdjacentHTML('beforebegin', realSection());
+  } catch (e) { /* the section simply stays hidden */ }
+}
+const realAv = m => `<span class="av">${m.photos[0] ? rImg(m.photos[0]) : `<span class="ini">${esc(initials(m.name))}</span>`}</span>`;
+const realSection = () => !REAL.list.length ? '' : `<section aria-labelledby="h-real"><div class="sec-head"><h2 class="sec-title" id="h-real">יוצרים שהצטרפו אלינו</h2><span class="small muted">${REAL.list.length}</span></div>
+  <p class="muted" style="margin-bottom:14px">אלה יוצרים שהצטרפו באמת, וכל אחד מהם אושר אצלנו ביד.</p>
+  <div class="mlist">${REAL.list.map(m => `<button class="mrow" data-act="rmaker" data-v="${esc(m.id)}">${realAv(m)}<span class="info"><span class="nm">${esc(m.name)}</span><span class="small muted">${craftName(m.craft)} · ${esc(m.city)}</span><span class="small clamp">${esc(m.story)}</span></span></button>`).join('')}</div></section>`;
+
+/* the owner: load what waits for a decision */
+async function adminLoad() {
+  if (!SB || !isOwner() || AD.loading) return;
+  AD.loading = true; AD.err = ''; redrawAdmin();
+  try {
+    const [m, r, a] = await Promise.all([
+      SB.from('makers').select('*').eq('status', 'pending').order('created_at', { ascending: true }),
+      SB.from('requests').select('*').eq('status', 'new').order('created_at', { ascending: true }),
+      SB.from('makers').select('id,craft,email').eq('status', 'approved')]);
+    const bad = m.error || r.error || a.error; if (bad) throw bad;
+    AD.makers = m.data || []; AD.requests = r.data || []; AD.approved = a.data || []; AD.loaded = true;
+  } catch (e) { console.warn(e); AD.err = 'לא הצלחנו לטעון את הנתונים. אפשר ללחוץ על ״רענון״, ואם זה חוזר, לבדוק שהמייל בהגדרות ובקובץ schema.sql זהה.'; }
+  AD.loading = false; redrawAdmin();
+}
+/* a ready-to-edit email to the approved makers of the right craft. The buyer's contact details are NOT in it:
+   the owner adds the buyer only after the buyer agreed. */
+function mailtoFor(r) {
+  const keys = new Set(r.crafts || []), rows = AD.approved.filter(m => keys.has(m.craft));
+  const mails = [...new Set(rows.map(m => String(m.email || '').trim()).filter(Boolean))];
+  const kinds = (r.crafts || []).map(c => craftName(c).replace(/&amp;|&lt;|&gt;|&quot;|&#39;/g, ' ')).join(', ');
+  const body = ['שלום,', '', 'הגיעה אלינו בקשה שנראית לי מתאימה לעבודה שלך:', '', r.title, ...(r.text ? [String(r.text).slice(0, 1500)] : []), '', `תחום: ${kinds}`, ...(r.due ? [`עד מתי: ${r.due}`] : []), '',
+    'אם זה מעניין אותך, ענו למייל הזה בכמה מילים: בערך מה המחיר, וכמה זמן ההכנה ייקח. ברגע שהקונה יסכים, אחבר ביניכם.', '', 'תודה,', 'בהזמנה'].join('\n');
+  return { mails, noMail: rows.length - rows.filter(m => String(m.email || '').trim()).length,
+    href: `mailto:?bcc=${mails.map(encodeURIComponent).join(',')}&subject=${encodeURIComponent('בקשה חדשה מבהזמנה: ' + r.title)}&body=${encodeURIComponent(body)}` };
+}
+const adminDate = s => { const d = new Date(s); return isNaN(d) ? '' : d.toLocaleDateString('he-IL'); };
+const radRejectSheet = m => `<div class="grab" aria-hidden="true"></div>
+  <form class="sheet-body" data-form="rreject" data-v="${esc(m.id)}" novalidate>
+    <div><h2 class="sec-title">דחיית ההרשמה של ${esc(m.name)}</h2><p class="small muted" style="margin-top:4px">כותבים הערה קצרה: למה דחיתם. היא נשמרת רק אצלכם ולא נשלחת ליוצר.</p></div>
+    <div class="field"><label for="rr-note">הערה</label><textarea class="input" id="rr-note" name="note" rows="3" maxlength="300"></textarea></div>
+    <p class="form-err" id="rr-err" role="alert" hidden></p>
+    <div class="row"><button type="button" class="btn ghost block" data-act="closesheet">ביטול</button><button type="submit" class="btn block warnbtn">דחייה</button></div>
+  </form>`;
+
+/* joining as a maker: photos are shrunk in the browser before anything is uploaded */
+const JP = [];                                     // picked photos: { blob, url, path }
+const PHOTO_SIDE = 1600, PHOTO_Q = .82, MAX_PHOTOS = 4;
+const OKTYPE = /^image\/(jpeg|png|webp)$/;
+function shrinkPhoto(file) {
+  return new Promise((ok, no) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const k = Math.min(1, PHOTO_SIDE / Math.max(img.naturalWidth, img.naturalHeight)), w = Math.max(1, Math.round(img.naturalWidth * k)), h = Math.max(1, Math.round(img.naturalHeight * k));
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); g.drawImage(img, 0, 0, w, h);
+      c.toBlob(b => b ? ok(b) : no(new Error('toBlob')), 'image/jpeg', PHOTO_Q);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); no(new Error('decode')); };
+    img.src = url;
+  });
+}
+function clearPhotos() { JP.forEach(p => URL.revokeObjectURL(p.url)); JP.length = 0; delete JP.folder; }
+const photosHTML = () => JP.map((p, i) => `<div class="art"><img src="${p.url}" alt="תמונה ${i + 1} שבחרתם"><button type="button" class="rm" data-act="jrm" data-v="${i}" aria-label="הסרת תמונה ${i + 1}">${svg('<path d="M6 6l12 12M18 6L6 18"/>')}</button></div>`).join('')
+    + (JP.length < MAX_PHOTOS ? `<button type="button" class="add-photo" data-act="jpick" aria-label="הוספת תמונה">+</button>` : '');
+function drawPhotos() { const box = document.getElementById('photos'); if (box) box.innerHTML = photosHTML(); }
+async function addPhotos(files) {
+  const msg = document.getElementById('j-pmsg'); let note = '';
+  for (const f of files) {
+    if (JP.length >= MAX_PHOTOS) { note = `אפשר עד ${MAX_PHOTOS} תמונות. את השאר לא הוספנו.`; break; }
+    if (!OKTYPE.test(f.type) || f.size > 30e6) { note = 'הוספנו רק תמונות (jpg, png או webp). קבצים אחרים לא נכנסו.'; continue; }
+    try { const blob = await shrinkPhoto(f); JP.push({ blob, url: URL.createObjectURL(blob) }); } catch (e) { note = 'לא הצלחנו לקרוא אחת התמונות, אפשר לנסות אחרת.'; }
+  }
+  drawPhotos(); if (msg) msg.textContent = note;
+}
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const phoneOK = s => /^[0-9+\-\s().]{7,25}$/.test(s) && s.replace(/\D/g, '').length >= 7;
+const privacySheet = () => `<div class="grab" aria-hidden="true"></div><div class="sheet-body">
+  <h2 class="sec-title">איך אנחנו שומרים את הפרטים שלך</h2>
+  <div class="field"><span class="lbl">מה נשמר</span><p>השם, העיר, התחום והסיפור שכתבת, התמונות שהעלית, והמייל או הטלפון שהשארת.</p></div>
+  <div class="field"><span class="lbl">למה</span><p>כדי לבדוק את ההרשמה בעצמי, ואחר כך להעביר אליך בקשות של קונים שמתאימות לעבודה שלך.</p></div>
+  <div class="field"><span class="lbl">מי רואה</span><p>אחרי שאישרתי אותך, אלה יופיעו באתר לכולם: השם, העיר, התחום, הסיפור והתמונות. המייל והטלפון פרטיים: רק הבעלים של בהזמנה רואה אותם. כשאני שולח בקשה לכמה יוצרים, זה בעותק מוסתר, כך שאף יוצר אחר לא רואה את המייל שלך.</p></div>
+  <div class="field"><span class="lbl">איך מבקשים למחוק</span><p>${(CONFIG.ADMIN_EMAIL || '').trim() ? `כתבו לי ל<a href="mailto:${esc(CONFIG.ADMIN_EMAIL.trim())}?subject=${encodeURIComponent('בקשת מחיקה מבהזמנה')}" dir="ltr">${esc(CONFIG.ADMIN_EMAIL.trim())}</a>` : 'כתבו לנו במייל'} ואמחק את כל הפרטים והתמונות שלך. בלי שאלות.</p></div>
+  <button type="button" class="btn block" data-act="closesheet">הבנתי</button></div>`;
+async function submitJoin(f) {
+  const d = Object.fromEntries(new FormData(f)), live = f.dataset.live === '1' && !!SB, err = f.querySelector('#j-err'), btn = f.querySelector('button[type="submit"]');
+  const v = k => String(d[k] || '').trim(), name = v('name'), city = v('city'), craft = v('craft'), story = v('story'), email = v('email'), phone = v('phone');
+  if (d.hp_site) { S.stack = [{ s: 'home' }, { s: 'joined', name: name.split(' ')[0], demo: false }]; S.anim = 'fwd'; render(true); return; } /* a bot filled the hidden field: look like success, send nothing */
+  f.querySelectorAll('[aria-invalid]').forEach(x => x.removeAttribute('aria-invalid'));
+  const bad = !name ? ['j-name', 'כתבו את השם שלכם.'] : !city ? ['j-city', 'כתבו באיזו עיר אתם.'] : !CRAFTS[craft] ? ['j-craft', 'בחרו את התחום שלכם.']
+    : !email && !phone ? ['j-email', 'השאירו מייל או טלפון, לפחות אחד מהם.'] : email && !EMAIL_RE.test(email) ? ['j-email', 'המייל לא נראה תקין, אפשר לבדוק שוב.']
+    : phone && !phoneOK(phone) ? ['j-phone', 'הטלפון לא נראה תקין, אפשר לבדוק שוב.'] : !d.consent ? ['j-consent', 'כדי להמשיך צריך לאשר את שמירת הפרטים.'] : null;
+  if (bad) { const el = f.querySelector('#' + bad[0]); if (el.type !== 'checkbox') el.setAttribute('aria-invalid', 'true'); err.textContent = bad[1]; err.hidden = false; el.focus(); return; }
+  err.hidden = true;
+  if (!live) { S.stack = [{ s: 'home' }, { s: 'joined', name: name.split(' ')[0], demo: true }]; S.anim = 'fwd'; clearPhotos(); render(true); return; }
+  btn.disabled = true; btn.textContent = 'שולחים...';
+  try {
+    JP.folder = JP.folder || (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2));
+    for (let i = 0; i < JP.length; i++) {
+      if (JP[i].path) continue; /* already uploaded on an earlier try */
+      const path = `${JP.folder}/${i + 1}-${Math.random().toString(36).slice(2, 7)}.jpg`;
+      const { error } = await SB.storage.from(BUCKET).upload(path, JP[i].blob, { contentType: 'image/jpeg', cacheControl: '31536000', upsert: false });
+      if (error) throw error; JP[i].path = path;
+    }
+    const { error } = await SB.from('makers').insert({ name, city, craft, story, email: email || null, phone: phone || null, photos: JP.map(p => p.path), status: 'pending' });
+    if (error) throw error;
+    clearPhotos(); S.stack = [{ s: 'home' }, { s: 'joined', name: name.split(' ')[0], demo: false }]; S.anim = 'fwd'; render(true);
+  } catch (e) {
+    console.warn(e);
+    err.textContent = 'משהו השתבש בשליחה. מה שמילאתם נשאר כאן, אפשר לנסות שוב בעוד רגע.'; err.hidden = false;
+    btn.disabled = false; btn.textContent = 'שליחת ההרשמה';
+  }
+}
+
+async function rejectMaker(f, id) {
+  const note = f.querySelector('#rr-note').value.trim(), err = f.querySelector('#rr-err'), m = AD.makers.find(x => x.id === id);
+  if (!note) { err.textContent = 'כתבו הערה קצרה לפני הדחייה.'; err.hidden = false; f.querySelector('#rr-note').focus(); return; }
+  const { data, error } = await SB.from('makers').update({ status: 'rejected', admin_note: note }).eq('id', id).select('id');
+  if (error || !data || !data.length) { err.textContent = 'לא הצלחנו לשמור, אפשר לנסות שוב.'; err.hidden = false; return; }
+  AD.makers = AD.makers.filter(x => x.id !== id); closeSheet(true); redrawAdmin(); toast(`ההרשמה של ${m ? m.name : 'היוצר'} נדחתה, וההערה נשמרה`);
+}
+
 const SCREENS = {
   home: () => {
     const r = S.requests.find(x => x.id === 'r1'), mo = r && r.offers[0], mm = mo && MAKERS[mo.maker], od = S.orders.find(x => x.id === 'o1');
@@ -948,6 +1131,7 @@ const SCREENS = {
           <button class="word" data-act="craft" data-v="all" aria-pressed="${S.craft === 'all'}"><span class="w">הכל</span><span class="n">${ITEMS.length}</span></button>
           ${Object.entries(CRAFTS).map(([k, v]) => `<button class="word" data-act="craft" data-v="${k}" aria-pressed="${S.craft === k}"><span class="w">${v}</span><span class="n">${nIn(k)}</span></button>`).join('')}</div></section>
       <section aria-labelledby="h-works"><div class="sec-head"><h2 class="sec-title" id="h-works">מהסדנאות</h2><span class="small muted">${ITEMS.length} יצירות</span></div><div id="works">${worksHTML()}</div></section>
+      ${realSection()}
       <section aria-labelledby="h-makers"><div class="sec-head"><h2 class="sec-title" id="h-makers">היוצרים שאנחנו מכירים</h2><button class="link" data-act="makers" data-v="all">לכולם</button></div>
         <div class="feat-maker bleed">${art(fm.img)}<div class="copy"><h3>${fm.name}</h3><span class="where">${CRAFTS[fm.craft]} בעכו · ${fm.g === 'f' ? 'יוצרת' : 'יוצר'} מאז ${fm.since}</span>
           <p>${fm.story}</p><span class="where">${track(fm)}</span><button class="btn paper" data-act="maker" data-v="yossi">לפגוש את יוסי</button></div></div>
@@ -957,9 +1141,9 @@ const SCREENS = {
         <div class="tale zig">${tale.map(([when, body, st, extra = '']) => `<div class="tale-row"><span class="when">${when}</span><div class="what">${body}</div><span class="stamp">${st}</span>${extra}</div>`).join('')}</div>
         <button class="btn paper" data-act="order" data-v="o1">לראות את ההזמנה של רון</button></section>` : ''}
       <div class="bleed"><section class="clayfield g" aria-labelledby="h-reply"><h2 class="say" id="h-reply">יש משהו שאתם רוצים?</h2>
-          <div class="reply"><h2>ספרו לנו, ונדאג שמישהו יענה</h2><p>כמה מילים מספיקות: מה, באיזה חומר ועד מתי. אפשר בלי מחיר, היוצרים יציעו אחד.</p><button class="btn" data-act="tab" data-v="post">לכתוב בקשה</button></div></section>
+          <div class="reply"><h2>ספרו לנו, ונדאג שמישהו יענה</h2><p>כמה מילים מספיקות: מה, באיזה חומר ועד מתי. אפשר בלי מחיר, היוצרים יציעו אחד.</p><button class="btn" data-act="tab" data-v="post">לכתוב בקשה</button><button class="btn ghost" data-act="join">אתם יוצרים? להצטרף אלינו</button></div></section>
         <footer class="backside g"><img class="logo-line" src="logo/logo-wordmark-ink.svg" width="204" height="96" alt="בהזמנה"><p class="sign">נשמח לשמוע מכם</p>
-          <p>בהזמנה היא גרסת הדגמה. היוצרים, המחירים והצילומים כאן לדוגמה, עד שיגיעו היוצרים האמיתיים.</p><p class="imprint">בהזמנה · עבודת יד · לפי הזמנה</p></footer></div>
+          <p>בהזמנה היא גרסת הדגמה. היוצרים, המחירים והצילומים כאן לדוגמה, עד שיגיעו היוצרים האמיתיים.</p><button class="link tap" style="align-self:flex-start" data-act="join">להצטרף כיוצרים</button><p class="imprint">בהזמנה · עבודת יד · לפי הזמנה</p></footer></div>
     </div>`; },
 
   item: ({ id }) => { const it = ITEMS.find(i => i.id === id);
@@ -1046,7 +1230,7 @@ const SCREENS = {
     return `${head(to ? `בקשה ל${MAKERS[to].name}` : 'בקשה חדשה')}
     <div class="stack g">
       <p class="muted">${to ? `הבקשה תישלח רק אל ${MAKERS[to].name}, שיחזור אליכם עם הצעת מחיר.` : 'הבקשה תופיע בלוח, ויוצרים מתאימים מכל הארץ ישלחו הצעות.'}</p>
-      <form class="f" data-form="post" data-v="${to || ''}">
+      <form class="f" data-form="post" data-v="${to || ''}"${SB && !to ? ' data-live="1"' : ''}>
         <div class="field"><label for="p-title">מה תרצו שיכינו בשבילכם?</label><input class="input" id="p-title" name="title" required placeholder="למשל: קרש חיתוך עם שמות הילדים" autocomplete="off" value="${esc(title)}"></div>
         <div class="field"><span class="lbl">תחום · אפשר לבחור כמה</span>
           <div class="picks">${Object.entries(CRAFTS).map(([k, v]) => `<label class="pick"><input type="checkbox" name="crafts" value="${k}" id="pc-${k}" ${pre.includes(k) ? 'checked' : ''}><span>${v}</span></label>`).join('')}
@@ -1055,6 +1239,8 @@ const SCREENS = {
           <span class="hint">עגילים מעץ? בחרו גם ״תכשיטים״ וגם ״עץ״.</span></div>
         <div class="field"><label for="p-text">פרטים</label><textarea class="input" id="p-text" name="text" placeholder="מידות, צבעים, למי זה מיועד..."></textarea></div>
         <div class="field"><label for="p-due">עד מתי?</label><input class="input" id="p-due" name="due" placeholder="למשל: לפני יום ההולדת, 12.12"></div>
+        ${SB && !to ? `<div class="field"><label for="p-contact">איך חוזרים אליכם?</label><input class="input" id="p-contact" name="contact" dir="auto" maxlength="120" autocomplete="email" placeholder="מייל או טלפון" aria-required="true" aria-describedby="p-contact-h"><span class="hint" id="p-contact-h">מייל או טלפון. הפרטים נשארים אצלנו, ולא עוברים ליוצרים בלי שאישרתם.</span></div>
+        <label class="opt"><input type="checkbox" name="consent" id="p-consent" aria-required="true"><span class="grow">מאשר/ת שיעבירו את הבקשה ליוצרים מתאימים</span></label>` : ''}
         <div class="field"><span class="lbl">תמונות השראה</span><div class="photos" id="photos"><button type="button" class="add-photo" data-act="addphoto" aria-label="הוספת תמונה">+</button></div><span class="hint">בהדגמה, לחיצה על + מוסיפה תמונה לדוגמה.</span></div>
         <button class="btn block" type="submit">${to ? 'שליחה ליוצר' : 'פרסום בלוח'}</button>
       </form>
@@ -1120,7 +1306,8 @@ const SCREENS = {
         <p class="small muted">${S.role === 'buyer' ? 'כקונים: מפרסמים בקשות, מדברים עם היוצרים ובוחרים הצעה.' : 'כיוצרים: עוברים על לוח הבקשות ושולחים הצעות מחיר.'}</p></section>
       <section><div class="sec-head"><h2 class="sec-title">שמרתי</h2><span class="small muted">${saved.length}</span></div>
         ${saved.length ? worksGrid(saved) : '<p class="muted small">לחיצה על הלב בכל עבודה שומרת אותה כאן.</p>'}</section>
-      <button class="req" data-act="go" data-v="admin"><span class="info"><span class="t">ניהול: אישור יוצרים חדשים</span><span class="small muted">רק לך, כבעלים של האפליקציה</span></span>${waiting ? `<span class="tag warn">${waiting} ממתינים</span>` : ''}</button>
+      <button class="req" data-act="join"><span class="info"><span class="t">להצטרף כיוצר/ת</span><span class="small muted">לספר לנו על העבודות שלך</span></span></button>
+      ${CFG_ON ? '' : `<button class="req" data-act="go" data-v="admin"><span class="info"><span class="t">ניהול: אישור יוצרים חדשים</span><span class="small muted">רק לך, כבעלים של האפליקציה</span></span>${waiting ? `<span class="tag warn">${waiting} ממתינים</span>` : ''}</button>`}
       <section class="panel"><h2 class="sec-title">על בהזמנה</h2><p class="small">חינם לגמרי בתקופת ההשקה, לקונים וליוצרים. בהמשך תיגבה עמלה קטנה רק על הזמנות ששולמו באפליקציה, עם מקדמה מוגנת ותשלום בשלבים.</p></section>
     </div>`; },
 
@@ -1135,7 +1322,76 @@ const SCREENS = {
           : `<span class="tag warn done-tag">נדחה · ההודעה שלך נשלחה ${p.msg.mail && p.msg.app ? 'במייל ובאפליקציה' : p.msg.mail ? 'במייל' : 'באפליקציה'}</span>
             <details class="sent"><summary class="link"><span class="o">הצגת ההודעה</span><span class="c">הסתרת ההודעה</span></summary>
               <div class="sent-box">${p.msg.mail ? `<span class="small muted">נושא: ${esc(p.msg.subject)}</span>` : ''}<p class="txt">${esc(p.msg.text)}</p></div></details>`}</section>`).join('')}
-    </div>`
+    </div>`,
+
+  /* joining as a maker. In demo mode the form works but says plainly that nothing is sent. */
+  join: () => { const live = !!SB;
+    return `${head('להצטרף כיוצרים')}
+    <div class="stack g">
+      <p class="muted">מכינים דברים בעבודת יד ומוכנים לקבל הזמנות אישיות? ספרו לנו על עצמכם. אני עובר על כל הרשמה בעצמי.</p>
+      ${live ? '' : '<p class="note" role="note">זו גרסת הדגמה: אפשר למלא את הטופס ולראות איך זה עובד, אבל שום דבר לא נשלח ולא נשמר.</p>'}
+      <form class="f" data-form="join" data-live="${live ? 1 : 0}" novalidate>
+        <div class="field"><label for="j-name">שם</label><input class="input" id="j-name" name="name" maxlength="80" autocomplete="name" aria-required="true"></div>
+        <div class="field"><label for="j-city">עיר</label><input class="input" id="j-city" name="city" maxlength="60" autocomplete="address-level2" aria-required="true"></div>
+        <div class="field"><label for="j-craft">תחום</label><select class="input" id="j-craft" name="craft" aria-required="true"><option value="">בחרו תחום</option>${Object.entries(CRAFTS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>
+        <div class="field"><label for="j-story">הסיפור שלכם</label><textarea class="input" id="j-story" name="story" rows="3" maxlength="1000" aria-describedby="j-story-h"></textarea><span class="hint" id="j-story-h">שלוש שורות מספיקות: מה אתם יוצרים, איך התחלתם, ומה אתם אוהבים להכין בהזמנה.</span></div>
+        <div class="field"><label for="j-email">מייל</label><input class="input" id="j-email" name="email" type="email" dir="ltr" maxlength="120" autocomplete="email" inputmode="email" aria-describedby="j-contact-h"></div>
+        <div class="field"><label for="j-phone">טלפון</label><input class="input" id="j-phone" name="phone" type="tel" dir="ltr" maxlength="30" autocomplete="tel" inputmode="tel" aria-describedby="j-contact-h"><span class="hint" id="j-contact-h">מספיק אחד מהשניים. הפרטים האלה פרטיים: רק אני רואה אותם.</span></div>
+        <div class="field"><span class="lbl" id="j-ph-l">תמונות מהעבודה שלכם</span><div class="photos big" id="photos" role="group" aria-labelledby="j-ph-l">${photosHTML()}</div>
+          <input type="file" id="j-file" accept="image/jpeg,image/png,image/webp" multiple hidden aria-label="בחירת תמונות">
+          <span class="hint">עד ${MAX_PHOTOS} תמונות, עדיף בצילום ליד חלון על רקע אחד. אנחנו מקטינים אותן לפני השליחה.</span><span class="hint" id="j-pmsg" role="status" aria-live="polite"></span></div>
+        <div class="field"><label class="opt"><input type="checkbox" id="j-consent" name="consent" aria-required="true"><span class="grow">קראתי ומאשר/ת לשמור את הפרטים שלי כמתואר. השם, העיר, התחום, הסיפור והתמונות יוצגו באתר אחרי שאאשר אותם.</span></label>
+          <button type="button" class="link tap" style="align-self:flex-start" data-act="privacy">איך אנחנו שומרים את הפרטים שלך</button></div>
+        <div class="hp" aria-hidden="true"><label for="j-hp">אל תמלאו את השדה הזה</label><input id="j-hp" name="hp_site" type="text" tabindex="-1" autocomplete="off"></div>
+        <p class="form-err" id="j-err" role="alert" hidden></p>
+        <button class="btn block" type="submit">שליחת ההרשמה</button>
+      </form>
+    </div>`; },
+
+  joined: ({ name = '', demo }) => `${head('<span class="sr">תודה</span>')}
+    <div class="stack g"><div class="thanks zig"><span class="stamp">התקבל</span><h2 class="display">תודה${name ? `, ${esc(name)}` : ''}.</h2>
+      <p>אני עובר על כל בקשה בעצמי ואחזור אליך תוך כמה ימים.</p>
+      ${demo ? '<p class="small muted">זו הייתה גרסת הדגמה, אז שום דבר לא נשלח.</p>' : ''}
+      <button class="btn" data-act="tab" data-v="home">חזרה לדף הבית</button></div></div>`,
+
+  /* a real maker (approved, from public_makers): full story and photos. Every field goes through esc(). */
+  rmaker: ({ id }) => { const m = REAL.list.find(x => x.id === id);
+    if (!m) return `${head('יוצר')}<div class="stack g"><p class="empty">לא מצאנו את היוצר הזה.</p></div>`;
+    return `${head(`<span class="sr">${esc(m.name)}</span>`)}<section class="banner">${m.photos[0] ? rImg(m.photos[0], `תמונה של ${m.name}`) : ''}
+      <div class="copy g"><h2>${esc(m.name)}</h2><span class="where">${craftName(m.craft)} · ${esc(m.city)}</span></div></section>
+    <div class="stack g">
+      ${m.story ? `<section><div class="sec-head"><h2 class="sec-title">הסיפור</h2></div><p class="rstory">${esc(m.story)}</p></section>` : ''}
+      ${m.photos.length > 1 ? `<section><div class="sec-head"><h2 class="sec-title">מהסדנה</h2></div><div class="strip">${m.photos.slice(1).map((p, i) => rImg(p, `תמונה ${i + 2} מהעבודה של ${m.name}`)).join('')}</div></section>` : ''}
+      <p class="note">רוצים שיכינו לכם משהו? כתבו בקשה, ואני אעביר אותה ליוצרים שמתאימים.</p>
+      <button class="btn block" data-act="tab" data-v="post">לכתוב בקשה</button>
+    </div>`; },
+
+  /* the owner's screen, only at #admin: magic-link login, then what waits for a decision */
+  radmin: () => { let body;
+    if (AD.failed) body = '<p class="form-err" role="alert">אין חיבור לשרת כרגע, אז אי אפשר לפתוח את המסך. אפשר לרענן את הדף ולנסות שוב.</p>';
+    else if (!SB) body = '<p class="muted" role="status">מתחברים...</p>';
+    else if (!AD.session) body = `<section class="panel"><h2 class="sec-title">כניסה לבעלים</h2><p>אשלח קישור כניסה חד־פעמי אל <span dir="ltr">${esc((CONFIG.ADMIN_EMAIL || '').trim())}</span>. פותחים אותו באותו מכשיר.</p>
+        ${AD.msg ? `<p class="${AD.msgErr ? 'form-err' : 'form-ok'}" role="status">${esc(AD.msg)}</p>` : ''}<button class="btn" data-act="radlogin" ${AD.busy ? 'disabled' : ''}>שליחת קישור כניסה</button></section>`;
+    else if (!isOwner()) body = '<section class="panel"><h2 class="sec-title">המסך הזה לבעלים בלבד</h2><p>נכנסתם עם מייל שאינו של הבעלים.</p><button class="btn ghost" data-act="radlogout">יציאה</button></section>';
+    else if (!AD.loaded && !AD.err) body = '<p class="muted" role="status">טוענים...</p>';
+    else body = `<div class="adm-bar"><p class="muted">${AD.makers.length} יוצרים ממתינים · ${AD.requests.length} בקשות חדשות</p><span class="row"><button class="chip" data-act="radrefresh">רענון</button><button class="chip" data-act="radlogout">יציאה</button></span></div>
+      ${AD.err ? `<p class="form-err" role="alert">${esc(AD.err)}</p>` : ''}
+      <section aria-labelledby="a-mk"><div class="sec-head"><h2 class="sec-title" id="a-mk">יוצרים שמחכים לאישור</h2></div>
+        <div style="display:flex;flex-direction:column;gap:12px">${AD.makers.map(m => `<article class="panel">
+          <div><b>${esc(m.name)}</b><div class="small muted">${craftName(m.craft)} · ${esc(m.city)} · ${esc(adminDate(m.created_at))}</div></div>
+          <dl class="specs one" style="overflow-wrap:anywhere">${m.email ? `<div><dt>מייל</dt><dd dir="ltr">${esc(m.email)}</dd></div>` : ''}${m.phone ? `<div><dt>טלפון</dt><dd dir="ltr">${esc(m.phone)}</dd></div>` : ''}</dl>
+          ${m.story ? `<p class="small rstory">${esc(m.story)}</p>` : ''}
+          ${(m.photos || []).length ? `<div class="strip" style="grid-template-columns:repeat(3,1fr)">${m.photos.map((p, i) => `<a href="${esc(photoURL(p))}" target="_blank" rel="noopener" aria-label="תמונה ${i + 1} של ${esc(m.name)} בגודל מלא">${rImg(p)}</a>`).join('')}</div>` : '<p class="small muted">לא הועלו תמונות.</p>'}
+          <div class="row"><button class="btn small" data-act="radapprove" data-v="${esc(m.id)}">אישור</button><button class="btn small danger" data-act="radreject" data-v="${esc(m.id)}">דחייה</button></div></article>`).join('') || '<p class="empty">אין הרשמות שמחכות.</p>'}</div></section>
+      <section aria-labelledby="a-rq"><div class="sec-head"><h2 class="sec-title" id="a-rq">בקשות חדשות</h2></div>
+        <div style="display:flex;flex-direction:column;gap:12px">${AD.requests.map(r => { const mt = mailtoFor(r); return `<article class="panel">
+          <span class="tags">${(r.crafts || []).map(c => `<span class="tag">${craftName(c)}</span>`).join('')}</span>
+          <h3 class="sub-title" style="margin:0">${esc(r.title)}</h3>
+          ${r.text ? `<p class="small rstory">${esc(r.text)}</p>` : ''}
+          <dl class="specs one" style="overflow-wrap:anywhere"><div><dt>מתי</dt><dd>${esc(r.due || 'גמיש')}</dd></div><div><dt>פרטי הקונה (פרטיים)</dt><dd dir="auto">${esc(r.contact)}</dd></div></dl>
+          <p class="small muted">${esc(adminDate(r.created_at))} · ${mt.mails.length ? `${mt.mails.length} יוצרים מאושרים עם מייל בתחום` : 'עוד אין יוצרים מאושרים עם מייל בתחום הזה'}${mt.noMail ? ` · ${mt.noMail} עם טלפון בלבד` : ''}</p>
+          <div class="row wrap">${mt.mails.length ? `<a class="btn small" href="${esc(mt.href)}">מייל ליוצרים מתאימים</a>` : ''}<button class="btn small ghost" data-act="rroute" data-v="${esc(r.id)}">סימון: הועברה ליוצרים</button></div></article>`; }).join('') || '<p class="empty">אין בקשות חדשות.</p>'}</div></section>`;
+    return `${head('ניהול')}<div class="stack g">${body}</div>`; }
 };
 
 const NAV = [['home', 'בית', UI.home], ['board', 'בקשות', UI.board], ['post', 'בקשה', UI.plus], ['chats', 'הודעות', UI.chat], ['orders', 'הזמנות', UI.box]];
@@ -1275,6 +1531,24 @@ const ACT = {
     (REVIEWS[o.maker] = REVIEWS[o.maker] || []).unshift({ w: 'רון מ.', s: +n, t: `דירוג ${n} מתוך 5 להזמנה ״${o.title}״.` });
     render(); toast('תודה! הביקורת פורסמה בפרופיל היוצר'); },
   approve: v => { S.pending.find(p => p.id === v).status = 'approved'; render(); toast('היוצר אושר'); },
+  join: () => { clearPhotos(); go('join'); },
+  privacy: () => openSheet(privacySheet(), 'איך אנחנו שומרים את הפרטים שלך'),
+  jpick: () => { const i = document.getElementById('j-file'); if (i) i.click(); },
+  jrm: v => { const p = JP.splice(+v, 1)[0]; if (p) URL.revokeObjectURL(p.url); drawPhotos(); const b = document.querySelector('#photos .add-photo'); if (b) b.focus(); },
+  rmaker: v => go('rmaker', { id: v }),
+  radlogin: async () => { if (!SB || AD.busy) return; AD.busy = true; AD.msg = ''; redrawAdmin();
+    const { error } = await SB.auth.signInWithOtp({ email: CONFIG.ADMIN_EMAIL.trim(), options: { emailRedirectTo: location.origin + location.pathname + '?admin=1' } });
+    AD.busy = false; AD.msgErr = !!error; AD.msg = error ? 'לא הצלחנו לשלוח את הקישור. אפשר לנסות שוב בעוד דקה.' : 'שלחתי קישור כניסה למייל. פותחים אותו במכשיר הזה.'; redrawAdmin(); },
+  radlogout: async () => { if (SB) await SB.auth.signOut(); AD.session = null; AD.loaded = false; AD.makers = []; AD.requests = []; AD.approved = []; AD.msg = ''; redrawAdmin(); },
+  radrefresh: () => { AD.loaded = false; adminLoad(); },
+  radapprove: async v => { const m = AD.makers.find(x => x.id === v); if (!m) return;
+    const { data, error } = await SB.from('makers').update({ status: 'approved' }).eq('id', v).select('id');
+    if (error || !data || !data.length) { toast('לא הצלחנו לשמור את האישור, אפשר לנסות שוב'); return; }
+    AD.makers = AD.makers.filter(x => x.id !== v); AD.approved.push({ id: v, craft: m.craft, email: m.email }); redrawAdmin(); toast(`${m.name} אושר/ה ויופיע באתר`); },
+  radreject: v => { const m = AD.makers.find(x => x.id === v); if (m) openSheet(radRejectSheet(m), `דחיית ההרשמה של ${m.name}`); },
+  rroute: async v => { const { data, error } = await SB.from('requests').update({ status: 'routed' }).eq('id', v).select('id');
+    if (error || !data || !data.length) { toast('לא הצלחנו לשמור, אפשר לנסות שוב'); return; }
+    AD.requests = AD.requests.filter(x => x.id !== v); redrawAdmin(); toast('סומן שהבקשה הועברה ליוצרים'); },
   /* rejecting never happens in one tap: it opens a message the owner writes, and sends only from there */
   reject: v => { const p = S.pending.find(x => x.id === v); if (p.status !== 'pending') return; openSheet(rejectSheet(p), `דחיית ההרשמה של ${p.name}`); rjCheck(); }
 };
@@ -1293,6 +1567,7 @@ document.addEventListener('input', e => {
   if (e.target.closest('form[data-form="reject"]')) rjCheck();
 });
 document.addEventListener('change', e => {
+  if (e.target.id === 'j-file') { addPhotos([...e.target.files]).then(() => { e.target.value = ''; }); return; }
   if (e.target.closest('form[data-form="reject"]')) rjCheck();
   if (e.target.id === 'pc-other') { const o = document.getElementById('p-other'); o.hidden = !e.target.checked; if (e.target.checked) o.focus(); }
 });
@@ -1318,6 +1593,8 @@ document.addEventListener('submit', e => {
     }, 1300);
     return;
   }
+  if (kind === 'join') { submitJoin(f); return; }
+  if (kind === 'rreject') { rejectMaker(f, v); return; }
   if (kind === 'reject') {
     const st = rjState(), p = S.pending.find(x => x.id === v);
     if (!st || !st.ok || p.status !== 'pending') { rjCheck(); toast(st && !st.text ? 'כתבו הודעה לפני שליחה' : 'בחרו איך לשלוח את ההודעה'); return; }
@@ -1334,11 +1611,24 @@ document.addEventListener('submit', e => {
   if (kind === 'post') {
     const crafts = fd.getAll('crafts'), other = d.otherOn ? (d.other || '').trim() : '';
     if (!crafts.length && !other) { toast('בחרו לפחות תחום אחד, או ״אחר״'); return; }
-    const vis = MAT[crafts[0]] || 'mat-wood';
+    const finish = real => { const vis = MAT[crafts[0]] || 'mat-wood';
     const r = { id: 'r' + Date.now(), title: d.title, crafts, other, v: vis, due: d.due || 'גמיש', buyer: 'רון מ.', city: 'מודיעין', ago: 'עכשיו', mine: true, text: d.text || 'אין פרטים נוספים.', offers: [], to: v || null };
     S.requests.unshift(r); S.role = 'buyer';
     S.stack = [{ s: 'board' }, { s: 'req', id: r.id }]; S.anim = 'fwd'; render(true);
-    toast(v ? `הבקשה נשלחה אל ${MAKERS[v].name}` : 'הבקשה פורסמה. יוצרים יקבלו התראה.');
+    toast(v ? `הבקשה נשלחה אל ${MAKERS[v].name}` : real ? 'הבקשה נשלחה אלינו. אעביר אותה ליוצרים שמתאימים.' : 'הבקשה פורסמה. יוצרים יקבלו התראה.'); };
+    /* configured mode: the request is also saved for the owner, who routes it by hand. The local board works exactly as before. */
+    if (f.dataset.live === '1' && SB) {
+      const contact = String(d.contact || '').trim();
+      if (!contact || !(EMAIL_RE.test(contact) || phoneOK(contact))) { toast(!contact ? 'השאירו מייל או טלפון, כדי שנוכל לחזור אליכם' : 'המייל או הטלפון לא נראים תקינים'); f.querySelector('#p-contact').focus(); return; }
+      if (!d.consent) { toast('כדי לשלוח צריך לאשר שיעבירו את הבקשה ליוצרים'); f.querySelector('#p-consent').focus(); return; }
+      const btn = f.querySelector('button[type="submit"]'); btn.disabled = true;
+      const text = String(d.text || '').trim() + (other ? `${d.text ? '\n' : ''}תחום נוסף: ${other}` : '');
+      SB.from('requests').insert({ title: String(d.title).trim(), crafts: [...crafts, ...(other ? ['other'] : [])], text, due: String(d.due || '').trim(), contact, consent: true, status: 'new' })
+        .then(({ error }) => { if (error) throw error; finish(true); })
+        .catch(e => { console.warn(e); btn.disabled = false; toast('לא הצלחנו לשלוח את הבקשה. מה שכתבתם נשמר, אפשר לנסות שוב'); });
+      return;
+    }
+    finish(false);
   }
   if (kind === 'offer') {
     const r = S.requests.find(x => x.id === v);
@@ -1419,8 +1709,12 @@ function motionFor(c) {
   });
 }
 if (GS && document.fonts && document.fonts.ready) document.fonts.ready.then(() => ScrollTrigger.refresh());
+/* the owner's screen lives at #admin (configured mode only; in demo mode the address does nothing) */
+if (CFG_ON && adminUrl()) S.stack = [{ s: 'radmin' }];
+window.addEventListener('hashchange', () => { if (CFG_ON && adminUrl() && cur().s !== 'radmin') { S.stack = [{ s: 'radmin' }]; S.anim = 'fade'; render(true); if (isOwner() && !AD.loaded) adminLoad(); } });
 document.getElementById('view').addEventListener('animationend', e => { if (e.target.id === 'view' || e.target.classList.contains('chat-shell')) e.target.classList.remove('in-fwd', 'in-back', 'in-fade'); });
 render();
+loadBackend();
 </script>
 </body>
 </html>
