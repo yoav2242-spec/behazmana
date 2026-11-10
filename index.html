@@ -506,7 +506,7 @@ const UI = {
 };
 const svg = p => `<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
 /* photos: free Unsplash images, cropped and resized, published next to the page under img/ */
-const art = (img, cls = '', cap = '') => `<div class="art ${cls}"><img src="img/${img}.jpg" alt="" loading="${/eager/.test(cls) ? 'eager' : 'lazy'}" decoding="async" draggable="false">${cap ? `<span class="cap">${cap}</span>` : ''}</div>`;
+const art = (img, cls = '', cap = '', alt = '', pos = '') => `<div class="art ${cls}"><img src="img/${img}.jpg" alt="${alt}"${pos ? ` style="object-position:${pos}"` : ''} loading="${/eager/.test(cls) ? 'eager' : 'lazy'}" decoding="async" draggable="false">${cap ? `<span class="cap">${cap}</span>` : ''}</div>`;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const ils = n => '₪' + Number(n).toLocaleString('he-IL');
 const initials = name => name.split(' ').slice(0, 2).map(w => w[0]).join('');
@@ -820,6 +820,9 @@ const HEADLINES = [['yossi', 'מעכו', 'יכין', 'קערה'], ['maya', 'מי
 const HL_I = (() => { let n = Math.floor(Math.random() * HEADLINES.length);
   try { const last = +localStorage.getItem('behazmana.hl'); if (Number.isInteger(last)) n = (last + 1) % HEADLINES.length; localStorage.setItem('behazmana.hl', String(n)); } catch (e) { /* private mode: a random one */ }
   return n; })();
+/* one hero photo per headline, same index: a person making that kind of thing (stock photos, so the alt never names a maker) */
+const HERO_PHOTOS = [['mk-ceramic', 'ידיים יוצרות קערה מחרס על אובניים', '50% 45%'], ['leather-elder', 'אדם תופר רצועת עור בעבודת יד', '50% 40%'], ['forge-shop', 'נפח עובד עם מלקחיים ליד כבשן בסדנה', '50% 45%'], ['hero-clay', 'יד על חרס מסתובב באובניים', '50% 35%'], ['mk-leather', 'ידיים מכינות עגיל עם צבת', '50% 50%'], ['mk-jewelry', 'צורפת בשולחן העבודה שלה עם טבעות וכלים', '50% 78%']];
+const heroPhotoHTML = () => { const [img, alt, pos] = HERO_PHOTOS[HL_I]; return art(img, 'eager', '', alt, pos); };
 const headlineHTML = () => { const [id, city, verb, what] = HEADLINES[HL_I]; return `<button type="button" class="hl-link" data-act="maker" data-v="${id}">${MAKERS[id].name.split(' ')[0]} ${city}</button> ${verb} לכם ${what}`; };
 const bubbleHTML = (b, mine, isNew) => `<div class="bubble ${mine ? 'me' : 'them'}${isNew ? ' new' : ''}">${esc(b.t)}</div>`;
 const msgCount = n => n === 1 ? 'הודעה אחת' : `${n} הודעות`;
@@ -934,7 +937,7 @@ const SCREENS = {
       ['יום 12', '<b>הארנק אצל אבא</b><span>עם האותיות שלו, ובזמן.</span>', 'נמסר']] : [];
     return `<header class="top g on-dark"><img class="corner-mark" src="logo/mark-slip.svg" width="32" height="40" alt="בהזמנה"><span class="grow"></span>
       <button class="round" data-act="search" aria-label="חיפוש">${svg(UI.search)}</button><button class="round me-btn" data-act="go" data-v="profile" aria-label="החשבון שלי">${svg(UI.user)}</button></header>
-    <section class="hero"><div class="photo">${art('hero-clay', 'eager')}</div>
+    <section class="hero"><div class="photo">${heroPhotoHTML()}</div>
       <div class="slip-wrap g"><div class="slip zig"><img class="logo-big" src="logo/logo-primary-ink.svg" width="168" height="109" alt="בהזמנה, עבודת יד לפי הזמנה">
         <h1>${headlineHTML()}</h1><p>כותבים מה תרצו, והיוצרים עונים בעצמם. בואו להכיר אותם.</p>
         <button class="btn" data-act="tab" data-v="post">לכתוב בקשה</button></div></div><div class="below-slip"></div></section>
