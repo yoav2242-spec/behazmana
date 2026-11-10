@@ -29,7 +29,7 @@
 /* Look: the workshop order slip. Everything is stationery: stone-coloured ground, paper slips, olive-black ink.
    Palette from the place and the materials (Jerusalem stone, Acre clay, olive) plus ONE colour that is only Be'hazmana's: the blue of the stamp
    on the order slip (primary actions, stamps, the logo). Five type sizes (13 / 16 / 20 / 28 / 44 px, written in rem so they follow the reader's font size),
-   two faces (Karantina, Miriam Libre), no lines, no resting shadows, no gradients. One move on the whole site: the stamp landing on "how it works". */
+   two faces (Karantina, Miriam Libre), no lines, no resting shadows, no gradients. Motion: the stamp landing on "how it works", plus quiet continuity (see the motion block). */
 :root {
   color-scheme: only light;
   --ground: #ece8de;      /* Jerusalem stone in shade */
@@ -50,6 +50,8 @@
   --nav-h: 64px;
   --top-h: 64px;
   --r: 12px;              /* soft corners: everything a thumb touches */
+  --ease: cubic-bezier(.16, 1, .3, 1);   /* exponential ease-out: every arrival on the site */
+  --stamp-hover: #1b3685; --stamp-press: #16296b; --tone-press: #c5bdae;
 }
 html { background: var(--tone); }
 html, body { color: var(--ink); margin: 0; }
@@ -160,7 +162,9 @@ mark { background: var(--stamp); color: var(--paper); padding-inline: 2px; }
 
 /* makers who joined */
 .mlist { display: flex; flex-direction: column; gap: 4px; }
-.mrow { display: flex; align-items: center; gap: 14px; background: var(--paper); border: 0; padding: 12px 14px; text-align: start; width: 100%; }
+.mrow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; background: var(--paper); border: 0; padding: 12px 14px; width: 100%; }
+.mmain { flex: 1 1 200px; min-width: 0; display: flex; align-items: center; gap: 14px; background: none; border: 0; padding: 0; text-align: start; color: inherit; }
+.macts { display: flex; gap: 6px; margin-inline-start: auto; flex: none; }
 .mrow .av { width: 56px; height: 64px; }
 .mrow .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .mrow .nm { font-family: var(--display); font-size: var(--fs-4); line-height: 1; }
@@ -238,6 +242,7 @@ select.input { appearance: auto; }
 .opt { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--paper); margin-bottom: 4px; }
 .opt input { accent-color: var(--stamp); width: 20px; height: 20px; flex: none; }
 .opt .grow { flex: 1; }
+.field > label.opt { font-weight: 400; }
 .photos { display: flex; gap: 8px; flex-wrap: wrap; }
 .photos .art { width: 84px; height: 84px; }
 .add-photo { width: 84px; height: 84px; border: 0; background: var(--tone); color: var(--ink); font-size: var(--fs-4); }
@@ -272,7 +277,11 @@ body.sheet-open { overflow: hidden; }
 .nav { position: fixed; bottom: 0; left: 0; right: 0; margin-inline: auto; width: min(440px, 100%); padding-bottom: env(safe-area-inset-bottom, 0px); min-height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px)); background: var(--olive); display: grid; grid-template-columns: repeat(4, 1fr); z-index: 20; }
 .nav button { border: 0; background: none; color: var(--on-olive); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px 2px; font-size: var(--fs-1); line-height: 1.2; position: relative; min-height: var(--nav-h); text-align: center; overflow-wrap: normal; }
 .nav button svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
-.nav button[aria-current="page"] { background: var(--paper); color: var(--ink); font-weight: 700; border-radius: var(--r) var(--r) 0 0; }
+.nav button[aria-current="page"] { color: var(--ink); font-weight: 700; }
+.nav button { z-index: 1; }
+/* the paper tab is one persistent block behind the labels, so it can slide from tab to tab */
+.nav-ind { position: absolute; top: 0; inset-inline-start: 0; width: 25%; height: var(--nav-h); background: var(--paper); pointer-events: none; z-index: 0; opacity: 0; transform: translateX(calc(var(--i, 0) * -100%)); }
+.nav[data-on="1"] .nav-ind { opacity: 1; }
 .nav .plus .c { width: 40px; height: 40px; background: var(--stamp); color: var(--paper); display: grid; place-items: center; }
 .nav .plus .c svg { width: 20px; height: 20px; stroke-width: 2; }
 .no-nav .nav { display: none; }
@@ -283,16 +292,56 @@ body.sheet-open { overflow: hidden; }
 .no-nav .toast, .kb-open .toast { bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
 .toast.show { opacity: 1; }
 
-/* motion: ONE move (the stamp on "how it works", see the script). The only other change is plain colour feedback on controls. */
+/* motion. Everything is visible from the first frame without any of this; it only runs when the person has not asked for less motion.
+   One easing (--ease), compositor-only properties (transform, opacity), nothing that moves layout.
+   - screens: a short fade and a small slide in the reading direction (RTL: forward arrives from the left edge, back from the right);
+     the old screen stays underneath until the new one covers it, so there is no blank frame (View Transitions; a plain fade-in where unsupported)
+   - the gated join screen, thank-you screens and tab switches fade without a slide
+   - sheets rise from the bottom, the backdrop fades; buttons dip 1px; the tab bar's paper tab slides; the hero photo settles once; makers fade-rise once */
 @media (prefers-reduced-motion: no-preference) {
-  button, .toast { transition: background-color .15s, color .15s, opacity .2s; }
+  button, a.btn, a.cbtn, a.cbtn2, .toast { transition: background-color .15s, color .15s, opacity .2s, transform .1s var(--ease); }
+  .btn:not(:disabled):active, .cbtn2:active { transform: translateY(1px); }
+  .btn:not(.paper):not(.ghost):not(.danger):not(.warnbtn):not(:disabled):active { background: var(--stamp-press); }
+  .btn.paper:active, .btn.ghost:active { background: var(--tone-press); }
+  .nav-ind { transition: transform .26s var(--ease), opacity .15s; }
+  html[data-vt] .nav-ind { transition: none; }
+
+  .hero .photo img[data-drift] { animation: drift 1.2s var(--ease) both; }
+  @keyframes drift { from { transform: scale(1.04); } }
+
+  .sheet-back { animation: fade-in .24s var(--ease) both; }
+  .sheet-panel { animation: sheet-up .28s var(--ease) both; }
+  @keyframes fade-in { from { opacity: 0; } }
+  @keyframes sheet-up { from { transform: translateY(100%); } }
+
+  .mrow { transition: opacity .32s var(--ease), transform .32s var(--ease); }
+  .mrow.rv { opacity: 0; transform: translateY(8px); }
+
+  /* screen changes (View Transitions). The tab bar keeps still: it has its own group. */
+  html[data-vt] .nav { view-transition-name: nav; }
+  html[data-vt]::view-transition-old(root), html[data-vt]::view-transition-new(root) { mix-blend-mode: normal; }
+  html[data-vt]::view-transition-new(root) { animation: .26s var(--ease) both; }
+  html[data-vt]::view-transition-old(root) { animation: vt-hold .2s linear both, .2s var(--ease) both; }
+  html[data-vt="fwd"]::view-transition-new(root) { animation-name: vt-in-l; }
+  html[data-vt="back"]::view-transition-new(root) { animation-name: vt-in-r; }
+  html[data-vt="fade"]::view-transition-new(root) { animation-name: vt-in; animation-duration: .22s; }
+  html[data-vt="fwd"]::view-transition-old(root) { animation-name: vt-hold, vt-out-r; }
+  html[data-vt="back"]::view-transition-old(root) { animation-name: vt-hold, vt-out-l; }
+  html[data-vt="fade"]::view-transition-old(root) { animation-name: vt-hold; animation-duration: .22s; }
+  @keyframes vt-in { from { opacity: 0; } }
+  @keyframes vt-in-l { from { opacity: 0; transform: translateX(-24px); } }
+  @keyframes vt-in-r { from { opacity: 0; transform: translateX(24px); } }
+  @keyframes vt-hold { 0%, 35% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes vt-out-r { to { transform: translateX(10px); } }
+  @keyframes vt-out-l { to { transform: translateX(-10px); } }
 }
 @media (hover: hover) {
-  .btn:not(:disabled):hover { background: #1b3685; }
+  .btn:not(:disabled):hover { background: var(--stamp-hover); }
   .btn.paper:hover { background: var(--tone); }
-  .btn.ghost:hover, .round:hover, .chip:hover, .filters button:hover, .pick:hover span { background: #c5bdae; }
+  .btn.ghost:hover, .round:hover, .chip:hover, .filters button:hover, .pick:hover span { background: var(--tone-press); }
   .on-dark .round:hover { background: #a5b08b; }
   .mrow:hover, .entry:hover { background: #fff; }
+  .cbtn:hover { background: #c5bdae; }
   .link:hover { text-decoration-thickness: 3px; }
   .nav button:not([aria-current="page"]):hover { background: #b3bd9b; }
 }
@@ -324,9 +373,28 @@ body.sheet-open { overflow: hidden; }
    buttons borrow the slip's cut corner (one clipped corner, no circles). Clip-path would cut the focus ring, so focus drops it. */
 :root { --r: 4px; --cut: 10px; }
 .strip .art, .photos .art, .av, .mrow, .entry, .opt, .sent-list li, .form-ok, .form-err, .toast, .add-photo, .photos .art .rm, .banner .copy, .sheet-panel, .nav button[aria-current="page"], .nav .plus .c { border-radius: 0; }
+.nav button[aria-current="page"] { border-radius: 0; }
 .btn { border-radius: 0; clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut)); }
 .btn:focus-visible { clip-path: none; }
 @media (forced-colors: active) { .btn { clip-path: none; } }
+
+/* reaching a maker directly: WhatsApp and call. Only for makers who chose to show their phone at signup. */
+.cbtn { width: 44px; height: 44px; border: 0; background: var(--tone); color: var(--ink); display: grid; place-items: center; flex: none; padding: 0; text-decoration: none; }
+.cbtn svg, .cbtn2 svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.cbtn.wa svg, .cbtn2.wa svg { color: #0b7a3b; }   /* WhatsApp green, darkened so the glyph passes 3:1 on the tone */
+.contact { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cbtn2 { min-height: 52px; padding: 10px 12px; background: var(--tone); color: var(--ink); font-weight: 700; font-size: var(--fs-2); display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; text-align: center; border-radius: 0; clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut)); }
+.cbtn2.wa { border-bottom: 3px solid #25D366; }   /* WhatsApp's own green as a thin accent only */
+.cbtn2:focus-visible { clip-path: none; }
+.contact-alt { color: var(--muted); font-size: var(--fs-2); display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px; }
+.contact-alt .link { font-size: var(--fs-2); }
+@media (forced-colors: active) { .cbtn, .cbtn2 { border: 2px solid ButtonText; clip-path: none; } }
+
+/* the vision text (a bottom sheet) and the quiet request line on a maker without a public phone */
+.vision { display: flex; flex-direction: column; gap: 18px; }
+.vision .pull { background: var(--ground); padding: 20px 18px; font-family: var(--display); font-size: var(--fs-4); line-height: 1.12; text-wrap: balance; }
+.vision .last { font-weight: 700; font-size: var(--fs-3); line-height: 1.35; }
+.askline { background: var(--paper); padding: 16px 18px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
 </style>
 </head>
 <body>
@@ -338,7 +406,7 @@ if (window.top !== window.self) { try { window.top.location.href = window.locati
 <div class="app" dir="rtl" lang="he">
   <a class="skip" href="#view">דילוג לתוכן</a>
   <main id="view" tabindex="-1"></main>
-  <nav class="nav" id="nav" aria-label="ניווט ראשי"></nav>
+  <nav class="nav" id="nav" aria-label="ניווט ראשי"><span class="nav-ind" aria-hidden="true"></span></nav>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="sheet" id="sheet" hidden></div>
 </div>
@@ -356,7 +424,9 @@ const UI = {
   back: '<path d="M9 6l6 6-6 6"/>', search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>', close: '<path d="M6 6l12 12M18 6L6 18"/>',
   home: '<path d="M4 11l8-7 8 7v9H4z"/>', plus: '<path d="M12 5v14M5 12h14"/>',
   users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M15.5 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/>',
-  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  phone: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  wa: '<path d="M3 21l1.65-4.9A8.5 8.5 0 1 1 8 19.4z"/><path d="M9 8.6c0 3.4 2.9 6.4 6.4 6.4l1.1-1.6-2-1-.9.7a4.6 4.6 0 0 1-2-2l.7-.9-1-2z"/>'
 };
 const svg = p => `<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -514,17 +584,38 @@ function loadBackend() {
 }
 async function loadReal() {
   try {
-    const { data, error } = await SB.from('public_makers').select('id,name,city,craft,story,photos,portrait');
+    let { data, error } = await SB.from('public_makers').select('id,name,city,craft,story,photos,portrait,contact_phone');
+    /* the view may not have contact_phone yet (the database update not applied): the list still loads, without call buttons */
+    if (error && /contact_phone/i.test(String(error.message || ''))) ({ data, error } = await SB.from('public_makers').select('id,name,city,craft,story,photos,portrait'));
     if (error || !Array.isArray(data)) throw error || new Error('no data');
-    REAL.list = data.filter(m => m && m.id && m.name).map(m => ({ id: String(m.id), name: String(m.name), city: String(m.city || ''), craft: String(m.craft || ''), story: String(m.story || ''), portrait: String(m.portrait || ''), photos: Array.isArray(m.photos) ? m.photos.map(String) : [] }))
+    REAL.list = data.filter(m => m && m.id && m.name).map(m => ({ id: String(m.id), name: String(m.name), city: String(m.city || ''), craft: String(m.craft || ''), story: String(m.story || ''), portrait: String(m.portrait || ''), photos: Array.isArray(m.photos) ? m.photos.map(String) : [], contact: contactPhone(m.contact_phone) }))
       .sort((a, b) => a.name.localeCompare(b.name, 'he'));
     REAL.loaded = true;
   } catch (e) { REAL.failed = true; }
   realChanged();
 }
 const realState = () => !CFG_ON ? 'ready' : REAL.loaded ? 'ready' : REAL.failed || AD.failed ? 'failed' : 'loading';
+/* A maker's phone, only when the maker chose to show it (public_makers.contact_phone). It comes from the database, so it is checked here:
+   only digits with an optional leading +, spaces, dashes, dots or brackets pass, and links are built from the digits alone, never from the raw text. */
+function contactPhone(raw) {
+  if (raw == null) return null;
+  const s = String(raw).trim();
+  if (!s || s.length > 30 || !/^\+?[0-9\s\-().]+$/.test(s)) return null;
+  let d = s.replace(/\D/g, ''); const plus = s[0] === '+' || d.startsWith('00'); if (d.startsWith('00')) d = d.slice(2);
+  let e = '';
+  if (plus || d.startsWith('972')) {
+    if (d.startsWith('972')) { const rest = d.slice(3).replace(/^0/, ''); if (/^[1-9]\d{7,9}$/.test(rest)) e = '972' + rest; }
+    else if (plus && /^[1-9]\d{7,14}$/.test(d)) e = d;
+  } else if (d.startsWith('0')) { const rest = d.slice(1); if (/^[1-9]\d{7,9}$/.test(rest)) e = '972' + rest; }
+  else if (/^5\d{8}$/.test(d)) e = '972' + d;
+  return e ? { tel: 'tel:+' + e, wa: 'https://wa.me/' + e } : null;
+}
+const firstName = m => String(m.name).trim().split(/\s+/)[0].slice(0, 40);
+const waHref = m => `${m.contact.wa}?text=${encodeURIComponent(`היי ${firstName(m)}, ראיתי את הפרופיל שלך בבהזמנה. אשמח לדבר על יצירה.`)}`;
+const OUT = 'target="_blank" rel="noopener noreferrer"';
+const cardActs = m => m.contact ? `<span class="macts"><a class="cbtn wa" href="${esc(waHref(m))}" ${OUT} aria-label="${esc(`שליחת וואטסאפ ל${firstName(m)}`)}">${svg(UI.wa)}</a><a class="cbtn" href="${esc(m.contact.tel)}" aria-label="${esc(`התקשרות אל ${firstName(m)}`)}">${svg(UI.phone)}</a></span>` : '';
 const realAv = m => `<span class="av">${m.portrait || m.photos[0] ? rImg(m.portrait || m.photos[0]) : `<span class="ini">${esc(initials(m.name))}</span>`}</span>`;
-const realRow = (m, h = esc, extra = '') => `<button class="mrow" data-act="rmaker" data-v="${esc(m.id)}">${realAv(m)}<span class="info"><span class="nm">${h(m.name)}</span><span class="small muted">${h(craftName(m.craft))}${m.city ? ` · ${h(m.city)}` : ''}</span>${extra || (m.story ? `<span class="small clamp">${esc(m.story)}</span>` : '')}</span></button>`;
+const realRow = (m, h = esc, extra = '') => `<div class="mrow"><button type="button" class="mmain" data-act="rmaker" data-v="${esc(m.id)}">${realAv(m)}<span class="info"><span class="nm">${h(m.name)}</span><span class="small muted">${h(craftName(m.craft))}${m.city ? ` · ${h(m.city)}` : ''}</span>${extra || (m.story ? `<span class="small clamp">${esc(m.story)}</span>` : '')}</span></button>${cardActs(m)}</div>`;
 const emptyMakers = () => `<div class="s-empty"><p class="say">עוד אין כאן יוצרים, האתר חדש.</p>
   <p class="small muted">אם אתם מכינים דברים בידיים, ספרו לנו עליכם. כשנאשר את ההרשמה, הפרופיל שלכם יופיע כאן.</p>
   <button type="button" class="btn" data-act="join">להצטרף כיוצרים</button></div>`;
@@ -649,6 +740,8 @@ async function submitJoin(f) {
   const bad = !name ? ['j-name', 'כתבו את השם שלכם.'] : !city ? ['j-city', 'כתבו באיזו עיר אתם.'] : !Object.prototype.hasOwnProperty.call(CRAFTS, craft) ? ['j-craft', 'בחרו את התחום שלכם.']
     : !email ? ['j-email', 'כתבו כתובת מייל.'] : !EMAIL_RE.test(email) ? ['j-email', 'המייל לא נראה נכון. בדקו שוב.']
     : !phone ? ['j-phone', 'כתבו מספר טלפון.'] : !phoneOK(phone) ? ['j-phone', 'הטלפון לא נראה נכון. בדקו שוב.']
+    : d.phone_public !== 'yes' && d.phone_public !== 'no' ? ['j-pp-yes', 'בחרו אם להציג את הטלפון.']
+    : d.phone_public === 'yes' && !contactPhone(phone) ? ['j-phone', 'כדי להציג את הטלפון באתר, כתבו מספר ישראלי רגיל, למשל 050-1234567.']
     : !JP.portrait ? ['j-portrait', 'הוסיפו תמונה שלכם.'] : !JP.length ? ['j-pick', 'הוסיפו לפחות תמונה אחת של העבודות.']
     : !d.consent ? ['j-consent', 'כדי להמשיך, סמנו שאתם מסכימים לתנאי השימוש ולמדיניות הפרטיות.'] : null;
   if (bad) { const el = f.querySelector('#' + bad[0]); if (el.classList.contains('input')) el.setAttribute('aria-invalid', 'true'); err.textContent = bad[1]; err.hidden = false; el.focus(); return; }
@@ -668,7 +761,7 @@ async function submitJoin(f) {
       if (error) throw error; jobs[i].path = path;
     }
     stage = ''; btn.textContent = 'שומרים את ההרשמה...';
-    const { error } = await SB.from('makers').insert({ name, city, craft, story, email, phone, portrait: JP.portrait.path, photos: JP.map(p => p.path), status: 'pending' });
+    const { error } = await SB.from('makers').insert({ name, city, craft, story, email, phone, phone_public: d.phone_public === 'yes', portrait: JP.portrait.path, photos: JP.map(p => p.path), status: 'pending' });
     if (error) throw error;
   } catch (e) {
     console.error('join failed', errCode(e), e);
@@ -747,10 +840,10 @@ const privacySheet = () => `<div class="sheet-body">
   <h2 class="sec-title">מה אנחנו עושים עם הפרטים שלכם</h2>
   <div class="field"><span class="lbl">מה נשמר</span><p>בהרשמה כיוצרים: שם, עיר, תחום, סיפור, התמונה שלכם, תמונות של העבודות, מייל וטלפון. בבקשה: מה שכתבתם בה, המייל או הטלפון שהשארתם, והסכמה שלכם שנעביר אותה.</p></div>
   <div class="field"><span class="lbl">למה</span><p>כדי שנוכל לבדוק כל הרשמה ולהעביר כל בקשה ליוצרים שמתאימים לה. אנחנו לא מוכרים את הפרטים ולא משתמשים בהם לפרסום.</p></div>
-  <div class="field"><span class="lbl">מי רואה</span><p>אחרי שאישרנו יוצר, אלה מופיעים באתר לכולם: שם, עיר, תחום, סיפור ותמונות. המייל והטלפון, של יוצרים ושל מי שמבקש, רק אנחנו רואים. פרטי הקשר של מי שמבקש לא עוברים ליוצרים בלי אישור. כשאנחנו כותבים לכמה יוצרים יחד, הכתובות מוסתרות, ואף אחד מהם לא רואה את המייל של האחרים.</p></div>
+  <div class="field"><span class="lbl">מי רואה</span><p>אחרי שאישרנו יוצר, אלה מופיעים באתר לכולם: שם, עיר, תחום, סיפור ותמונות. הטלפון של יוצר מופיע באתר רק אם הוא בחר בהרשמה להציג אותו, וגם אז רק אחרי האישור שלנו. מי שרואה מספר מוצג יכול להעתיק אותו, ולכן בחרו להציג רק מספר שנוח לכם שיתפרסם. המייל של יוצר אף פעם לא מוצג. הטלפון של מי שבחר לא להציג אותו, והמייל והטלפון של מי שמבקש, רק אנחנו רואים. פרטי הקשר של מי שמבקש לא עוברים ליוצרים בלי אישור. כשאנחנו כותבים לכמה יוצרים יחד, הכתובות מוסתרות, ואף אחד מהם לא רואה את המייל של האחרים.</p></div>
   <div class="field"><span class="lbl">איפה זה נשמר, ומי עוזר לנו</span><p>הפרטים והתמונות נשמרים אצל Supabase, שירות אחסון בענן. השרתים שלו כרגע במומבאי שבהודו. כשאנחנו שולחים בקשה ליוצרים במייל, היא עוברת דרך תיבת הג׳ימייל שלנו (Google). כדי להציג את האתר, הדפדפן שלכם טוען גופנים מ־Google Fonts וספריות קוד מ־cdnjs (Cloudflare) ומ־jsDelivr, ולכן כתובת ה־IP שלכם מגיעה גם אליהם. תמונה שהועלתה שמורה בקישור ציבורי שקשה מאוד לנחש, והיא מוצגת באתר רק אחרי שאישרנו.</p></div>
   <div class="field"><span class="lbl">במכשיר שלכם</span><p>האתר זוכר במכשיר הזה את כותרות הבקשות ששלחתם, ואם כבר נרשמתם. זה נשמר רק אצלכם, ואפשר למחוק את זה בניקוי נתוני האתר בדפדפן.</p></div>
-  <div class="field"><span class="lbl">איך מבקשים למחוק</span><p>כתבו לנו ונמחק את הפרופיל והתמונות שלכם, או את הבקשה ששלחתם. נעדכן אתכם כשזה נעשה.</p><div class="links-col">${mailLink('בקשת מחיקה מבהזמנה')}</div></div>
+  <div class="field"><span class="lbl">איך מבקשים למחוק</span><p>כתבו לנו ונמחק את הפרופיל והתמונות שלכם, או את הבקשה ששלחתם. אם בחרתם להציג את הטלפון ושיניתם את דעתכם, כתבו לנו ונסתיר אותו. נעדכן אתכם כשזה נעשה.</p><div class="links-col">${mailLink('בקשת מחיקה מבהזמנה')}</div></div>
   <button type="button" class="btn block" data-act="closesheet">הבנתי</button></div>`;
 const termsSheet = () => `<div class="sheet-body">
   <h2 class="sec-title">תנאי השימוש</h2>
@@ -759,43 +852,56 @@ const termsSheet = () => `<div class="sheet-body">
     <li>דרך האתר לא עובר כסף. את המחיר, הזמנים והתשלום (למשל בביט או בהעברה בנקאית) מסכמים ישירות מי שמבקש ומי שיוצר.</li>
     <li>היוצרים אחראים לעבודה שלהם, למחירים ולמסירה, ולכך שמותר להם להשתמש בתמונות שהם מעלים.</li>
     <li>בהרשמה אתם מרשים לנו להציג באתר, אחרי שנאשר אתכם, את השם, העיר, התחום, הסיפור והתמונות שלכם.</li>
+    <li>את הטלפון שלכם נציג באתר, עם כפתורי התקשרות וואטסאפ, רק אם בחרתם בזה בהרשמה. מי שרואה מספר מוצג יכול להעתיק אותו. אפשר לבקש בכל זמן להסתיר אותו.</li>
     <li>אנחנו יכולים לאשר פרופיל, לדחות אותו או להסיר אותו.</li>
     <li>אסור להעלות תוכן שאינו שלכם, או תוכן פוגעני.</li>
     <li>אפשר לבקש בכל זמן למחוק את הפרופיל או את הבקשה. כתבו לנו.</li>
-    <li>המייל והטלפון שלכם פרטיים, ואנחנו שומרים אותם כמתואר במדיניות הפרטיות.</li>
+    <li>המייל שלכם אף פעם לא מוצג באתר, והטלפון מוצג רק אם בחרתם. אנחנו שומרים אותם כמתואר במדיניות הפרטיות.</li>
   </ul>
   <div class="links-col">${mailLink('שאלה על תנאי השימוש בבהזמנה')}</div>
   <p class="small muted">זו גרסה ראשונה, והיא עוד עשויה להשתנות.</p>
   <button type="button" class="btn block" data-act="closesheet">הבנתי</button></div>`;
 
+const visionSheet = () => `<div class="sheet-body vision">
+  <h2 class="sec-title">למה בהזמנה</h2>
+  <p class="pull">חפץ שנעשה בשבילכם, בידיים של מישהו שאתם יודעים איך קוראים לו.</p>
+  <p>יש דברים שאי אפשר לקנות מוכנים. ארנק עם האותיות של אבא, שולחן שמתאים בדיוק לפינה שלכם. מישהו צריך להכין אותם, ולפני זה להקשיב.</p>
+  <p>בישראל יש יוצרים שמכינים בידיים לפי הזמנה, בעץ, בעור, בקרמיקה, בתכשיטים ובמתכת. הם מעדיפים בקשה רצינית על פני מיקוח. אנחנו לא קטלוג. אנחנו קוראים כל בקשה וכל הרשמה בעצמנו, ומחברים ביד בין מי שמבקש ליוצר שמתאים.</p>
+  <p>האתר עוד חדש והשימוש בו חינם. דרך האתר לא עובר כסף: את המחיר, הזמן והתשלום מסכמים אתם והיוצר, ישירות.</p>
+  <p class="last">כל דבר כאן מתחיל בשיחה.</p>
+  <button type="button" class="btn ghost block" data-act="closesheet">סגירה</button></div>`;
+
 /* ---------- screens ---------- */
 const head = (title, extra = '') => `<header class="top g">${S.stack.length > 1 && !gated() ? `<button class="round" data-act="back" aria-label="חזרה">${svg(UI.back)}</button>` : ''}<h1>${title}</h1>${extra}</header>`;
 const findBtn = () => `<button class="round" data-act="search" aria-label="חיפוש יוצרים">${svg(UI.search)}</button>`;
-const legalLinks = () => `<div class="links-row"><button type="button" class="link" data-act="privacy">מדיניות הפרטיות</button><button type="button" class="link" data-act="terms">תנאי השימוש</button></div>`;
+const legalLinks = (first = '') => `<div class="links-row">${first}<button type="button" class="link" data-act="privacy">מדיניות הפרטיות</button><button type="button" class="link" data-act="terms">תנאי השימוש</button></div>`;
 const HOW = [
   ['כותבים מה תרצו', 'מה, מאיזה חומר ועד מתי. בלי מחיר.', 'בקשה'],
   ['אנחנו מעבירים ליוצרים שמתאימים', 'קוראים כל בקשה בעצמנו. כל יוצר באתר אושר אצלנו ביד.', 'יוצרים'],
   ['מדברים ישירות ומסכמים ביניכם', 'על המחיר, הזמן והתשלום (בביט, בהעברה) מסכמים ביניכם. דרך האתר לא עובר כסף.', 'ביחד']];
+/* the hero photo settles once (scale 1.04 to 1, 1.2 s). A re-render inside that window carries on from where it was instead of starting over. */
+let DRIFT_T0 = 0;
+function driftAttr() { const now = performance.now(); if (!DRIFT_T0) DRIFT_T0 = now; const t = now - DRIFT_T0; return t < 1150 ? ` data-drift style="animation-delay:-${Math.round(t)}ms"` : ''; }
 const fitCraft = c => S.mcraft === 'all' || c === S.mcraft;
 
 const SCREENS = {
   home: () => `<header class="top g on-dark"><img class="corner-mark" src="logo/mark-slip.svg" width="32" height="40" alt="בהזמנה"><span class="grow"></span>
       <button class="round" data-act="search" aria-label="חיפוש יוצרים">${svg(UI.search)}</button></header>
-    <section class="hero"><div class="photo"><img src="img/h/hero-880.jpg" srcset="img/h/hero-480.jpg 480w, img/h/hero-880.jpg 880w" sizes="(max-width: 440px) 100vw, 440px" width="880" height="640" alt="" loading="eager" fetchpriority="high" decoding="async" draggable="false"></div>
+    <section class="hero"><div class="photo"><img${driftAttr()} src="img/h/hero-880.jpg" srcset="img/h/hero-480.jpg 480w, img/h/hero-880.jpg 880w" sizes="(max-width: 440px) 100vw, 440px" width="880" height="640" alt="" loading="eager" fetchpriority="high" decoding="async" draggable="false"></div>
       <div class="slip-wrap g"><div class="slip zig"><img class="logo-big" src="logo/logo-primary-ink.svg" width="168" height="109" alt="">
         <h1>כתבו מה תרצו שיכינו לכם בידיים</h1><p>למשל ארנק עם האותיות של אבא. אנחנו קוראים כל בקשה ומעבירים אותה ליוצרים שמתאימים.</p>
-        <div class="acts"><button class="btn" data-act="tab" data-v="post">לכתוב בקשה</button><button class="link" data-act="join">אתם יוצרים? אפשר להצטרף</button></div></div></div><div class="below-slip"></div></section>
+        <div class="acts"><button class="btn" data-act="tab" data-v="post">לכתוב בקשה</button><button class="link" data-act="join">יוצרים? אפשר להצטרף</button></div></div></div><div class="below-slip"></div></section>
     <div class="stack g">
       <section aria-labelledby="h-how"><div class="sec-head"><h2 class="sec-title" id="h-how">איך זה עובד</h2></div>
         <div class="tale zig">${HOW.map(([t, d, st]) => `<div class="tale-row"><div class="what"><b>${t}</b><span>${d}</span></div><span class="stamp" aria-hidden="true">${st}</span></div>`).join('')}</div></section>
       <section aria-labelledby="h-real"><div class="sec-head"><h2 class="sec-title" id="h-real">יוצרים שהצטרפו</h2>${REAL.list.length ? `<span class="small muted">${REAL.list.length}</span>` : ''}</div>
         ${REAL.list.length ? '<p class="muted" style="margin-bottom:14px">כולם נרשמו בעצמם ואושרו אצלנו ביד.</p>' : ''}${makersBlock(REAL.list, 6)}</section>
       <div class="bleed"><section class="clayfield g" aria-labelledby="h-reply"><p class="say">יש לכם רעיון?</p>
-          <div class="reply"><h2 id="h-reply">ספרו לנו מה תרצו</h2><p>כמה מילים מספיקות: מה, מאיזה חומר ועד מתי. את המחיר היוצרים יציעו.</p><button class="btn" data-act="tab" data-v="post">לכתוב בקשה</button><button class="btn ghost" data-act="join">אתם יוצרים? אפשר להצטרף</button></div></section>
+          <div class="reply"><h2 id="h-reply">ספרו לנו מה תרצו</h2><p>כמה מילים מספיקות: מה, מאיזה חומר ועד מתי. את המחיר היוצרים יציעו.</p><button class="btn" data-act="tab" data-v="post">לכתוב בקשה</button><button class="btn ghost" data-act="join">יוצרים? אפשר להצטרף</button></div></section>
         <footer class="backside g"><img class="logo-line" src="logo/logo-wordmark-ink.svg" width="204" height="96" alt=""><p class="sign">כתבו לנו</p>
           <div class="links-col">${mailLink('שלום מבהזמנה')}</div>
           <p>האתר עוד חדש. אנחנו קוראים כל בקשה וכל הרשמה בעצמנו, וחוזרים אליכם כשמספיקים. דרך האתר לא עובר כסף: מי שמבקש ומי שיוצר מסכמים ביניהם.</p>
-          ${legalLinks()}<p class="imprint">בהזמנה · עבודת יד, לפי הזמנה</p></footer></div>
+          ${legalLinks('<button type="button" class="link" data-act="vision">למה בהזמנה</button>')}<p class="imprint">בהזמנה · עבודת יד, לפי הזמנה</p></footer></div>
     </div>`,
 
   makers: () => { const list = REAL.list.filter(m => fitCraft(m.craft)), crafts = new Set(REAL.list.map(m => m.craft));
@@ -814,10 +920,12 @@ const SCREENS = {
     return `${head(`<span class="sr">פרופיל של ${esc(m.name)}</span>`)}<section class="banner">${face ? rImg(face, `${m.name}`) : ''}
       <div class="copy g"><h2>${esc(m.name)}</h2><span class="where">${craftName(m.craft)}${m.city ? ` · ${esc(m.city)}` : ''}</span></div></section>
     <div class="stack g">
+      ${m.contact ? `<div class="contact"><a class="cbtn2 wa" href="${esc(waHref(m))}" ${OUT}>${svg(UI.wa)}וואטסאפ</a><a class="cbtn2" href="${esc(m.contact.tel)}">${svg(UI.phone)}התקשרו</a></div>`
+        : `<div class="askline"><p>אפשר לפנות אליהם דרך האתר. כתבו מה תרצו, ואנחנו נעביר את הבקשה.</p><button type="button" class="link" data-act="ask" data-v="${esc(m.craft)}">לכתוב בקשה</button></div>`}
       ${m.story ? `<section><div class="sec-head"><h2 class="sec-title">הסיפור</h2></div><p class="rstory">${esc(m.story)}</p></section>` : ''}
       ${works.length ? `<section><div class="sec-head"><h2 class="sec-title">מהסדנה</h2></div><div class="strip">${works.map((p, i) => rImg(p, `עבודה של ${m.name}, ${i + 1}`)).join('')}</div></section>` : ''}
-      <p class="note">רוצים שיכינו לכם משהו? כתבו בקשה, ואנחנו נעביר אותה ליוצרים שמתאימים.</p>
-      <button class="btn block" data-act="ask" data-v="${esc(m.craft)}">לכתוב בקשה</button>
+      ${m.contact ? `<p class="note">רוצים שיכינו לכם משהו? כתבו בקשה, ואנחנו נעביר אותה ליוצרים שמתאימים.</p>
+      <button class="btn block" data-act="ask" data-v="${esc(m.craft)}">לכתוב בקשה</button>` : ''}
     </div>`; },
 
   search: () => `<header class="top g">${S.stack.length > 1 ? `<button class="round" data-act="back" aria-label="חזרה">${svg(UI.back)}</button>` : ''}<h1 class="sr">חיפוש יוצרים</h1>
@@ -857,8 +965,8 @@ const SCREENS = {
           <p class="small muted" style="margin-top:10px">הרשימה נשמרת רק במכשיר הזה. כדי לשנות או לבטל בקשה, כתבו לנו.</p>`
         : `<div class="s-empty"><p>עוד לא שלחתם בקשות מהמכשיר הזה.</p><button class="btn" data-act="tab" data-v="post">לכתוב בקשה</button></div>`}</section>
       <button class="entry" data-act="join"><span class="t">להצטרף כיוצרים</span><span class="small muted">לספר לנו על העבודות שלכם</span></button>
-      <section class="panel" aria-labelledby="h-about"><h2 class="sec-title" id="h-about">על בהזמנה</h2>
-        <p class="small">אנחנו מחברים בין מי שרוצה משהו בעבודת יד לבין יוצרים שאישרנו ביד. האתר עוד חדש והשימוש בו חינם. דרך האתר לא עובר כסף: את המחיר והתשלום (בביט או בהעברה) מסכמים ישירות עם היוצרים.</p>
+      <button class="entry" data-act="vision"><span class="t">למה בהזמנה</span><span class="small muted">מה עומד מאחורי האתר</span></button>
+      <section class="panel" aria-labelledby="h-about"><h2 class="sec-title" id="h-about">כתבו לנו</h2>
         <div class="links-col">${mailLink('שלום מבהזמנה')}</div>${legalLinks()}</section>
     </div>`,
 
@@ -873,7 +981,11 @@ const SCREENS = {
         <div class="field"><label for="j-city">עיר ${STAR}</label><input class="input" id="j-city" name="city" maxlength="60" autocomplete="address-level2" aria-required="true"></div>
         <div class="field"><label for="j-craft">תחום ${STAR}</label><select class="input" id="j-craft" name="craft" aria-required="true"><option value="">בחרו תחום</option>${Object.entries(CRAFTS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>
         <div class="field"><label for="j-email">מייל ${STAR}</label><input class="input" id="j-email" name="email" type="email" dir="ltr" maxlength="120" autocomplete="email" inputmode="email" aria-required="true"></div>
-        <div class="field"><label for="j-phone">טלפון ${STAR}</label><input class="input" id="j-phone" name="phone" type="tel" dir="ltr" maxlength="30" autocomplete="tel" inputmode="tel" aria-required="true" aria-describedby="j-contact-h"><span class="hint" id="j-contact-h">המייל והטלפון נשארים אצלנו, ואף אחד אחר לא רואה אותם.</span></div>
+        <div class="field"><label for="j-phone">טלפון ${STAR}</label><input class="input" id="j-phone" name="phone" type="tel" dir="ltr" maxlength="30" autocomplete="tel" inputmode="tel" aria-required="true" aria-describedby="j-contact-h"><span class="hint" id="j-contact-h">אנחנו משתמשים בו כדי לחזור אליכם. אם להציג אותו באתר, תחליטו בשאלה הבאה.</span></div>
+        <fieldset class="field" role="radiogroup" aria-required="true" aria-describedby="j-pp-h"><legend class="lbl" id="j-pp-l">הטלפון באתר ${STAR}<span class="sr">, חובה</span></legend>
+          <label class="opt"><input type="radio" name="phone_public" value="yes" id="j-pp-yes"><span class="grow">להציג את הטלפון באתר, כדי שקונים יוכלו להתקשר ולשלוח וואטסאפ</span></label>
+          <label class="opt"><input type="radio" name="phone_public" value="no" id="j-pp-no"><span class="grow">לא, רק אתם תראו אותו</span></label>
+          <span class="hint" id="j-pp-h">המייל לא מוצג אף פעם. אפשר לבקש בכל זמן להסתיר את הטלפון.</span></fieldset>
         <div class="field"><span class="lbl" id="j-pr-l">תמונה שלכם ${STAR}<span class="sr">, חובה</span></span><div class="pt-row"><div class="photos" id="portrait" role="group" aria-labelledby="j-pr-l">${portraitHTML()}</div></div>
           <input type="file" id="j-pfile" accept="image/jpeg,image/png,image/webp" hidden aria-label="בחירת תמונה שלכם">
           <span class="hint">אנשים רוצים לראות מי מכין להם את הדברים. מספיקה תמונה שלכם, בסדנה או ליד עבודה.</span><span class="hint" id="j-prmsg" role="status" aria-live="polite"></span></div>
@@ -908,7 +1020,7 @@ const SCREENS = {
         <p class="small muted" style="margin-bottom:12px">בודקים שהעבודות באמת שלהם לפני שמאשרים. החדשות למעלה.</p>
         <div style="display:flex;flex-direction:column;gap:12px">${AD.makers.map(m => `<article class="panel">
           <div class="face-row">${m.portrait ? `<a class="av" href="${esc(photoURL(m.portrait))}" target="_blank" rel="noopener" aria-label="התמונה של ${esc(m.name)}, בגודל מלא">${rImg(m.portrait)}</a>` : `<span class="av"><span class="ini">${esc(initials(m.name))}</span></span>`}<div><b>${esc(m.name)}</b><div class="small muted">${craftName(m.craft)} · ${esc(m.city)} · ${esc(dateHe(m.created_at))}</div>${m.portrait ? '' : '<div class="small muted">בלי תמונה אישית</div>'}</div></div>
-          <dl class="specs">${m.email ? `<div><dt>מייל</dt><dd dir="ltr">${esc(m.email)}</dd></div>` : ''}${m.phone ? `<div><dt>טלפון</dt><dd dir="ltr">${esc(m.phone)}</dd></div>` : ''}</dl>
+          <dl class="specs">${m.email ? `<div><dt>מייל</dt><dd dir="ltr">${esc(m.email)}</dd></div>` : ''}${m.phone ? `<div><dt>טלפון</dt><dd dir="ltr">${esc(m.phone)}</dd></div><div><dt>הטלפון באתר</dt><dd>${m.phone_public ? 'יוצג, כי בחרו בזה' : 'לא יוצג'}</dd></div>` : ''}</dl>
           ${m.story ? `<p class="small rstory">${esc(m.story)}</p>` : ''}
           ${(m.photos || []).length ? `<div class="strip" style="grid-template-columns:repeat(3,1fr)">${m.photos.map((p, i) => `<a href="${esc(photoURL(p))}" target="_blank" rel="noopener" aria-label="עבודה ${i + 1} של ${esc(m.name)}, בגודל מלא">${rImg(p, `עבודה של ${m.name}`)}</a>`).join('')}</div>` : '<p class="small muted">לא הועלו תמונות.</p>'}
           <div class="row"><button class="btn small" data-act="radapprove" data-v="${esc(m.id)}">אישור</button><button class="btn small danger" data-act="radreject" data-v="${esc(m.id)}">דחייה</button></div></article>`).join('') || '<p class="empty">אין הרשמות שמחכות.</p>'}
@@ -954,19 +1066,75 @@ const craftOf = q => { const ws = toks(q); for (const [c, words] of Object.entri
 const NAV = [['home', 'בית', UI.home], ['makers', 'יוצרים', UI.users], ['post', 'בקשה', UI.plus], ['mine', 'שלי', UI.user]];
 const NAVKEYS = NAV.map(n => n[0]);
 const root = document.documentElement;
-function render(scroll) {
+const navOn = () => S.stack.length > 1 && NAVKEYS.includes(S.stack[1].s) ? S.stack[1].s : S.stack[0].s === 'home' ? 'home' : '';
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)');
+const SCROLLS = Object.create(null);                 // scroll position per screen, so back lands where you were
+try { history.scrollRestoration = 'manual'; } catch (e) { /* ignore */ }
+let PL = 0, PON = null;                              // depth and current tab of the screen on show
+function drawNav(noNav, on) {
+  const nav = document.getElementById('nav');
+  nav.querySelectorAll('button').forEach(b => b.remove());
+  if (noNav) return;
+  const i = NAVKEYS.indexOf(on);
+  if (i >= 0) nav.style.setProperty('--i', i);
+  nav.dataset.on = i >= 0 ? '1' : '0';
+  nav.insertAdjacentHTML('beforeend', NAV.map(([k, label, icon]) => k === 'post'
+    ? `<button class="plus" data-act="tab" data-v="post" ${on === k ? 'aria-current="page"' : ''}><span class="c">${svg(icon)}</span>${label}</button>`
+    : `<button data-act="tab" data-v="${k}" ${on === k ? 'aria-current="page"' : ''}>${svg(icon)}${label}</button>`).join(''));
+}
+function paint(scroll, top) {
   const c = cur(), view = document.getElementById('view');
   view.innerHTML = SCREENS[c.s](c);
-  RENDERED = JSON.stringify(S.stack);
   const noNav = c.s === 'join' || c.s === 'joined';
   document.body.classList.toggle('no-nav', noNav);
-  const on = S.stack.length > 1 && NAVKEYS.includes(S.stack[1].s) ? S.stack[1].s : S.stack[0].s === 'home' ? 'home' : '';
-  document.getElementById('nav').innerHTML = noNav ? '' : NAV.map(([k, label, icon]) => k === 'post'
-    ? `<button class="plus" data-act="tab" data-v="post" ${on === k ? 'aria-current="page"' : ''}><span class="c">${svg(icon)}</span>${label}</button>`
-    : `<button data-act="tab" data-v="${k}" ${on === k ? 'aria-current="page"' : ''}>${svg(icon)}${label}</button>`).join('');
-  if (scroll) { window.scrollTo(0, 0); if (BOOTED && !(c.s === 'search' && c.focus)) view.focus({ preventScroll: true }); }
+  drawNav(noNav, navOn());
+  if (scroll) { window.scrollTo(0, top || 0); if (BOOTED && !(c.s === 'search' && c.focus)) view.focus({ preventScroll: true }); }
   if (c.s === 'search' && c.focus) { delete c.focus; const i = document.getElementById('sq'); if (i) { i.focus({ preventScroll: true }); i.setSelectionRange(i.value.length, i.value.length); } }
   motionFor(c);
+  revealCards(view);
+}
+/* fwd / back: fade plus a small slide in the reading direction; fade: gated join, thank-you, replaced screens; tab: switching tabs */
+function render(scroll) {
+  const key = JSON.stringify(S.stack), c = cur(), on = navOn();
+  const changed = !!scroll && BOOTED && !!RENDERED && key !== RENDERED;
+  let dir = '';
+  if (changed) dir = c.s === 'joined' || c.s === 'sent' || (c.s === 'join' && c.gate) ? 'fade' : on !== PON ? 'tab' : S.stack.length > PL ? 'fwd' : S.stack.length < PL ? 'back' : 'fade';
+  if (RENDERED) SCROLLS[RENDERED] = window.scrollY;
+  const top = dir === 'back' ? SCROLLS[key] : 0;
+  RENDERED = key; PL = S.stack.length; PON = on;
+  if (!dir || RM.matches || document.hidden) { paint(scroll, top); return; }
+  if (dir !== 'tab' && document.startViewTransition) {
+    root.dataset.vt = dir;
+    const t = document.startViewTransition(() => paint(scroll, top));
+    t.finished.finally(() => { delete root.dataset.vt; });
+    return;
+  }
+  paint(scroll, top);
+  const view = document.getElementById('view'), x = dir === 'fwd' ? -24 : dir === 'back' ? 24 : 0;
+  if (view.animate) view.animate(x ? [{ opacity: .4, transform: `translateX(${x}px)` }, { opacity: 1, transform: 'translateX(0)' }] : [{ opacity: .4 }, { opacity: 1 }],
+    { duration: x ? 260 : 200, easing: 'cubic-bezier(.16, 1, .3, 1)' });
+}
+
+/* makers fade-rise 8px once as they come into view, 40 ms apart (at most 6 per batch). They are visible unless this code hides them,
+   and if the observer never answers they are shown after a moment. Search results are not animated (they change as you type). */
+const SEEN = new Set();
+let IO = null;
+function revealCards(view) {
+  if (IO) { IO.disconnect(); IO = null; }
+  if (RM.matches || !('IntersectionObserver' in window)) return;
+  const idOf = r => { const b = r.querySelector('[data-v]'); return b ? b.dataset.v : ''; };
+  const rows = [...view.querySelectorAll('.mrow')].filter(r => !SEEN.has(idOf(r)));
+  if (!rows.length) return;
+  let answered = false;
+  const show = (r, i) => { SEEN.add(idOf(r)); r.style.transitionDelay = `${Math.min(i, 5) * 40}ms`; r.classList.remove('rv'); setTimeout(() => { r.style.transitionDelay = ''; }, 800); };
+  try {
+    IO = new IntersectionObserver(es => {
+      answered = true;
+      es.filter(e => e.isIntersecting).sort((a, b) => (a.target.compareDocumentPosition(b.target) & 4 ? -1 : 1)).forEach((e, i) => { IO.unobserve(e.target); show(e.target, i); });
+    }, { rootMargin: '0px 0px -6% 0px', threshold: 0.01 });
+    rows.forEach(r => { r.classList.add('rv'); IO.observe(r); });
+    setTimeout(() => { if (!answered) rows.forEach(r => r.classList.remove('rv')); }, 1200);
+  } catch (e) { rows.forEach(r => r.classList.remove('rv')); }
 }
 
 const ACT = {
@@ -983,6 +1151,7 @@ const ACT = {
   closesheet: () => closeSheet(),
   privacy: () => openSheet(privacySheet(), 'מה אנחנו עושים עם הפרטים שלכם'),
   terms: () => openSheet(termsSheet(), 'תנאי השימוש'),
+  vision: () => openSheet(visionSheet(), 'למה בהזמנה'),
   jppick: () => { const i = document.getElementById('j-pfile'); if (i) i.click(); },
   jprm: () => { if (JP.portrait) URL.revokeObjectURL(JP.portrait.url); delete JP.portrait; drawPortrait(); const b = document.getElementById('j-portrait'); if (b) b.focus(); },
   jpick: () => { const i = document.getElementById('j-file'); if (i) i.click(); },
@@ -1032,6 +1201,7 @@ let kbFocus = false, kbVV = false, kbT;
 function setKb() { document.body.classList.toggle('kb-open', kbVV || (kbFocus && COARSE.matches)); }
 document.addEventListener('focusin', e => { if (isTextField(e.target)) { clearTimeout(kbT); kbFocus = true; setKb(); } });
 document.addEventListener('focusout', () => { clearTimeout(kbT); kbT = setTimeout(() => { kbFocus = isTextField(document.activeElement); setKb(); }, 150); });
+document.addEventListener('touchstart', () => {}, { passive: true });   /* lets :active press feedback show on iOS */
 function vvUpdate() {
   const vv = window.visualViewport;
   if (!vv) { root.style.setProperty('--vvh', window.innerHeight + 'px'); root.style.setProperty('--vvt', '0px'); return; }
@@ -1044,19 +1214,24 @@ if (window.visualViewport) { visualViewport.addEventListener('resize', vvUpdate)
 window.addEventListener('resize', vvUpdate);
 vvUpdate();
 
-/* ---------- motion (GSAP from cdnjs): ONE move ----------
-   The stamp lands on each line of "how it works" once, as it scrolls into view. Everything is fully visible without it,
-   and it only runs when GSAP loaded and the person hasn't asked for less motion. */
+/* ---------- motion (GSAP from cdnjs): the stamp ----------
+   A stamp presses onto each line of "how it works" once, as it scrolls into view (scale 1.35 to 1, a slight turn, 280 ms). Everything is fully visible without it,
+   and it only runs when GSAP loaded and the person hasn't asked for less motion. The other motion (screens, sheets, tabs, cards) is CSS and WAAPI above. */
 const GS = window.gsap && window.ScrollTrigger ? window.gsap : null;
 if (GS) { gsap.registerPlugin(ScrollTrigger); ScrollTrigger.config({ ignoreMobileResize: true }); }
 let MM = null;
+const STAMPED = new Set();                           // each stamp lands once, the first time it scrolls into view
 function motionFor(c) {
   if (MM) { MM.revert(); MM = null; }
   if (!GS || c.s !== 'home') return;
   MM = gsap.matchMedia();
   MM.add('(prefers-reduced-motion: no-preference)', () => {
-    document.querySelectorAll('.tale .stamp').forEach(st => ScrollTrigger.create({ trigger: st, start: 'top 86%', once: true,
-      onEnter: () => gsap.fromTo(st, { scale: 1.9, rotation: -16, autoAlpha: 0 }, { scale: 1, rotation: -3, autoAlpha: 1, duration: .36, ease: 'power4.in', clearProps: 'transform,opacity,visibility' }) }));
+    document.querySelectorAll('.tale .stamp').forEach((st, i) => {
+      if (STAMPED.has(i)) return;
+      gsap.set(st, { autoAlpha: 0 });
+      ScrollTrigger.create({ trigger: st, start: 'top 92%', once: true, onEnter: () => { STAMPED.add(i);
+        gsap.fromTo(st, { scale: 1.35, rotation: -9, autoAlpha: 0 }, { scale: 1, rotation: -3, autoAlpha: 1, duration: .28, ease: 'power3.in', clearProps: 'transform,opacity,visibility' }); } });
+    });
   });
 }
 if (GS && document.fonts && document.fonts.ready) document.fonts.ready.then(() => ScrollTrigger.refresh());

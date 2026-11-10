@@ -33,6 +33,7 @@ Features that must keep working in every redesign:
 - request form: multi-select crafts + "אחר", no budget field, contact + consent; never says "sent" unless the row was saved
 - "שלי": the requests sent from this device (titles and dates, localStorage only)
 - join form (portrait + work photos, shrunk in the browser); arriving by `#join` is a gate until the form is sent
+- direct contact: a maker's phone is shown (WhatsApp and call buttons on cards and profiles) only if the maker chose that at signup (`phone_public`, read through `public_makers.contact_phone`); emails are never shown; there is no messaging through the site
 - real maker list and profiles, with empty states for zero makers
 - admin at `#admin`: approve, or reject with a note the owner writes; requests with mailto routing; 200 rows per page
 - the phone's back button follows the in-app trail (History API) and closes sheets first; tab bar hidden while typing

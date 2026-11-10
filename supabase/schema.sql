@@ -36,6 +36,7 @@ create table if not exists public.makers (
   story       text not null default '',
   email       text,
   phone       text,
+  phone_public boolean not null default false,       -- the maker chose to show the phone on the site (call and WhatsApp buttons). The email is never shown.
   photos      text[] not null default '{}',          -- paths inside the storage bucket "maker-photos" (the work photos, up to 10)
   portrait    text,                                  -- path of the maker's own photo in the same bucket
   status      text not null default 'pending',
@@ -73,6 +74,7 @@ create table if not exists public.requests (
 
 -- For a database made with an older version of this file: add the portrait column and raise the photo limit to 10.
 alter table public.makers add column if not exists portrait text;
+alter table public.makers add column if not exists phone_public boolean not null default false;
 alter table public.makers drop constraint if exists makers_photos_ck;
 alter table public.makers add constraint makers_photos_ck check (coalesce(array_length(photos, 1), 0) <= 10);
 
@@ -91,7 +93,7 @@ revoke all on public.requests from anon, authenticated;
 
 -- Visitors (anon, the public key in index.html): may only ADD rows, and only these columns.
 -- They cannot choose the id, the date or the admin note, and they cannot read anything back.
-grant insert (name, city, craft, story, email, phone, portrait, photos, status) on public.makers   to anon, authenticated;
+grant insert (name, city, craft, story, email, phone, phone_public, portrait, photos, status) on public.makers   to anon, authenticated;
 grant insert (title, crafts, "text", due, contact, consent, status)   on public.requests to anon, authenticated;
 
 -- The owner (signed in by magic link): full access, but the policies below still check the email.
@@ -145,7 +147,9 @@ create policy "owner deletes requests" on public.requests
 -- ---------------------------------------------------------------------
 -- The public list of approved makers.
 -- Visitors must NOT read the makers table (it holds emails and phones), so they read this VIEW instead.
--- It shows only approved rows and only the public columns: id, name, city, craft, story, photos, portrait.
+-- It shows only approved rows and only the public columns: id, name, city, craft, story, photos, portrait,
+-- and contact_phone: the maker's phone ONLY when the maker chose to show it at signup (phone_public = true),
+-- otherwise null. The email is never in this view. A shown phone can be copied by anyone who sees it.
 -- security_invoker = false means: "run as the view's owner", so the view can read makers even though
 -- visitors cannot. That is safe and intended here, because the view itself decides which rows and
 -- columns come out. (Supabase's security linter may mention this; it is expected for this view.)
@@ -153,7 +157,8 @@ create policy "owner deletes requests" on public.requests
 create or replace view public.public_makers
   with (security_invoker = false)
 as
-  select id, name, city, craft, story, photos, portrait
+  select id, name, city, craft, story, photos, portrait,
+         case when phone_public then phone end as contact_phone
   from public.makers
   where status = 'approved';
 

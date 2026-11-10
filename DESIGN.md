@@ -48,7 +48,17 @@ All text pairs pass 4.5:1 (axe-core: 0 violations on 15 screen states).
 
 ## Motion
 
-One move: the stamp that lands on each "how it works" line as it scrolls into view (GSAP + ScrollTrigger, once, under `prefers-reduced-motion: no-preference` only). Everything else is visible from the first frame. Controls change colour on press and hover; nothing else moves.
+Restrained, one easing everywhere (`--ease`, exponential ease-out), only `transform` and `opacity`, nothing that moves layout. All of it runs only under `prefers-reduced-motion: no-preference`; with reduce, every change is instant and everything is visible at once. Content is always visible without JS.
+
+- **Screens**: 220-280 ms fade plus a 24 px slide in the reading direction (RTL: forward arrives from the left edge, back from the right). Built on View Transitions, so the old screen stays underneath until the new one covers it (no blank frame); a plain fade-in where unsupported. The gated join screen, the thank-you screens and replaced screens fade without a slide; tab switches fade and the tab bar's paper tab slides. Back restores the scroll position of the screen you return to.
+- **The stamp**: lands on each "how it works" line once, the first time it scrolls into view (GSAP + ScrollTrigger; scale 1.35 to 1 with a slight turn, 280 ms).
+- **Sheets**: the panel rises from the bottom (280 ms), the backdrop fades. Closing is instant.
+- **Feedback**: buttons dip 1px and darken on press (100 ms). The hero photo settles once (scale 1.04 to 1, 1.2 s).
+- **Makers**: cards fade-rise 8 px once as they enter the viewport, 40 ms apart (6 at most per batch). Shown anyway if the observer is missing or silent. Search results do not animate.
+
+## Vision text
+
+"למה בהזמנה": a bottom sheet (from the "שלי" screen and the footer of home). A title, one pull-quote in the display face on a ground-toned block, three short paragraphs and a closing line. Built only from facts in PRODUCT.md, in "אנחנו"; the owner's own words can replace it later (see `עסק/למה-בהזמנה.md`).
 
 ## Photography
 
