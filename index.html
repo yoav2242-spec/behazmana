@@ -871,13 +871,13 @@ async function cleanPhoto(file) {
   const img = await decodeImg(file), W = img.naturalWidth, H = img.naturalHeight;
   if (!W || !H || W * H > 150e6) throw new Error('size');
   let blob = null, shrunk = false;
-  for (const [side, q] of [[0, .92], [0, .85], [0, .78], [BIG_SIDE, BIG_Q], [3000, .85], [2200, .8]]) {
+  for (const [side, q] of [[2400, .86], [2400, .78], [2000, .75]]) {   /* 2400px on the long side is sharper than any phone screen, and keeps a photo near half a megabyte */
     const k = side ? Math.min(1, side / Math.max(W, H)) : 1, w = Math.max(1, Math.round(W * k)), h = Math.max(1, Math.round(H * k));
     const c = document.createElement('canvas'); c.width = w; c.height = h;
     let b = null;
     try { const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); g.drawImage(img, 0, 0, w, h); b = await new Promise(r => c.toBlob(r, 'image/jpeg', q)); } catch (e) { b = null; }
     c.width = c.height = 0;
-    if (b && b.size <= MAX_FILE) { shrunk = k < 1; return { blob: b, shrunk }; }   /* a canvas too big for this phone gives no blob: the next, smaller try */
+    if (b && b.size <= MAX_FILE) { return { blob: b, shrunk: false }; }   /* a canvas too big for this phone gives no blob: the next, smaller try */
     blob = b;
   }
   throw new Error('still too big');
