@@ -33,7 +33,7 @@ All text pairs pass 4.5:1 (axe-core: 0 violations on 15 screen states).
 - **Square corners everywhere** (avatars and photos included). No resting shadows, no gradients, no hairlines or outlined boxes: surfaces separate by a step in tone (ground → paper → tone).
 - **Slip**: paper-coloured block with a drawn zig-zag tear edge (`.zig`, SVG strip, not clip-path). Used for the hero card, "how it works" and the thank-you screens.
 - **Stamp**: small stamp-blue label tilted −3°, one per line of "how it works" and on each thank-you.
-- **Tab bar**: a plain olive bar at the foot (בית / יוצרים / בקשה / שלי), current tab = paper tab. Hidden while typing and on the join screens.
+- **Tab bar**: a plain olive bar at the foot (בית / יצירות / יוצרים / בקשה / אני; the label size is capped to a fifth of the bar so all five fit at 320px and at 200% text), current tab = paper tab. Hidden while typing and on the join screens.
 - **Sheets**: a close button at the top, Escape and the phone's back button close them, focus stays inside.
 - **Makers** show only what they wrote themselves (name, city, craft, story, photos). No scores, counts or response times.
 - Forced-colours mode adds real borders to controls; text links have a 44px tap area.
@@ -56,9 +56,17 @@ Restrained, one easing everywhere (`--ease`, exponential ease-out), only `transf
 - **Feedback**: buttons dip 1px and darken on press (100 ms). The hero photo settles once (scale 1.04 to 1, 1.2 s).
 - **Makers**: cards fade-rise 8 px once as they enter the viewport, 40 ms apart (6 at most per batch). Shown anyway if the observer is missing or silent. Search results do not animate.
 
+## Shop and workspaces
+
+- **Piece card**: photo (4:5, square corners), title, price as ₪1,200 or "מחיר בפנייה", maker; a sold piece is muted and carries an ink "נמכר" badge, and sinks after the available ones of each loaded page. Two columns; "עוד" pages by 24.
+- **Piece detail**: a swipeable photo scroller (scroll-snap, counter), title and price in the display/text faces, the maker, WhatsApp / call / mail only when the maker opted in, and one plain line that no money goes through the site.
+- **Status stamps** (`.st`): small tilted labels, always words (new, offered, not a fit, edited); never colour alone. Used on route cards, inbox cards and listing status.
+- **Request card (maker inbox)**: a paper block whose head is the title, chips and dates; opening it shows the text, the buyer's contact as safe buttons, and the answers. **Route card (buyer)**: one paper row per maker with portrait, name, state stamp, offer and contact buttons.
+- **Maker workspace**: three tabs (בקשות אליי / היצירות שלי / הפרופיל) in ink-on-tone, then the buyer links.
+
 ## Vision text
 
-"למה בהזמנה": a bottom sheet (from the "שלי" screen and the footer of home). A title, one pull-quote in the display face on a ground-toned block, three short paragraphs and a closing line. Built only from facts in PRODUCT.md, in "אנחנו"; the owner's own words can replace it later (see `עסק/למה-בהזמנה.md`).
+"מי אנחנו": a bottom sheet (from the "אני" screen and the footer of home). A title, one pull-quote in the display face on a ground-toned block, short paragraphs and a closing line. Built only from facts in PRODUCT.md and what exists now; the owner's own words can replace it later (see `עסק/מי-אנחנו.md`).
 
 ## Photography
 

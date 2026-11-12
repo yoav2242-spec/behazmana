@@ -21,7 +21,18 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="בהזמנה">
-<link rel="preload" as="image" href="img/h/hero-880.jpg" imagesrcset="img/h/hero-480.jpg 480w, img/h/hero-880.jpg 880w" imagesizes="(max-width: 440px) 100vw, 440px" fetchpriority="high">
+<script>/* the home photo changes on every visit: five bright workshop photos in turn (the next one each load, a random one the first time).
+   Chosen here, before paint, so that only the chosen photo is preloaded and the page then uses that same download. */
+(function () {
+  var H = [['hero', 'ידיים בכפפות מגלפות חתיכת עץ'], ['clay', 'יד על חימר שמסתובב על הגלגל'], ['ring', 'ידיים עובדות על תכשיט'], ['hands', 'ידיים מכוסות חימר'], ['shop', 'שולחן עבודה של נגר, עם כלים ועץ']], i;
+  try { var n = parseInt(localStorage.getItem('behazmana.hero'), 10); i = isFinite(n) && n >= 0 && n < H.length ? (n + 1) % H.length : Math.floor(Math.random() * H.length); localStorage.setItem('behazmana.hero', String(i)); }
+  catch (e) { i = Math.floor(Math.random() * H.length); }
+  window.HERO = { k: H[i][0], alt: H[i][1] };
+  var l = document.createElement('link'); l.rel = 'preload'; l.as = 'image'; l.href = 'img/h/' + H[i][0] + '-880.jpg';
+  l.setAttribute('imagesrcset', 'img/h/' + H[i][0] + '-480.jpg 480w, img/h/' + H[i][0] + '-880.jpg 880w'); l.setAttribute('imagesizes', '(max-width: 440px) 100vw, 440px'); l.setAttribute('fetchpriority', 'high');
+  document.head.appendChild(l);
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karantina:wght@700&family=Miriam+Libre:wght@400;700&display=swap">
@@ -247,9 +258,9 @@ select.input { appearance: auto; }
 .photos { display: flex; gap: 8px; flex-wrap: wrap; }
 .photos .art { width: 84px; height: 84px; }
 .add-photo { width: 84px; height: 84px; border: 0; background: var(--tone); color: var(--ink); font-size: var(--fs-4); }
-.photos .art .rm { position: absolute; top: 4px; inset-inline-end: 4px; z-index: 2; width: 32px; height: 32px; border: 0; padding: 0; display: grid; place-items: center; background: var(--paper); color: var(--ink); }
+.photos .art .rm { position: absolute; top: 0; inset-inline-end: 0; z-index: 2; width: 44px; height: 44px; border: 0; padding: 0; display: grid; place-items: center; background: var(--paper); color: var(--ink); }
 .photos .art .rm::before { content: ""; position: absolute; inset: -6px; }
-.photos .art .rm svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+.photos .art .rm svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
 .photos .chip { align-self: center; }
 .pt-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .hp { position: absolute; inset-inline-start: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; } /* honeypot: off-screen, not display:none, so bots still fill it */
@@ -268,7 +279,7 @@ select.input { appearance: auto; }
 .sheet-panel { position: relative; width: min(440px, 100%); margin-inline: auto; max-height: calc(100% - 16px - env(safe-area-inset-top, 0px)); overflow-y: auto; overscroll-behavior: contain;
   background: var(--paper); padding: 0 var(--gr) max(18px, calc(env(safe-area-inset-bottom, 0px) + 10px)) var(--gl); border-radius: 20px 20px 0 0; }
 .sheet-head { position: sticky; top: 0; z-index: 2; background: var(--paper); display: flex; align-items: center; justify-content: space-between; padding-block: 8px 6px; }
-.sheet-head .grab { width: 40px; height: 4px; background: var(--tone); border-radius: 4px; position: absolute; inset-inline: 0; margin-inline: auto; top: 8px; }
+.sheet-head .grab { width: 40px; height: 4px; background: var(--tone); position: absolute; inset-inline: 0; margin-inline: auto; top: 8px; }
 .sheet-head .round { margin-inline-start: auto; margin-top: 8px; }
 .sheet-panel h2:focus { outline: none; }
 .sheet-body { display: flex; flex-direction: column; gap: 18px; }
@@ -375,6 +386,7 @@ body.sheet-open { overflow: hidden; }
 :root { --r: 4px; --cut: 10px; }
 .strip .art, .photos .art, .av, .mrow, .entry, .opt, .sent-list li, .form-ok, .form-err, .toast, .add-photo, .photos .art .rm, .banner .copy, .sheet-panel, .nav button[aria-current="page"], .nav .plus .c { border-radius: 0; }
 .nav button[aria-current="page"] { border-radius: 0; }
+.chip, .tag, .filters button, .pick span, .input, .search, .round, .opt, .sheet-head .grab { border-radius: 0; }
 .btn { border-radius: 0; clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut)); }
 .btn:focus-visible { clip-path: none; }
 @media (forced-colors: active) { .btn { clip-path: none; } }
@@ -383,7 +395,8 @@ body.sheet-open { overflow: hidden; }
 .cbtn { width: 44px; height: 44px; border: 0; background: var(--tone); color: var(--ink); display: grid; place-items: center; flex: none; padding: 0; text-decoration: none; }
 .cbtn svg, .cbtn2 svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 .cbtn.wa svg, .cbtn2.wa svg { color: #0b7a3b; }   /* WhatsApp green, darkened so the glyph passes 3:1 on the tone */
-.contact { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.contact { display: flex; flex-wrap: wrap; gap: 8px; }
+.contact .cbtn2 { flex: 1 1 120px; }
 .cbtn2 { min-height: 52px; padding: 10px 12px; background: var(--tone); color: var(--ink); font-weight: 700; font-size: var(--fs-2); display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; text-align: center; border-radius: 0; clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut)); }
 .cbtn2.wa { border-bottom: 3px solid #25D366; }   /* WhatsApp's own green as a thin accent only */
 .cbtn2:focus-visible { clip-path: none; }
@@ -396,6 +409,109 @@ body.sheet-open { overflow: hidden; }
 .vision .pull { background: var(--ground); padding: 20px 18px; font-family: var(--display); font-size: var(--fs-4); line-height: 1.12; text-wrap: balance; }
 .vision .last { font-weight: 700; font-size: var(--fs-3); line-height: 1.35; }
 .askline { background: var(--paper); padding: 16px 18px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+
+/* the request screen: a workshop order slip. The form sits on a paper slip with the torn edge, a stamp-blue label on top,
+   and the crafts are larger tiles with one drawn line icon each. A chosen tile turns ink-dark AND shows a tick, so colour is never the only sign. */
+.order { background: var(--paper); padding: 22px 20px 30px; display: flex; flex-direction: column; gap: 22px; align-items: stretch; margin-bottom: 14px; }
+.order > .stamp { align-self: flex-start; }
+.order-intro { font-size: var(--fs-3); line-height: 1.4; max-width: 28ch; text-wrap: balance; }
+.order form.f { gap: 30px; }
+.order .input { background: var(--ground); }
+.order .opt { background: var(--ground); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.tile { position: relative; display: block; }
+.tile input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; z-index: 1; }
+.tile .face { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 92px; padding: 14px 8px 12px; background: var(--ground); color: var(--ink); text-align: center; }
+.tile .face > svg:not(.tick) { width: 30px; height: 30px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tile .tl { font-size: var(--fs-2); line-height: 1.2; font-weight: 700; }
+.tile .tick { display: none; position: absolute; top: 6px; inset-inline-end: 6px; width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.tile input:checked + .face { background: var(--ink); color: var(--paper); }
+.tile input:checked + .face .tick { display: block; }
+.tile input:focus-visible + .face { outline: 3px solid var(--stamp); outline-offset: 2px; }
+@media (hover: hover) { .tile:hover input:not(:checked) + .face { background: var(--tone-press); } }
+@media (forced-colors: active) { .tile .face { border: 2px solid ButtonText; } .tile input:checked + .face { border-color: Highlight; outline: 2px solid Highlight; } }
+.link.sm { font-size: var(--fs-1); }
+/* the stamp on a thank-you slip: bigger, and it lands once (the same press as on "how it works": 1.35 to 1, a slight turn, 280 ms) */
+.thanks .stamp { font-family: var(--display); font-size: var(--fs-4); line-height: 1.1; padding: 4px 18px 6px; }
+@media (prefers-reduced-motion: no-preference) {
+  .thanks .stamp { animation: stamp-land .28s cubic-bezier(.32, 0, .67, 0) .22s both; }
+  @keyframes stamp-land { from { opacity: 0; transform: scale(1.35) rotate(-9deg); } to { opacity: 1; transform: scale(1) rotate(-3deg); } }
+}
+
+/* five tabs. The label never grows past what a fifth of the bar can hold, even when the reader's text is at 200% */
+.nav { grid-template-columns: repeat(5, 1fr); }
+.nav-ind { width: 20%; }
+.nav button { font-size: min(var(--fs-1), 4.4vw); }
+
+/* status stamps: small, tilted, always words (colour is never the only sign) */
+.st { display: inline-flex; align-items: center; font-size: var(--fs-1); font-weight: 700; line-height: 1.3; padding: 3px 10px; background: var(--tone); color: var(--ink); transform: rotate(-2deg); white-space: nowrap; }
+.st.new { background: var(--stamp); color: var(--paper); }
+.st.go { background: var(--olive); color: var(--on-olive); }
+.st.seen { background: var(--ground); color: var(--ink); }
+.st.warn { background: var(--clay); color: var(--paper); }
+.st.dim { background: var(--tone); color: var(--muted); }
+.st.edit { background: var(--paper); color: var(--stamp); }
+.st.badge { position: absolute; top: 8px; inset-inline-start: 8px; z-index: 2; background: var(--ink); color: var(--paper); transform: rotate(-3deg); }
+.st.badge-inline { background: var(--ink); color: var(--paper); }
+
+/* the shop: two columns of pieces, a piece = photo, title, price, maker */
+.lgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 8px; }
+.lcard { display: flex; flex-direction: column; gap: 2px; text-align: start; background: none; border: 0; padding: 0; color: inherit; min-width: 0; width: 100%; }
+.lph { position: relative; display: block; }
+.lcard .art { aspect-ratio: 4 / 5; }
+.lcard .lt { font-weight: 700; line-height: 1.25; margin-top: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.lcard .lp { font-weight: 700; }
+.lcard.sold .art img { filter: grayscale(1) contrast(.9); opacity: .6; }
+.lcard.sold .lt, .lcard.sold .lp { color: var(--muted); }
+.lcard.sk .art { background: var(--tone); }
+.lcard.sk .lt, .lcard.sk .small { display: block; background: var(--tone); color: transparent; min-height: 1.2em; margin-top: 8px; }
+.lcard.sk .small { width: 60%; margin-top: 4px; }
+.hstrip { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; margin-inline: calc(-1 * var(--gl)) calc(-1 * var(--gr)); padding-inline: var(--gl) var(--gr); }
+.hstrip::-webkit-scrollbar { display: none; }
+.hstrip .lcard { flex: 0 0 148px; width: 148px; scroll-snap-align: start; }
+/* one piece: photos you swipe through, with a counter */
+.pwrap { position: relative; }
+.pscroll { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; background: var(--tone); }
+.pscroll::-webkit-scrollbar { display: none; }
+.slide { flex: 0 0 100%; scroll-snap-align: center; }
+.slide .art { aspect-ratio: 1; }
+.slide .art img { object-fit: contain; }
+.pcount { position: absolute; bottom: 10px; inset-inline-end: 10px; background: var(--ink); color: var(--paper); font-size: var(--fs-1); font-weight: 700; padding: 2px 10px; }
+.ltop { display: flex; flex-direction: column; gap: 6px; }
+.l-title { font-size: var(--fs-4); line-height: 1.05; }
+.l-price { font-weight: 700; font-size: var(--fs-3); }
+
+/* the maker's own space */
+.mtabs { display: flex; flex-wrap: wrap; gap: 4px; }
+.mtabs button { flex: 1 1 auto; min-height: 44px; border: 0; background: var(--tone); padding: 8px 10px; font-weight: 700; font-size: var(--fs-2); text-align: center; }
+.mtabs button[aria-selected="true"] { background: var(--ink); color: var(--paper); }
+.mtabs .cnt { background: var(--stamp); color: var(--paper); font-size: var(--fs-1); padding: 0 7px; margin-inline-start: 4px; }
+.mp { display: flex; flex-direction: column; gap: 12px; }
+.rq-list { display: flex; flex-direction: column; gap: 4px; }
+.rq { background: var(--paper); }
+.rq-head { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; width: 100%; text-align: start; background: none; border: 0; padding: 14px 16px; }
+.rq-t { font-weight: 700; font-size: var(--fs-3); line-height: 1.25; }
+.rq.closed .rq-t { color: var(--muted); }
+.rq-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+.rq-body .lbl { display: block; font-weight: 700; margin-bottom: 6px; }
+.mine-l { background: var(--paper); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.mine-l-top { display: flex; gap: 12px; align-items: flex-start; }
+.mine-l .av.sq { width: 72px; height: 88px; }
+.mine-l-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; align-items: flex-start; }
+.mine-l .lt { font-size: var(--fs-3); line-height: 1.2; }
+.mine-l.sold .lt { color: var(--muted); }
+.sent-list li:has(> .entry) { padding: 0; background: none; }
+/* what became of a request: one line per maker */
+.route-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.route { background: var(--paper); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.route-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.route .mmain { flex: 1 1 160px; }
+.route .av { width: 48px; height: 56px; }
+.route .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.route .nm { font-family: var(--display); font-size: var(--fs-4); line-height: 1; }
+.route.declined .info { opacity: 1; color: var(--muted); }
+.note b { color: var(--ink); }
+@media (forced-colors: active) { .lcard .art, .mtabs button, .rq-head, .st { border: 2px solid ButtonText; } }
 </style>
 </head>
 <body>
@@ -427,17 +543,32 @@ const UI = {
   users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M15.5 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
   phone: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  c_wood: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.2"/><path d="M12 12h.01"/>',
+  c_leather: '<rect x="3" y="6" width="18" height="13"/><path d="M3 10.5h18M15.5 15h2.5"/>',
+  c_ceramic: '<path d="M5.5 5h10.5v9a5.25 5.25 0 0 1-10.5 0z"/><path d="M16 7.5h1.5a2.5 2.5 0 0 1 0 5H16"/>',
+  c_jewelry: '<path d="M8 2.5h8L19 6.5l-7 5-7-5z"/><path d="M5 6.5h14"/><circle cx="12" cy="17" r="4.5"/>',
+  c_metal: '<g transform="rotate(-40 12 12)"><rect x="4.5" y="3" width="15" height="6"/><path d="M12 9v12.5"/></g>',
+  c_other: '<path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/>',
+  tick: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  grid: '<rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/>',
+  pencil: '<path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/>',
+  mail: '<rect x="3" y="5" width="18" height="14"/><path d="M3 7l9 6 9-6"/>',
   wa: '<path d="M3 21l1.65-4.9A8.5 8.5 0 1 1 8 19.4z"/><path d="M9 8.6c0 3.4 2.9 6.4 6.4 6.4l1.1-1.6-2-1-.9.7a4.6 4.6 0 0 1-2-2l.7-.9-1-2z"/>'
 };
 const svg = p => `<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const initials = name => String(name).trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('');
 const craftName = c => Object.prototype.hasOwnProperty.call(CRAFTS, c) ? CRAFTS[c] : c === 'other' ? 'אחר' : esc(String(c).slice(0, 30));
+/* a maker who picked "other" writes their own craft (craft_other). It comes from the database and from a form, so it is cleaned the same way both times:
+   tags, control characters and line breaks become spaces, invisible direction marks and angle brackets go, spaces collapse, 40 characters at most. */
+const cleanOther = s => Array.from(String(s == null ? '' : s).replace(/<[^>]*>/g, ' ').replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/g, ' ').replace(/[\u200b-\u200f\u202a-\u202e\u2066-\u2069\ufeff<>]/g, '').replace(/\s+/g, ' ').trim()).slice(0, 40).join('').trim();
+/* the craft as plain text (escape it where it is used): "other" shows the maker's own word, or "אחר" when it is missing */
+const craftText = (c, other) => c === 'other' ? (cleanOther(other) || 'אחר') : Object.prototype.hasOwnProperty.call(CRAFTS, c) ? CRAFTS[c] : String(c).slice(0, 30);
 const plural = (n, one, many, none) => n === 0 && none ? none : n === 1 ? one : `${n} ${many}`;
 
 /* ---------- this device only: what you sent, and whether you already joined. Every read survives garbage and private mode ---------- */
 const lsGet = (k, ok, dflt) => { try { const raw = localStorage.getItem(k); if (raw == null) return dflt; const v = JSON.parse(raw); return ok(v) ? v : dflt; } catch (e) { return dflt; } };
-const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* private mode: keep it for this visit only */ } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return localStorage.getItem(k) !== null; } catch (e) { return false; /* private mode: keep it for this visit only */ } };
 const MINE_KEY = 'behazmana.mine', JOINED_KEY = 'behazmana.joined';
 let MINE = lsGet(MINE_KEY, Array.isArray, []).filter(x => x && typeof x.t === 'string' && typeof x.d === 'string').map(x => ({ t: x.t.slice(0, 120), d: x.d.slice(0, 40) })).slice(0, 30);
 let JOINED = lsGet(JOINED_KEY, v => v === true, false);
@@ -446,7 +577,7 @@ const dateHe = s => { const d = new Date(s); return isNaN(d) ? '' : d.toLocaleDa
 /* ---------- state and navigation ----------
    S.stack is the trail of screens. Every step forward is also a browser history entry, so the phone's back button
    walks the same trail (and closes an open sheet first). Switching tabs replaces the entry instead of adding one. */
-const S = { stack: [{ s: 'home' }], sq: '', mcraft: 'all' };
+const S = { stack: [{ s: 'home' }], sq: '', mcraft: 'all', scraft: 'all' };
 const cur = () => S.stack[S.stack.length - 1];
 let HN = 0, BH = 1, RENDERED = '', BOOTED = false;     // HN: history entries above the first one; BH: the first entry is home
 const snap = () => S.stack.map(x => ({ ...x }));
@@ -555,7 +686,7 @@ function hl(text, terms) {
 function searchMakers(q) {
   const terms = parseQuery(q);
   if (!terms.length) return { terms, list: [], partial: [] };
-  const scored = REAL.list.map(m => ({ m, ts: termScores(terms, [[m.name, 3], [m.city, 2], [craftName(m.craft) + ' ' + (CRAFT_WORDS[m.craft] || ''), 2], [m.story, 1]]) }));
+  const scored = REAL.list.map(m => ({ m, ts: termScores(terms, [[m.name, 3], [m.city, 2], [craftText(m.craft, m.craftOther) + ' ' + (CRAFT_WORDS[m.craft] || ''), 2], [m.story, 1]]) }));
   const sum = x => x.ts.reduce((a, b) => a + b, 0);
   const list = scored.filter(x => x.ts.every(Boolean)).sort((a, b) => sum(b) - sum(a)).map(x => x.m);
   /* "שולחן אוכל": nobody wrote both words, but the carpenter who makes tables is still the closest answer */
@@ -569,38 +700,53 @@ const SUPA_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/
 const BUCKET = 'maker-photos';
 let SB = null;                                     // the Supabase client; null with an empty CONFIG, while loading, or if the library cannot load
 const REAL = { list: [], loaded: false, failed: false };   // approved makers (public_makers)
-const AD = { session: null, makers: [], approved: [], requests: [], moreM: false, moreR: false, loading: false, loaded: false, err: '', msg: '', busy: false, failed: false };
-const photoURL = p => `${CONFIG.SUPABASE_URL.trim().replace(/\/+$/, '')}/storage/v1/object/public/${BUCKET}/${String(p).split('/').map(encodeURIComponent).join('/')}`;
-const rImg = (p, alt = '') => `<div class="art"><img src="${esc(photoURL(p))}" alt="${esc(alt)}" loading="lazy" decoding="async" draggable="false"></div>`;
+const AD = { session: null, ro: undefined, lst: 'ok', lpend: [], lappr: [], moreLP: false, moreLA: false, routes: {}, makers: [], approved: [], requests: [], moreM: false, moreR: false, loading: false, loaded: false, err: '', msg: '', busy: false, failed: false };
+const okPath = p => typeof p === 'string' && p.length < 200 && /^[A-Za-z0-9_-]+(\/[A-Za-z0-9._-]+){1,2}$/.test(p) && !p.includes('..');
+const safeMk = m => m && typeof m === 'object' ? { ...m, portrait: okPath(m.portrait) ? m.portrait : '', photos: Array.isArray(m.photos) ? m.photos.filter(okPath) : [] } : m;   /* a path from the database is checked before it becomes a web address */
+const photoURL = (p, bucket = BUCKET) => !okPath(p) ? '#' : `${CONFIG.SUPABASE_URL.trim().replace(/\/+$/, '')}/storage/v1/object/public/${bucket}/${String(p).split('/').map(encodeURIComponent).join('/')}`;
+const rImg = (p, alt = '', bucket = BUCKET) => !okPath(p) ? '<div class="art"></div>' : `<div class="art"><img src="${esc(photoURL(p, bucket))}" alt="${esc(alt)}" loading="lazy" decoding="async" draggable="false"></div>`;
 const isOwner = () => !!(AD.session && AD.session.user && (CONFIG.ADMIN_EMAIL || '').trim() && String(AD.session.user.email || '').toLowerCase() === CONFIG.ADMIN_EMAIL.trim().toLowerCase());
 /* the owner's screen is at #admin; the magic link comes back with ?admin=1 and the login tokens in the hash */
-const adminUrl = () => /(^#admin)|[?&]admin=1|access_token=/.test(location.hash + location.search);
+const adminUrl = () => /(^#admin)|[?&]admin=1/.test(location.hash + location.search) || (/access_token=/.test(location.hash) && !meUrl());
 const redrawAdmin = () => { if (cur().s === 'radmin') render(); };
 const REAL_SCREENS = new Set(['home', 'makers', 'rmaker']);
 function realChanged() { const s = cur().s; if (REAL_SCREENS.has(s)) render(); else if (s === 'search') runSearch(); }
 
+/* the login link brings tokens in the address bar: when the library cannot read them, they must not stay there */
+const stripTokens = () => { if (/(^|[#&])(access_token|refresh_token)=/.test(location.hash)) replaceH(location.pathname + location.search); };
 function loadBackend() {
-  if (!CFG_ON) return;
+  if (!CFG_ON) { stripTokens(); return; }
   const s = document.createElement('script');
   s.src = SUPA_JS; s.integrity = 'sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug'; s.crossOrigin = 'anonymous'; s.async = true;
-  const fail = () => { SB = null; AD.failed = true; REAL.failed = true; redrawAdmin(); realChanged(); };
+  const fail = () => { stripTokens(); SB = null; AD.failed = true; REAL.failed = true; redrawAdmin(); realChanged(); shopChanged(); };
   s.onerror = fail;
   s.onload = () => {
     try { SB = window.supabase.createClient(CONFIG.SUPABASE_URL.trim(), CONFIG.SUPABASE_ANON_KEY.trim()); } catch (e) { return fail(); }
-    SB.auth.onAuthStateChange((ev, session) => setTimeout(() => { AD.session = session; if (!session) AD.loaded = false; if (cur().s === 'radmin') { if (isOwner() && !AD.loaded) adminLoad(); else render(); } }, 0));
-    SB.auth.getSession().then(({ data }) => { AD.session = data && data.session; if (adminUrl() && location.hash !== '#admin') replaceH(location.pathname + '#admin'); if (cur().s === 'radmin') { if (isOwner() && !AD.loaded) adminLoad(); else render(); } });
-    loadReal();
+    SB.auth.onAuthStateChange((ev, session) => setTimeout(() => {
+      const was = AD.session; AD.session = session; if (!session) { AD.loaded = false; resetMe(); } else if (!was || !was.user || was.user.id !== session.user.id) loadMe();
+      if (ev === 'SIGNED_IN' && session && wantsMe() && cur().s !== 'radmin') { clearWantsMe(); showMe(); }
+      if (cur().s === 'radmin') { if (isOwner() && !AD.loaded) adminLoad(); else render(); } else meRedraw();
+    }, 0));
+    SB.auth.getSession().then(({ data }) => { AD.session = data && data.session; if (AD.session) loadMe();
+      if (meUrl()) replaceH(location.pathname + location.search); else if (adminUrl() && location.hash !== '#admin') replaceH(location.pathname + '#admin');
+      if (cur().s === 'radmin') { if (isOwner() && !AD.loaded) adminLoad(); else render(); } else meRedraw(); });
+    loadReal(); loadShop('all');
     if (cur().s === 'radmin') render();
   };
   document.head.appendChild(s);
 }
 async function loadReal() {
   try {
-    let { data, error } = await SB.from('public_makers').select('id,name,city,craft,story,photos,portrait,contact_phone');
-    /* the view may not have contact_phone yet (the database update not applied): the list still loads, without call buttons */
-    if (error && /contact_phone/i.test(String(error.message || ''))) ({ data, error } = await SB.from('public_makers').select('id,name,city,craft,story,photos,portrait'));
+    /* the view may be missing its newer columns (the database update not applied yet): ask for all, then without contact_email, then without craft_other, then without contact_phone */
+    const BASE = 'id,name,city,craft,story,photos,portrait', q = cols => SB.from('public_makers').select(cols);
+    const ladder = [',contact_phone,craft_other,contact_email', ',contact_phone,craft_other', ',contact_phone', ''];
+    let data = null, error = null;
+    for (const extra of ladder) {
+      ({ data, error } = await q(BASE + extra));
+      if (!error || /failed to fetch|networkerror|network request failed|load failed/i.test(String(error.message || ''))) break;   /* a missing column is worth another try; no network is not */
+    }
     if (error || !Array.isArray(data)) throw error || new Error('no data');
-    REAL.list = data.filter(m => m && m.id && m.name).map(m => ({ id: String(m.id), name: String(m.name), city: String(m.city || ''), craft: String(m.craft || ''), story: String(m.story || ''), portrait: String(m.portrait || ''), photos: Array.isArray(m.photos) ? m.photos.map(String) : [], contact: contactPhone(m.contact_phone) }))
+    REAL.list = data.filter(m => m && m.id && m.name).map(m => ({ id: String(m.id), name: String(m.name), city: String(m.city || ''), craft: String(m.craft || ''), story: String(m.story || ''), portrait: okPath(m.portrait) ? String(m.portrait) : '', photos: Array.isArray(m.photos) ? m.photos.map(String).filter(okPath) : [], contact: contactPhone(m.contact_phone), email: contactEmail(m.contact_email), craftOther: cleanOther(m.craft_other) }))
       .sort((a, b) => a.name.localeCompare(b.name, 'he'));
     REAL.loaded = true;
   } catch (e) { REAL.failed = true; }
@@ -622,15 +768,20 @@ function contactPhone(raw) {
   else if (/^5\d{8}$/.test(d)) e = '972' + d;
   return e ? { tel: 'tel:+' + e, wa: 'https://wa.me/' + e } : null;
 }
+/* A maker's email, only when the maker chose to show it (public_makers.contact_email). It comes from the database, so it must pass the signup regex
+   AND a strict allow-list (letters, digits and . _ + - only), so nothing in it can add a mailto parameter or break out of the attribute. */
+const SAFE_MAIL = /^[A-Za-z0-9._+-]{1,64}@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
+function contactEmail(raw) { if (raw == null) return null; const s = String(raw).trim(); return s.length <= 120 && EMAIL_RE.test(s) && SAFE_MAIL.test(s) ? s : null; }
+const mailHref = m => `mailto:${m.email}?subject=${encodeURIComponent('הפרופיל שלך בבהזמנה')}`;
 const firstName = m => String(m.name).trim().split(/\s+/)[0].slice(0, 40);
 const waHref = m => `${m.contact.wa}?text=${encodeURIComponent(`היי ${firstName(m)}, ראיתי את הפרופיל שלך בבהזמנה. אשמח לדבר על יצירה.`)}`;
 const OUT = 'target="_blank" rel="noopener noreferrer"';
-const cardActs = m => m.contact ? `<span class="macts"><a class="cbtn wa" href="${esc(waHref(m))}" ${OUT} aria-label="${esc(`שליחת וואטסאפ ל${firstName(m)}`)}">${svg(UI.wa)}</a><a class="cbtn" href="${esc(m.contact.tel)}" aria-label="${esc(`התקשרות אל ${firstName(m)}`)}">${svg(UI.phone)}</a></span>` : '';
+const cardActs = m => m.contact || m.email ? `<span class="macts">${m.contact ? `<a class="cbtn wa" href="${esc(waHref(m))}" ${OUT} aria-label="${esc(`שליחת וואטסאפ ל${firstName(m)}`)}">${svg(UI.wa)}</a><a class="cbtn" href="${esc(m.contact.tel)}" aria-label="${esc(`התקשרות אל ${firstName(m)}`)}">${svg(UI.phone)}</a>` : ''}${m.email ? `<a class="cbtn" href="${esc(mailHref(m))}" aria-label="${esc(`שליחת מייל ל${firstName(m)}`)}">${svg(UI.mail)}</a>` : ''}</span>` : '';
 const realAv = m => `<span class="av">${m.portrait || m.photos[0] ? rImg(m.portrait || m.photos[0]) : `<span class="ini">${esc(initials(m.name))}</span>`}</span>`;
-const realRow = (m, h = esc, extra = '') => `<div class="mrow"><button type="button" class="mmain" data-act="rmaker" data-v="${esc(m.id)}">${realAv(m)}<span class="info"><span class="nm">${h(m.name)}</span><span class="small muted">${h(craftName(m.craft))}${m.city ? ` · ${h(m.city)}` : ''}</span>${extra || (m.story ? `<span class="small clamp">${esc(m.story)}</span>` : '')}</span></button>${cardActs(m)}</div>`;
-const emptyMakers = () => `<div class="s-empty"><p class="say">עוד אין כאן יוצרים, האתר חדש.</p>
-  <p class="small muted">אם אתם מכינים דברים בידיים, ספרו לנו עליכם. כשנאשר את ההרשמה, הפרופיל שלכם יופיע כאן.</p>
-  <button type="button" class="btn" data-act="join">להצטרף כיוצרים</button></div>`;
+const realRow = (m, h = esc, extra = '') => `<div class="mrow"><button type="button" class="mmain" data-act="rmaker" data-v="${esc(m.id)}">${realAv(m)}<span class="info"><span class="nm">${h(m.name)}</span><span class="small muted">${h(craftText(m.craft, m.craftOther))}${m.city ? ` · ${h(m.city)}` : ''}</span>${extra || (m.story ? `<span class="small clamp">${esc(m.story)}</span>` : '')}</span></button>${cardActs(m)}</div>`;
+const emptyMakers = () => `<div class="s-empty"><p class="say">עוד אין כאן יוצרים, האתר חדש.</p>${AU.maker ? '' : JOINED ? '<p class="small muted">כשנאשר את ההרשמה שלכם, הפרופיל יופיע כאן.</p>'
+  : `<p class="small muted">אם אתם מכינים דברים בידיים, ספרו לנו עליכם. כשנאשר את ההרשמה, הפרופיל שלכם יופיע כאן.</p>
+  <button type="button" class="btn" data-act="join">להצטרף כיוצרים</button>`}</div>`;
 function makersBlock(list, limit) {
   const st = realState();
   if (st === 'loading') return '<p class="muted" role="status">טוענים את היוצרים</p>';
@@ -642,18 +793,34 @@ function makersBlock(list, limit) {
 
 /* ---------- the owner's screen: what waits for a decision, 200 at a time ---------- */
 const PAGE = 200;
+/* the approved makers (for routing by craft). craft_other may not exist yet: ask without it then */
+async function approvedRows() {
+  const q = cols => SB.from('makers').select(cols).eq('status', 'approved').range(0, 1999);
+  let a = await q('id,name,city,craft,craft_other,email'); if (a.error) a = await q('id,name,city,craft,email'); if (a.error) a = await q('id,craft,email'); return a;
+}
 async function adminLoad(which) {
   if (!SB || !isOwner() || AD.loading) return;
   AD.loading = true; AD.err = ''; if (!which) redrawAdmin();
   const pending = from => SB.from('makers').select('*').eq('status', 'pending').order('created_at', { ascending: false }).range(from, from + PAGE - 1);
-  const fresh = from => SB.from('requests').select('*').eq('status', 'new').order('created_at', { ascending: false }).range(from, from + PAGE - 1);
+  /* requests: the view with routing when the database has it, else the old list of new requests */
+  const reqs = async from => {
+    if (AD.ro !== false) { const r = await dbq(() => SB.from('admin_requests').select('*').neq('status', 'closed').order('created_at', { ascending: false }).range(from, from + PAGE - 1)); if (!r.gone) return { ...r, ro: true }; AD.ro = false; }
+    const r = await dbq(() => SB.from('requests').select('*').eq('status', 'new').order('created_at', { ascending: false }).range(from, from + PAGE - 1)); return { ...r, ro: false };
+  };
+  const lq = (status, from) => dbq(async s => { let r = await s.from('listings').select('*, makers(name,city)').eq('status', status).order('created_at', { ascending: false }).range(from, from + PAGE - 1);
+    if (r.error && !isGone(r.error) && !isOff(r.error)) r = await s.from('listings').select('*').eq('status', status).order('created_at', { ascending: false }).range(from, from + PAGE - 1); return r; });
   try {
-    if (which === 'm') { const m = await pending(AD.makers.length); if (m.error) throw m.error; AD.makers = AD.makers.concat(m.data || []); AD.moreM = (m.data || []).length === PAGE; }
-    else if (which === 'r') { const r = await fresh(AD.requests.length); if (r.error) throw r.error; AD.requests = AD.requests.concat(r.data || []); AD.moreR = (r.data || []).length === PAGE; }
+    if (which === 'm') { const m = await pending(AD.makers.length); if (m.error) throw m.error; AD.makers = AD.makers.concat((m.data || []).map(safeMk)); AD.moreM = (m.data || []).length === PAGE; }
+    else if (which === 'r') { const r = await reqs(AD.requests.length); if (r.error) throw r.error; const add = r.data || []; AD.requests = AD.requests.concat(add); AD.moreR = add.length === PAGE; if (AD.ro) await loadRoutes(add.map(x => x.id)); }
+    else if (which === 'lp') { const l = await lq('pending', AD.lpend.length); if (l.error) throw l.error; AD.lpend = AD.lpend.concat(l.data || []); AD.moreLP = (l.data || []).length === PAGE; }
+    else if (which === 'la') { const l = await lq('approved', AD.lappr.length); if (l.error) throw l.error; AD.lappr = AD.lappr.concat(l.data || []); AD.moreLA = (l.data || []).length === PAGE; }
     else {
-      const [m, r, a] = await Promise.all([pending(0), fresh(0), SB.from('makers').select('id,craft,email').eq('status', 'approved').range(0, 1999)]);
+      const [m, r, a, lp, la] = await Promise.all([pending(0), reqs(0), approvedRows(), lq('pending', 0), lq('approved', 0)]);
       const bad = m.error || r.error || a.error; if (bad) throw bad;
-      AD.makers = m.data || []; AD.requests = r.data || []; AD.approved = a.data || []; AD.moreM = AD.makers.length === PAGE; AD.moreR = AD.requests.length === PAGE; AD.loaded = true;
+      AD.makers = (m.data || []).map(safeMk); AD.requests = r.data || []; AD.approved = (a.data || []).map(safeMk); AD.ro = r.ro; AD.routes = {};
+      AD.lst = lp.gone ? 'gone' : lp.error ? 'failed' : 'ok'; AD.lpend = lp.data || []; AD.lappr = la.data || [];
+      AD.moreM = AD.makers.length === PAGE; AD.moreR = AD.requests.length === PAGE; AD.moreLP = AD.lpend.length === PAGE; AD.moreLA = AD.lappr.length === PAGE; AD.loaded = true;
+      if (AD.ro) await loadRoutes();
     }
   } catch (e) { console.warn(e); AD.err = 'הנתונים לא נטענו. לחצו על ״רענון״, ואם זה חוזר, פנו למי שבנה את האתר.'; }
   AD.loading = false; redrawAdmin();
@@ -680,50 +847,73 @@ const radRejectSheet = m => `<form class="sheet-body" data-form="rreject" data-v
     <div class="row"><button type="button" class="btn ghost block" data-act="closesheet">ביטול</button><button type="submit" class="btn block warnbtn">דחייה</button></div>
   </form>`;
 
-/* ---------- joining as a maker: photos are shrunk in the browser before anything is uploaded ---------- */
-const JP = [];                                     // picked photos: { blob, url, path }
-const PHOTO_SIDE = 1600, PHOTO_Q = .82, MAX_PHOTOS = 10;
+/* ---------- joining as a maker: photos go up at full size, without their hidden details ----------
+   Every JPG, PNG or WebP is redrawn at its full size as a JPEG (quality .92) so camera and location data are removed; it must fit in 10 MB.
+   Previews are object URLs on small lazy images, so twenty big photos never sit decoded in memory at once. */
+const JP = [];                                     // picked photos: { blob, type, name, url, path }
+const MAX_PHOTOS = 20, MAX_FILE = 10 * 1024 * 1024, HARD_MAX = 60 * 1024 * 1024, BIG_SIDE = 4096, BIG_Q = .92;
 const OKTYPE = /^image\/(jpeg|png|webp)$/;
-function shrinkPhoto(file) {
+const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
+const EXT_TYPE = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
+const fileLabel = f => { const n = Array.from(String(f && f.name || '').replace(/[\u0000-\u001f\u007f\u200b-\u200f\u202a-\u202e\u2066-\u2069]/g, ' ').trim()).slice(0, 40).join(''); return n ? `״${n}״` : 'התמונה'; };
+const typeOf = f => { const t = String(f.type || '').toLowerCase(); if (OKTYPE.test(t)) return t; if (t) return ''; const m = /\.([a-z0-9]+)$/i.exec(f.name || ''); return m && EXT_TYPE[m[1].toLowerCase()] || ''; };
+function decodeImg(file) {
   return new Promise((ok, no) => {
     const url = URL.createObjectURL(file), img = new Image();
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const k = Math.min(1, PHOTO_SIDE / Math.max(img.naturalWidth, img.naturalHeight)), w = Math.max(1, Math.round(img.naturalWidth * k)), h = Math.max(1, Math.round(img.naturalHeight * k));
-      const c = document.createElement('canvas'); c.width = w; c.height = h;
-      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); g.drawImage(img, 0, 0, w, h);
-      c.toBlob(b => b ? ok(b) : no(new Error('toBlob')), 'image/jpeg', PHOTO_Q);
-    };
+    img.onload = () => { URL.revokeObjectURL(url); ok(img); };
     img.onerror = () => { URL.revokeObjectURL(url); no(new Error('decode')); };
     img.src = url;
   });
 }
+/* every photo is drawn again on a canvas, so the hidden details in the file (camera model, GPS location) never leave the phone. The picture keeps its full size
+   (orientation is applied while drawing). Only if the result would not fit in 10 MB do we lower the quality, and as a last resort the size. */
+async function cleanPhoto(file) {
+  const img = await decodeImg(file), W = img.naturalWidth, H = img.naturalHeight;
+  if (!W || !H || W * H > 150e6) throw new Error('size');
+  let blob = null, shrunk = false;
+  for (const [side, q] of [[0, .92], [0, .85], [0, .78], [BIG_SIDE, BIG_Q], [3000, .85], [2200, .8]]) {
+    const k = side ? Math.min(1, side / Math.max(W, H)) : 1, w = Math.max(1, Math.round(W * k)), h = Math.max(1, Math.round(H * k));
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    let b = null;
+    try { const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); g.drawImage(img, 0, 0, w, h); b = await new Promise(r => c.toBlob(r, 'image/jpeg', q)); } catch (e) { b = null; }
+    c.width = c.height = 0;
+    if (b && b.size <= MAX_FILE) { shrunk = k < 1; return { blob: b, shrunk }; }   /* a canvas too big for this phone gives no blob: the next, smaller try */
+    blob = b;
+  }
+  throw new Error('still too big');
+}
+/* { photo } when the file can be used (with a plain-words note when it was made smaller), { note } when it cannot */
+async function preparePhoto(f) {
+  const nm = fileLabel(f), type = typeOf(f);
+  if (!type) return { note: `לא ניתן להוסיף את ${nm}. שמרו את התמונה כ-JPEG או PNG ונסו שוב.` };
+  if (f.size > HARD_MAX) return { note: `${nm} גדולה מדי. בחרו תמונה קטנה יותר.` };
+  try { const r = await cleanPhoto(f); return { photo: { blob: r.blob, type: 'image/jpeg', name: nm }, ...(r.shrunk ? { note: `${nm} כבדה מדי, אז הקטנו אותה קצת כדי שתעלה.` } : {}) }; }
+  catch (e) { return { note: `לא הצלחנו לקרוא את ${nm}, ולכן לא הוספנו אותה. שמרו אותה כ-JPEG או PNG ונסו שוב.` }; }
+}
 function clearPhotos() { JP.forEach(p => URL.revokeObjectURL(p.url)); if (JP.portrait) URL.revokeObjectURL(JP.portrait.url); JP.length = 0; delete JP.portrait; delete JP.folder; }
-const photosHTML = () => JP.map((p, i) => `<div class="art"><img src="${p.url}" alt="העבודה שהוספתם, ${i + 1}"><button type="button" class="rm" data-act="jrm" data-v="${i}" aria-label="הסרת תמונה ${i + 1}">${svg(UI.close)}</button></div>`).join('')
-    + (JP.length < MAX_PHOTOS ? `<button type="button" class="add-photo" data-act="jpick" id="j-pick" aria-label="הוספת תמונה של העבודות">+</button>` : '');
+/* one set of photo helpers for the join form (p = 'j') and the listing form (p = 'l') */
+const photosHTML = (L = JP, max = MAX_PHOTOS, p = 'j', label = 'העבודה שהוספתם') => L.map((x, i) => `<div class="art"><img src="${esc(x.url)}" alt="${label}, ${i + 1}" loading="lazy" decoding="async"><button type="button" class="rm" data-act="${p}rm" data-v="${i}" aria-label="הסרת תמונה ${i + 1}">${svg(UI.close)}</button></div>`).join('')
+    + (L.length < max ? `<button type="button" class="add-photo" data-act="${p}pick" id="${p}-pick" aria-label="הוספת תמונה">+</button>` : '');
 const portraitHTML = () => JP.portrait
-  ? `<div class="art"><img src="${JP.portrait.url}" alt="התמונה שבחרתם"><button type="button" class="rm" data-act="jprm" aria-label="הסרת התמונה שלכם">${svg(UI.close)}</button></div><button type="button" class="chip" data-act="jppick">החלפת תמונה</button>`
+  ? `<div class="art"><img src="${JP.portrait.url}" alt="התמונה שבחרתם" decoding="async"><button type="button" class="rm" data-act="jprm" aria-label="הסרת התמונה שלכם">${svg(UI.close)}</button></div><button type="button" class="chip" data-act="jppick">החלפת תמונה</button>`
   : `<button type="button" class="add-photo" data-act="jppick" id="j-portrait" aria-label="הוספת תמונה שלכם">+</button>`;
-const photoCount = () => `${JP.length} מתוך ${MAX_PHOTOS} תמונות`;
+const photoCount = (L = JP, max = MAX_PHOTOS) => `${L.length} מתוך ${max} תמונות`;
 function drawPhotos() { const box = document.getElementById('photos'); if (box) box.innerHTML = photosHTML(); }
 function drawPortrait() { const box = document.getElementById('portrait'); if (box) box.innerHTML = portraitHTML(); }
-const MAX_FILE = 15e6;
-async function addPhotos(files) {
-  const msg = document.getElementById('j-pmsg'); let note = '';
+async function addPhotos(files, L = JP, max = MAX_PHOTOS, msgId = 'j-pmsg', draw = drawPhotos) {
+  const msg = document.getElementById(msgId), notes = [];
   for (const f of files) {
-    if (JP.length >= MAX_PHOTOS) { note = `אפשר עד ${MAX_PHOTOS} תמונות. את השאר לא הוספנו.`; break; }
-    if (!OKTYPE.test(f.type) || f.size > MAX_FILE) { note = 'הוספנו רק תמונות (JPG, PNG או WebP) עד 15MB. קבצים אחרים לא נכנסו.'; continue; }
-    try { const blob = await shrinkPhoto(f); JP.push({ blob, url: URL.createObjectURL(blob) }); } catch (e) { note = 'לא הצלחנו לקרוא אחת התמונות, אפשר לנסות אחרת.'; }
+    if (L.length >= max) { notes.push(`אפשר עד ${max} תמונות. את השאר לא הוספנו.`); break; }
+    const r = await preparePhoto(f); if (r.note) notes.push(r.note);
+    if (r.photo) L.push({ ...r.photo, url: URL.createObjectURL(r.photo.blob) });
   }
-  drawPhotos(); if (msg) msg.textContent = note || (JP.length ? photoCount() : '');
+  draw(); if (msg) msg.textContent = [...new Set(notes), L.length ? photoCount(L, max) : ''].filter(Boolean).join(' ');
 }
 async function addPortrait(f) {
   const msg = document.getElementById('j-prmsg'); if (!f) return;
-  if (!OKTYPE.test(f.type) || f.size > MAX_FILE) { if (msg) msg.textContent = 'אפשר רק תמונה (JPG, PNG או WebP) עד 15MB.'; return; }
-  try {
-    const blob = await shrinkPhoto(f); if (JP.portrait) URL.revokeObjectURL(JP.portrait.url);
-    JP.portrait = { blob, url: URL.createObjectURL(blob) }; if (msg) msg.textContent = '';   /* a replaced portrait has no path yet, so it uploads again */
-  } catch (e) { if (msg) msg.textContent = 'לא הצלחנו לקרוא את התמונה, אפשר לנסות אחרת.'; }
+  const r = await preparePhoto(f);
+  if (r.photo) { if (JP.portrait) URL.revokeObjectURL(JP.portrait.url); JP.portrait = { ...r.photo, url: URL.createObjectURL(r.photo.blob) }; }   /* a replaced portrait has no path yet, so it uploads again */
+  if (msg) msg.textContent = r.note || '';
   drawPortrait(); const b = document.querySelector('#portrait .chip, #portrait .add-photo'); if (b) b.focus();
 }
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -735,7 +925,7 @@ function sendWhy(e) {
   const msg = String((e && (e.message || e.error_description || e.error)) || ''), code = String((e && (e.code || e.statusCode || e.status)) || '');
   if (code === 'P0001' || /busy, try again/i.test(msg)) return 'יש עומס כרגע, נסו שוב בעוד כמה דקות.';
   if (!navigator.onLine || /failed to fetch|networkerror|network request failed|load failed|timed? ?out/i.test(msg)) return 'נראה שאין חיבור לאינטרנט. בדקו ונסו שוב.';
-  if (code === '413' || /too large|exceed|payload/i.test(msg)) return 'אחת התמונות גדולה מדי.';
+  if (code === '413' || /too large|exceed|payload/i.test(msg)) return 'אחת התמונות גדולה מדי (עד 10MB לתמונה).';
   if (/mime|invalid.*type|not supported/i.test(msg)) return 'אחת התמונות בסוג קובץ שאנחנו לא תומכים בו.';
   if (/^(23514|22001)$/.test(code) || /violates check|too long/i.test(msg)) return 'אחד הפרטים ארוך מדי או לא נראה תקין.';
   return 'משהו אצלנו לא עובד כרגע. נסו שוב מאוחר יותר, או כתבו לנו במייל.';
@@ -744,16 +934,18 @@ const errCode = e => e && (e.code || e.statusCode || e.status) ? String(e.code |
 const showErr = (el, lead, reason) => { el.innerHTML = esc(lead) + (reason ? `<span class="small">${esc(reason)}</span>` : ''); el.hidden = false; el.scrollIntoView({ block: 'nearest' }); };
 async function submitJoin(f) {
   const d = Object.fromEntries(new FormData(f)), live = CFG_ON && !!SB, err = f.querySelector('#j-err'), btn = f.querySelector('button[type="submit"]');
-  const v = k => String(d[k] || '').trim(), name = v('name'), city = v('city'), craft = v('craft'), story = String(d.story || '').replace(/\r\n?/g, '\n').trim(), email = v('email'), phone = v('phone');
+  const v = k => String(d[k] || '').trim(), name = v('name'), city = v('city'), craft = v('craft'), other = craft === 'other' ? cleanOther(d.craft_other) : '', story = String(d.story || '').replace(/\r\n?/g, '\n').trim(), email = v('email'), phone = v('phone');
   const done = demo => { const gate = !!cur().gate; if (!demo) { JOINED = true; lsSet(JOINED_KEY, true); } clearPhotos();
     const th = { s: 'joined', name: name.split(' ')[0], demo, gate }; S.stack = gate ? [th] : [{ s: 'home' }, th]; replaceH(); render(true); };
   if (d.hp_site) { done(false); return; } /* a bot filled the hidden field: look like success, send nothing */
   f.querySelectorAll('[aria-invalid]').forEach(x => x.removeAttribute('aria-invalid'));
-  const bad = !name ? ['j-name', 'כתבו את השם שלכם.'] : !city ? ['j-city', 'כתבו באיזו עיר אתם.'] : !Object.prototype.hasOwnProperty.call(CRAFTS, craft) ? ['j-craft', 'בחרו את התחום שלכם.']
+  const bad = !name ? ['j-name', 'כתבו את השם שלכם.'] : !city ? ['j-city', 'כתבו באיזו עיר אתם.'] : !(Object.prototype.hasOwnProperty.call(CRAFTS, craft) || craft === 'other') ? ['j-craft', 'בחרו את התחום שלכם.']
+    : craft === 'other' && Array.from(other).length < 2 ? ['j-other', 'כתבו איזה תחום זה, אפילו מילה אחת.']
     : !email ? ['j-email', 'כתבו כתובת מייל.'] : !EMAIL_RE.test(email) ? ['j-email', 'המייל לא נראה נכון. בדקו שוב.']
     : !phone ? ['j-phone', 'כתבו מספר טלפון.'] : !phoneOK(phone) ? ['j-phone', 'הטלפון לא נראה נכון. בדקו שוב.']
     : d.phone_public !== 'yes' && d.phone_public !== 'no' ? ['j-pp-yes', 'בחרו אם להציג את הטלפון.']
     : d.phone_public === 'yes' && !contactPhone(phone) ? ['j-phone', 'כדי להציג את הטלפון באתר, כתבו מספר ישראלי רגיל, למשל 050-1234567.']
+    : d.email_public !== 'yes' && d.email_public !== 'no' ? ['j-ep-yes', 'בחרו אם להציג את המייל.']
     : !JP.portrait ? ['j-portrait', 'הוסיפו תמונה שלכם.'] : !JP.length ? ['j-pick', 'הוסיפו לפחות תמונה אחת של העבודות.']
     : !d.consent ? ['j-consent', 'כדי להמשיך, סמנו שאתם מסכימים לתנאי השימוש ולמדיניות הפרטיות.'] : null;
   if (bad) { const el = f.querySelector('#' + bad[0]); if (el.classList.contains('input')) el.setAttribute('aria-invalid', 'true'); err.textContent = bad[1]; err.hidden = false; el.focus(); return; }
@@ -764,19 +956,25 @@ async function submitJoin(f) {
   let stage = '';
   try {
     JP.folder = JP.folder || (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2));
-    const jobs = [JP.portrait, ...JP];   /* one at a time, so ten photos on a phone connection do not time out */
+    const jobs = [JP.portrait, ...JP];   /* one at a time, so twenty photos on a phone connection do not time out */
     for (let i = 0; i < jobs.length; i++) {
       if (jobs[i].path) continue; /* already uploaded on an earlier try */
-      stage = `תמונה ${i + 1} מתוך ${jobs.length} לא עלתה.`; btn.textContent = `מעלים תמונה ${i + 1} מתוך ${jobs.length}`;
-      const path = `${JP.folder}/${i ? i : 'portrait'}-${Math.random().toString(36).slice(2, 7)}.jpg`;
-      const { error } = await SB.storage.from(BUCKET).upload(path, jobs[i].blob, { contentType: 'image/jpeg', cacheControl: '31536000', upsert: false });
+      stage = `${i ? `תמונה ${i + 1} מתוך ${jobs.length}` : 'התמונה שלכם'} (${jobs[i].name}) לא עלתה.`; btn.textContent = `מעלים תמונה ${i + 1} מתוך ${jobs.length}`;
+      const path = `${JP.folder}/${i ? i : 'portrait'}-${Math.random().toString(36).slice(2, 7)}.${EXT[jobs[i].type] || 'jpg'}`;   /* one folder level, extension from the real type */
+      const { error } = await SB.storage.from(BUCKET).upload(path, jobs[i].blob, { contentType: jobs[i].type, cacheControl: '31536000', upsert: false });
       if (error) throw error; jobs[i].path = path;
     }
     stage = ''; btn.textContent = 'שומרים את ההרשמה...';
-    const { error } = await SB.from('makers').insert({ name, city, craft, story, email, phone, phone_public: d.phone_public === 'yes', portrait: JP.portrait.path, photos: JP.map(p => p.path), status: 'pending' });
+    const { error } = await SB.from('makers').insert({ name, city, craft, ...(craft === 'other' ? { craft_other: other } : {}), story, email, phone, phone_public: d.phone_public === 'yes', ...(d.email_public === 'yes' ? { email_public: true } : {}), portrait: JP.portrait.path, photos: JP.map(p => p.path), status: 'pending' });
     if (error) throw error;
   } catch (e) {
     console.error('join failed', errCode(e), e);
+    if (errCode(e) === '23505') {   /* the photos are already up and keep their paths: a retry does not upload them again */
+      const t = String(e.message || '') + ' ' + String(e.details || ''), em = /makers_email_unique/.test(t), ph = /makers_phone_unique/.test(t), el = f.querySelector(em ? '#j-email' : ph ? '#j-phone' : '#j-name');
+      err.textContent = em ? 'המייל הזה כבר רשום אצלנו. אם זו ההרשמה שלכם, אנחנו קוראים אותה ונחזור אליכם.' : ph ? 'המספר הזה כבר רשום אצלנו. אם זו ההרשמה שלכם, אנחנו קוראים אותה ונחזור אליכם.' : 'ההרשמה הזו כבר קיימת אצלנו. אם זו ההרשמה שלכם, אנחנו קוראים אותה ונחזור אליכם.';
+      err.hidden = false; if (em || ph) el.setAttribute('aria-invalid', 'true'); err.scrollIntoView({ block: 'nearest' }); el.focus();
+      btn.disabled = false; btn.textContent = 'שליחת ההרשמה'; return;
+    }
     showErr(err, 'ההרשמה לא נשלחה. מה שמילאתם עדיין כאן, נסו שוב בעוד רגע.', [stage, sendWhy(e)].filter(Boolean).join(' '));
     btn.disabled = false; btn.textContent = 'שליחת ההרשמה'; return;
   }
@@ -791,35 +989,6 @@ async function rejectMaker(f, id) {
 }
 
 /* ---------- a buyer's request: saved for the owner, who routes it by hand ---------- */
-async function submitPost(f) {
-  const fd = new FormData(f), d = Object.fromEntries(fd), err = f.querySelector('#p-err'), btn = f.querySelector('button[type="submit"]');
-  const title = String(d.title || '').trim(), crafts = fd.getAll('crafts').filter(c => Object.prototype.hasOwnProperty.call(CRAFTS, c)), otherOn = !!d.otherOn, other = otherOn ? String(d.other || '').trim() : '';
-  const contact = String(d.contact || '').trim();
-  f.querySelectorAll('[aria-invalid]').forEach(x => x.removeAttribute('aria-invalid'));
-  const bad = !title ? ['p-title', 'כתבו מה תרצו שיכינו בשבילכם.'] : !crafts.length && !otherOn ? ['pc-wood', 'בחרו לפחות תחום אחד, או ״אחר״.']
-    : otherOn && !other ? ['p-other', 'כתבו איזה תחום, או בטלו את הסימון של ״אחר״.']
-    : !contact ? ['p-contact', 'השאירו מייל או טלפון, כדי שנוכל לחזור אליכם.'] : !(EMAIL_RE.test(contact) || phoneOK(contact)) ? ['p-contact', 'המייל או הטלפון לא נראים נכון. בדקו שוב.']
-    : !d.consent ? ['p-consent', 'כדי לשלוח, סמנו שאתם מסכימים שנעביר את הבקשה.'] : null;
-  if (bad) { const el = f.querySelector('#' + bad[0]); if (el.classList.contains('input')) el.setAttribute('aria-invalid', 'true'); err.textContent = bad[1]; err.hidden = false; el.focus(); return; }
-  err.hidden = true;
-  const sent = demo => { if (!demo) { MINE = [{ t: title.slice(0, 120), d: new Date().toISOString() }, ...MINE].slice(0, 30); lsSet(MINE_KEY, MINE); }
-    S.stack = [{ s: 'home' }, { s: 'sent', demo }]; replaceH(); render(true); };
-  if (!CFG_ON) { sent(true); return; }
-  /* never say "sent" when nothing was saved: the library is still loading, or it could not load at all */
-  if (!SB) { err.textContent = AD.failed ? 'אין חיבור לשרת כרגע, אז הבקשה לא נשמרה. אפשר לרענן את הדף ולנסות שוב.' : 'החיבור עדיין נטען. נסו שוב בעוד רגע.'; err.hidden = false; err.scrollIntoView({ block: 'nearest' }); return; }
-  btn.disabled = true; btn.textContent = 'שולחים...';
-  const text = String(d.text || '').trim() + (other ? `${String(d.text || '').trim() ? '\n' : ''}תחום נוסף: ${other}` : '');
-  try {
-    const { error } = await SB.from('requests').insert({ title, crafts: [...crafts, ...(other ? ['other'] : [])], text: text.slice(0, 2000), due: String(d.due || '').trim(), contact, consent: true, status: 'new' });
-    if (error) throw error;
-  } catch (e) {
-    console.warn('request failed', errCode(e), e);
-    showErr(err, 'הבקשה לא נשלחה. מה שכתבתם עדיין כאן, נסו שוב.', sendWhy(e));
-    btn.disabled = false; btn.textContent = 'שליחת הבקשה'; return;
-  }
-  sent(false);
-}
-
 /* ---------- bottom sheets: a close button on top, Escape and the phone's back button close them, Tab stays inside ---------- */
 let sheetReturn = null, SHEET_NOW = false;
 const sheetFocusables = () => [...document.querySelectorAll('#sheet .sheet-panel :is(a[href], button:not([disabled]), input:not([type=hidden]), textarea, select)')].filter(el => el.offsetParent !== null);
@@ -850,47 +1019,559 @@ document.addEventListener('keydown', e => {
 });
 const privacySheet = () => `<div class="sheet-body">
   <h2 class="sec-title">מה אנחנו עושים עם הפרטים שלכם</h2>
-  <div class="field"><span class="lbl">מה נשמר</span><p>בהרשמה כיוצרים: שם, עיר, תחום, סיפור, התמונה שלכם, תמונות של העבודות, מייל וטלפון. בבקשה: מה שכתבתם בה, המייל או הטלפון שהשארתם, והסכמה שלכם שנעביר אותה.</p></div>
-  <div class="field"><span class="lbl">למה</span><p>כדי שנוכל לבדוק כל הרשמה ולהעביר כל בקשה ליוצרים שמתאימים לה. אנחנו לא מוכרים את הפרטים ולא משתמשים בהם לפרסום.</p></div>
-  <div class="field"><span class="lbl">מי רואה</span><p>אחרי שאישרנו יוצר, אלה מופיעים באתר לכולם: שם, עיר, תחום, סיפור ותמונות. הטלפון של יוצר מופיע באתר רק אם הוא בחר בהרשמה להציג אותו, וגם אז רק אחרי האישור שלנו. מי שרואה מספר מוצג יכול להעתיק אותו, ולכן בחרו להציג רק מספר שנוח לכם שיתפרסם. המייל של יוצר אף פעם לא מוצג. הטלפון של מי שבחר לא להציג אותו, והמייל והטלפון של מי שמבקש, רק אנחנו רואים. פרטי הקשר של מי שמבקש לא עוברים ליוצרים בלי אישור. כשאנחנו כותבים לכמה יוצרים יחד, הכתובות מוסתרות, ואף אחד מהם לא רואה את המייל של האחרים.</p></div>
-  <div class="field"><span class="lbl">איפה זה נשמר, ומי עוזר לנו</span><p>הפרטים והתמונות נשמרים אצל Supabase, שירות אחסון בענן. השרתים שלו כרגע במומבאי שבהודו. כשאנחנו שולחים בקשה ליוצרים במייל, היא עוברת דרך תיבת הג׳ימייל שלנו (Google). כדי להציג את האתר, הדפדפן שלכם טוען גופנים מ־Google Fonts וספריות קוד מ־cdnjs (Cloudflare) ומ־jsDelivr, ולכן כתובת ה־IP שלכם מגיעה גם אליהם. תמונה שהועלתה שמורה בקישור ציבורי שקשה מאוד לנחש, והיא מוצגת באתר רק אחרי שאישרנו.</p></div>
-  <div class="field"><span class="lbl">במכשיר שלכם</span><p>האתר זוכר במכשיר הזה את כותרות הבקשות ששלחתם, ואם כבר נרשמתם. זה נשמר רק אצלכם, ואפשר למחוק את זה בניקוי נתוני האתר בדפדפן.</p></div>
-  <div class="field"><span class="lbl">איך מבקשים למחוק</span><p>כתבו לנו ונמחק את הפרופיל והתמונות שלכם, או את הבקשה ששלחתם. אם בחרתם להציג את הטלפון ושיניתם את דעתכם, כתבו לנו ונסתיר אותו. נעדכן אתכם כשזה נעשה.</p><div class="links-col">${mailLink('בקשת מחיקה מבהזמנה')}</div></div>
+  <div class="field"><span class="lbl">מה נשמר</span><p>בהרשמה כיוצרים: שם, עיר, תחום, סיפור, התמונה שלכם, תמונות של העבודות, מייל וטלפון. בבקשה: מה שכתבתם בה, המייל או הטלפון שהשארתם, והסכמה שלכם שנעביר אותה. בכניסה ליוצרים: כתובת המייל, ששמורה אצל Supabase Authentication, וההתחברות עצמה, שנשמרת בדפדפן שלכם עד שמתנתקים. ביצירה שיוצר מוסיף: כותרת, תיאור, מחיר ותמונות.</p></div>
+  <div class="field"><span class="lbl">למה</span><p>כדי שנוכל לבדוק כל הרשמה ויצירה, להעביר כל בקשה ליוצרים שמתאימים לה, ולתת ליוצרים מקום משלהם באתר. אנחנו לא מוכרים את הפרטים ולא משתמשים בהם לפרסום.</p></div>
+  <div class="field"><span class="lbl">מי רואה</span><p>אחרי שאישרנו יוצר, אלה מופיעים באתר לכולם: שם, עיר, תחום, סיפור ותמונות. הטלפון והמייל של יוצר מופיעים באתר רק אם הוא בחר בהרשמה להציג אותם, וגם אז רק אחרי האישור שלנו. אפשר לבקש מאיתנו בכל זמן להסתיר או להסיר אותם. מי שרואה מספר או מייל מוצגים יכול להעתיק אותם, ולכן בחרו להציג רק מה שנוח לכם שיתפרסם. הטלפון והמייל של מי שבחר לא להציג אותם רק אנחנו רואים.</p></div>
+  <div class="field"><span class="lbl">יצירות</span><p>כותרת, תיאור, מחיר ותמונות של יצירה מוצגים לכולם, יחד עם שם היוצר והעיר שלו, רק אחרי שאישרנו אותה. היוצר נשאר הבעלים של הזכויות ביצירה ובתמונות. פרטי מיקום ומצלמה שבקובצי התמונה מוסרים בהעלאה.</p></div>
+  <div class="field"><span class="lbl">בקשה ומעקב אחריה</span><p>בקשה עוברת אלינו וליוצרים שמתאימים לה, יחד עם פרטי הקשר שהשארתם, כפי שכתוב ליד כפתור השליחה. ליוצרים שהעברנו אליהם בקשה יש גישה לפרטי הקשר רק כל עוד הבקשה פתוחה. כשסוגרים בקשה, פרטי הקשר נעלמים מהתיבה שלהם והבקשה מסומנת אצלם כסגורה. יוצר שקיבל פרטי קשר רשאי לפנות אליכם, והוא יכול היה להעתיק אותם. כשאנחנו כותבים לכמה יוצרים יחד במייל, הכתובות מוסתרות, ואף אחד מהם לא רואה את המייל של האחרים. בשליחת בקשה המכשיר שלכם יוצר קוד סודי ושומר אותו אצלכם. מי שמחזיק בקוד רואה מה קרה לבקשה, יכול לערוך אותה ולסגור אותה. אם מנקים את נתוני הדפדפן הקוד אובד, ואי אפשר לשחזר אותו מהאתר.</p></div>
+  <div class="field"><span class="lbl">איפה זה נשמר, ומי עוזר לנו</span><p>הפרטים והתמונות נשמרים אצל Supabase, שירות אחסון בענן. השרתים שלו כרגע במומבאי שבהודו. קישור הכניסה ליוצרים נשלח למייל מהשירות של Supabase. כשאנחנו שולחים בקשה ליוצרים במייל, היא עוברת דרך תיבת הג׳ימייל שלנו (Google). כדי להציג את האתר, הדפדפן שלכם טוען גופנים מ־Google Fonts וספריות קוד מ־cdnjs (Cloudflare) ומ־jsDelivr, ולכן כתובת ה־IP שלכם מגיעה גם אליהם. תמונה שהועלתה שמורה בקישור ציבורי שקשה מאוד לנחש, והיא מוצגת באתר רק אחרי שאישרנו.</p></div>
+  <div class="field"><span class="lbl">במכשיר שלכם</span><p>האתר זוכר במכשיר הזה את כותרות הבקשות ששלחתם ואת הקוד הסודי של כל אחת, ואם כבר נרשמתם. מי שנכנס כיוצר נשאר מחובר בדפדפן עד שמתנתק. זה נשמר רק אצלכם, ואפשר למחוק את זה בניקוי נתוני האתר בדפדפן.</p></div>
+  <div class="field"><span class="lbl">כמה זמן שומרים, ואיך מבקשים למחוק</span><p>אנחנו שומרים הרשמות, בקשות ויצירות עד שנמחק אותן. כתבו לנו ונמחק את הפרופיל והתמונות שלכם, יצירה, או את הבקשה ששלחתם, בכל זמן. אם בחרתם להציג את הטלפון או המייל ושיניתם את דעתכם, כתבו לנו ונסתיר אותם. נעדכן אתכם כשזה נעשה.</p><div class="links-col">${mailLink('בקשת מחיקה מבהזמנה')}</div></div>
   <button type="button" class="btn block" data-act="closesheet">הבנתי</button></div>`;
 const termsSheet = () => `<div class="sheet-body">
   <h2 class="sec-title">תנאי השימוש</h2>
   <ul class="terms">
-    <li>האתר מפגיש בין יוצרים למי שמבקש מהם משהו. הוא לא חנות, ואנחנו לא צד לעסקה ביניהם.</li>
-    <li>דרך האתר לא עובר כסף. את המחיר, הזמנים והתשלום (למשל בביט או בהעברה בנקאית) מסכמים ישירות מי שמבקש ומי שיוצר.</li>
+    <li>האתר מפגיש בין יוצרים למי שמבקש מהם משהו. התשלום והמסירה נעשים ישירות ביניהם, לא דרך האתר, ואנחנו לא צד לעסקה ביניהם.</li>
+    <li>דרך האתר לא עובר כסף ואנחנו לא לוקחים עמלה. את המחיר, הזמנים, המסירה והתשלום (למשל בביט או בהעברה בנקאית) מסכמים ישירות מי שמבקש ומי שיוצר.</li>
     <li>היוצרים אחראים לעבודה שלהם, למחירים ולמסירה, ולכך שמותר להם להשתמש בתמונות שהם מעלים.</li>
     <li>בהרשמה אתם מרשים לנו להציג באתר, אחרי שנאשר אתכם, את השם, העיר, התחום, הסיפור והתמונות שלכם.</li>
-    <li>את הטלפון שלכם נציג באתר, עם כפתורי התקשרות וואטסאפ, רק אם בחרתם בזה בהרשמה. מי שרואה מספר מוצג יכול להעתיק אותו. אפשר לבקש בכל זמן להסתיר אותו.</li>
+    <li>את הטלפון והמייל שלכם נציג באתר, עם כפתורי וואטסאפ, שיחה ומייל, רק אם בחרתם בזה בהרשמה וגם אז רק אחרי שאישרנו אתכם. אפשר לבקש בכל זמן להסתיר או להסיר אותם. מי שרואה אותם באתר יכול להעתיק אותם.</li>
+    <li>יוצר שאושר נכנס לאזור שלו באתר בקישור שנשלח למייל. הוא יכול לראות בקשות שהעברנו אליו, להשיב להן, ולהוסיף יצירות.</li>
+    <li>מי ששולח בקשה מסכים שנעביר אותה ואת פרטי הקשר שלו ליוצרים שמתאימים. יוצר שקיבל בקשה רשאי לפנות למי שכתב אותה. אפשר לערוך ולסגור בקשה בכל זמן.</li>
+    <li>יצירה: חייבת להיות עבודה שלכם, עם תיאור ומחיר בשקלים כמו שהם באמת, בלי תוכן לא חוקי או מסוכן. אנחנו יכולים לסרב ליצירה, להסתיר אותה או להסיר אותה, וכל יצירה שנערכה חוזרת לאישור. הזכויות ביצירה ובתמונות נשארות אצלכם.</li>
+    <li>דרך האתר לא קונים: המחיר והמסירה של יצירה מסכמים ישירות היוצר ומי שמעוניין בה.</li>
     <li>אנחנו יכולים לאשר פרופיל, לדחות אותו או להסיר אותו.</li>
     <li>אסור להעלות תוכן שאינו שלכם, או תוכן פוגעני.</li>
-    <li>אפשר לבקש בכל זמן למחוק את הפרופיל או את הבקשה. כתבו לנו.</li>
-    <li>המייל שלכם אף פעם לא מוצג באתר, והטלפון מוצג רק אם בחרתם. אנחנו שומרים אותם כמתואר במדיניות הפרטיות.</li>
+    <li>אפשר לבקש בכל זמן למחוק את הפרופיל, יצירה או בקשה. כתבו לנו.</li>
+    <li>הטלפון והמייל שלכם מוצגים רק אם בחרתם. אנחנו שומרים אותם כמתואר במדיניות הפרטיות.</li>
   </ul>
   <div class="links-col">${mailLink('שאלה על תנאי השימוש בבהזמנה')}</div>
   <p class="small muted">זו גרסה ראשונה, והיא עוד עשויה להשתנות.</p>
   <button type="button" class="btn block" data-act="closesheet">הבנתי</button></div>`;
 
 const visionSheet = () => `<div class="sheet-body vision">
-  <h2 class="sec-title">למה בהזמנה</h2>
+  <h2 class="sec-title">מי אנחנו</h2>
   <p class="pull">חפץ שנעשה בשבילכם, בידיים של מישהו שאתם יודעים איך קוראים לו.</p>
-  <p>יש דברים שאי אפשר לקנות מוכנים. ארנק עם האותיות של אבא, שולחן שמתאים בדיוק לפינה שלכם. מישהו צריך להכין אותם, ולפני זה להקשיב.</p>
-  <p>בישראל יש יוצרים שמכינים בידיים לפי הזמנה, בעץ, בעור, בקרמיקה, בתכשיטים ובמתכת. הם מעדיפים בקשה רצינית על פני מיקוח. אנחנו לא קטלוג. אנחנו קוראים כל בקשה וכל הרשמה בעצמנו, ומחברים ביד בין מי שמבקש ליוצר שמתאים.</p>
-  <p>האתר עוד חדש והשימוש בו חינם. דרך האתר לא עובר כסף: את המחיר, הזמן והתשלום מסכמים אתם והיוצר, ישירות.</p>
+  <p>יש דברים שאי אפשר לקנות מוכנים. ארנק עם האותיות של אבא, שולחן שמתאים בדיוק לפינה שלכם. אצלנו כותבים במילים שלכם מה תרצו, מאיזה חומר ועד מתי, בלי מחיר.</p>
+  <p>את כל הבקשות אנחנו קוראים בעצמנו, ומעבירים כל אחת ליוצרים שמתאימים לה. כל יוצר באתר אושר אצלנו ביד, והשם, העיר והעבודות שלו גלויים לכולם.</p>
+  <p>ליוצרים יש באתר מקום משלהם: שם הם רואים את הבקשות שהעברנו אליהם, עונים להן ומציגים באתר את מה שהכינו. מי שביקש רואה לאילו יוצרים הבקשה הגיעה ומה כל אחד ענה.</p>
+  <p>דרך האתר לא עובר כסף ואנחנו לא לוקחים עמלה. את המחיר, הזמן והמסירה מסכמים אתם והיוצר, ישירות. האתר עוד בתחילת הדרך, והשימוש בו חינם.</p>
   <p class="last">כל דבר כאן מתחיל בשיחה.</p>
   <button type="button" class="btn ghost block" data-act="closesheet">סגירה</button></div>`;
+
+/* ---------- shop, accounts, tracking ----------
+   Everything new goes through dbq(): one helper, one pattern. A view or function that does not exist yet (the database update not applied)
+   answers "gone" and the screen shows a friendly empty state; the network being down answers "off" and the screen offers a retry. Nothing here can blank an existing screen. */
+const LB = 'listing-photos';
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const BAD_CHARS = new RegExp('[\x00-\x08\x0b-\x1f\x7f-\x9f' + [0x2028, 0x2029, 0x200b].map(c => String.fromCharCode(c)).join('') + '-' + String.fromCharCode(0x200f) + String.fromCharCode(0x202a) + '-' + String.fromCharCode(0x202e) + String.fromCharCode(0x2066) + '-' + String.fromCharCode(0x2069) + String.fromCharCode(0xfeff) + ']', 'g');
+const cleanText = (s, n = 200) => Array.from(String(s == null ? '' : s).replace(BAD_CHARS, ' ').replace(/\s+/g, ' ').trim()).slice(0, n).join('').trim();
+const cleanBlock = (s, n = 2000) => Array.from(String(s == null ? '' : s).replace(/\r\n?/g, '\n').replace(BAD_CHARS, ' ').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim()).slice(0, n).join('');
+const NF = new Intl.NumberFormat('he-IL');
+const priceText = p => p === null ? 'מחיר בפנייה' : p === 0 ? 'חינם' : '₪' + NF.format(p);
+const priceHTML = p => p === null || p === 0 ? esc(priceText(p)) : `<bdi dir="ltr">${esc(priceText(p))}</bdi>`;
+const intOrNull = v => v === null || v === undefined || v === '' ? null : Number.isInteger(+v) && +v >= 0 && +v <= 1000000 ? +v : null;
+const isGone = e => { if (!e) return false; const c = String(e.code || ''), st = String(e.status || e.statusCode || ''), m = String(e.message || '');
+  return /^(42P01|PGRST205|PGRST202|42883)$/.test(c) || st === '404' || (/could not find the (table|function)|schema cache|relation .* does not exist|function .* does not exist/i.test(m) && !/column/i.test(m)); };
+const isOff = e => !!e && (!navigator.onLine || /failed to fetch|networkerror|network request failed|load failed/i.test(String(e.message || '')));
+async function dbq(run) {
+  if (!SB) return { data: null, error: { message: 'no client' }, off: true };
+  try { const r = await run(SB); if (r && r.error) return { data: null, error: r.error, gone: isGone(r.error), off: isOff(r.error) }; return { data: r ? r.data : null, error: null }; }
+  catch (e) { return { data: null, error: e, off: true }; }
+}
+/* plain Hebrew for what the database says (the codes and constraint names are in the two client specs) */
+function friendly(e, kind = '') {
+  if (!e) return '';
+  const c = errCode(e), m = String(e.message || '') + ' ' + String(e.details || '');
+  if (isOff(e)) return 'אין חיבור כרגע. נסו שוב.';
+  if (c === 'P0001' || /busy, try again/i.test(m)) return kind === 'status' ? 'יש עומס כרגע, נסו שוב בעוד דקה.' : 'יש עומס כרגע, נסו שוב בעוד כמה דקות.';
+  if (c === '22023') {
+    if (/bad status change/i.test(m)) return 'אי אפשר לעבור לסטטוס הזה. רעננו ונסו שוב.';
+    if (/offer note required/i.test(m)) return 'כתבו הערה קצרה להצעה.';
+    if (/request closed/i.test(m)) return kind === 'edit' ? 'הבקשה נסגרה, אי אפשר לערוך אותה.' : 'מי שביקש סגר את הבקשה.';
+    if (/bad craft|too many crafts/i.test(m)) return 'אחד התחומים לא נראה נכון. בחרו שוב מהרשימה.';
+    if (/bad title/i.test(m)) return 'כתבו מה תרצו שיכינו בשבילכם, עד 120 תווים.';
+    if (/text too long/i.test(m)) return 'הפרטים ארוכים מדי. קצרו קצת.';
+    if (/due too long/i.test(m)) return 'השדה ״עד מתי״ ארוך מדי. קצרו קצת.';
+    if (/bad contact/i.test(m)) return 'המייל או הטלפון לא נראים נכון. בדקו שוב.';
+    if (/maker not approved/i.test(m)) return 'היוצר הזה עדיין לא מאושר.';
+    if (/request not open/i.test(m)) return 'הבקשה סגורה או לא קיימת.';
+  }
+  if (c === '23514') {
+    if (/listings_title_ck/.test(m)) return 'הכותרת צריכה להיות בין 2 ל־80 תווים.';
+    if (/listings_desc_ck/.test(m)) return 'התיאור ארוך מדי (עד 1500 תווים).';
+    if (/listings_price_ck/.test(m)) return 'המחיר צריך להיות בין 0 ל־1,000,000.';
+    if (/listings_photos_ck/.test(m)) return 'צריך בין תמונה אחת ל־10 תמונות.';
+    if (/request_routes_note_ck/.test(m)) return 'ההערה ארוכה מדי (עד 500 תווים).';
+    if (/request_routes_price_ck/.test(m)) return 'המחיר צריך להיות בין 0 ל־1,000,000.';
+    if (/requests_token_ck/.test(m)) return 'משהו השתבש, רעננו את הדף ונסו שוב.';
+  }
+  if (c === '23505') {
+    if (/request_routes_uq/.test(m)) return 'כבר נשלח ליוצר הזה.';
+    return 'כבר יש יוצר מאושר עם אותו מייל או טלפון.';
+  }
+  if (c === '23503') return 'משהו השתבש, רעננו את הדף.';
+  if (c === '42501' || /^40[13]$/.test(c) || /row-level security|permission denied|not allowed/i.test(m)) return /new row violates row-level/i.test(m) ? 'החשבון הזה עדיין לא מאושר כיוצר.' : 'אין לך הרשאה לפעולה הזו. התחברו שוב ונסו שוב.';
+  return 'לא הצלחנו, נסו שוב.';
+}
+function storageErr(e) {
+  const c = errCode(e), m = String((e && e.message) || '');
+  if (isOff(e)) return 'אין חיבור כרגע.';
+  if (c === '413' || /exceeded the maximum|too large/i.test(m)) return 'התמונה גדולה מדי.';
+  if (c === '415' || /mime type|not supported/i.test(m)) return 'אפשר להעלות רק JPG, PNG או WEBP.';
+  if (/bucket not found/i.test(m) || (c === '404' && /bucket/i.test(m))) return 'העלאת תמונות עדיין לא זמינה.';
+  if (c === '403' || /row-level security/i.test(m)) return 'אין אפשרות להעלות את התמונה.';
+  return 'התמונה לא עלתה.';
+}
+const stChip = (t, k = '') => `<span class="st${k ? ' ' + k : ''}">${esc(t)}</span>`;
+const craftTags = list => `<span class="tags">${(list || []).map(c => `<span class="tag">${esc(craftText(c, ''))}</span>`).join('')}</span>`;
+const firstOf = n => cleanText(n, 40).split(' ')[0] || '';
+const canJoin = () => !JOINED && !AU.maker;
+const newToken = () => {
+  try { if (crypto.randomUUID) return crypto.randomUUID(); } catch (e) { /* older browsers */ }
+  try { const b = crypto.getRandomValues(new Uint8Array(16)); b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128; const h = [...b].map(x => x.toString(16).padStart(2, '0')).join(''); return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`; } catch (e) { /* last resort */ }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); });
+};
+
+/* ---- the shop (public_listings): 24 per page, sold pieces stay in the grid, muted, after the available ones of each loaded page ---- */
+const LCOLS = 'id,title,description,price_ils,photos,availability,created_at,maker_id,maker_name,maker_city,maker_craft,maker_craft_other,maker_portrait,contact_phone,contact_email';
+const LPAGE = 24;
+const SHOP = { gone: false };
+const LST = new Map(), LFETCH = {};
+const shopOf = c => SHOP[c] || (SHOP[c] = { list: [], page: 0, more: false, st: 'idle', busy: false });
+const SHOP_CR = new Set();
+function normListing(r) {
+  if (!r || !r.id) return null;
+  return { id: String(r.id), title: cleanText(r.title, 80) || 'ללא כותרת', desc: cleanBlock(r.description, 1500), price: intOrNull(r.price_ils), photos: (Array.isArray(r.photos) ? r.photos : []).map(String).filter(okPath).slice(0, 10), sold: r.availability === 'sold',
+    created: String(r.created_at || ''), makerId: String(r.maker_id || ''), mname: cleanText(r.maker_name, 80), mcity: cleanText(r.maker_city, 60), mcraft: String(r.maker_craft || '').slice(0, 20), mother: cleanOther(r.maker_craft_other), mportrait: okPath(r.maker_portrait) ? String(r.maker_portrait) : '',
+    phone: contactPhone(r.contact_phone), email: contactEmail(r.contact_email) };
+}
+const shopState = c => { const sh = shopOf(c); return !CFG_ON ? 'ready' : SHOP.gone ? 'gone' : sh.st === 'idle' ? (AD.failed ? 'failed' : 'loading') : sh.st; };
+function shopChanged() { const s = cur().s; if (s === 'shop' || s === 'home' || s === 'listing') render(); else if (s === 'search') runSearch(); }
+async function loadShop(craft = 'all', more = false) {
+  if (!CFG_ON || !SB || SHOP.gone) return;
+  const sh = shopOf(craft); if (sh.busy || (more && !sh.more)) return;
+  sh.busy = true; if (!more) { sh.st = 'loading'; sh.err = ''; }
+  const page = more ? sh.page + 1 : 0;
+  const r = await dbq(s => { let q = s.from('public_listings').select(LCOLS).order('created_at', { ascending: false }).order('id', { ascending: false }); if (craft !== 'all') q = q.eq('maker_craft', craft); return q.range(page * LPAGE, page * LPAGE + LPAGE - 1); });
+  sh.busy = false;
+  if (r.gone) { SHOP.gone = true; sh.st = 'gone'; }
+  else if (r.error || !Array.isArray(r.data)) { if (more) sh.err = 'failed'; else sh.st = 'failed'; }
+  else {
+    const rows = r.data.map(normListing).filter(Boolean); rows.forEach(l => { LST.set(l.id, l); if (craft === 'all') SHOP_CR.add(l.mcraft); });
+    const seen = new Set(sh.list.map(l => l.id)), add = rows.filter(l => !seen.has(l.id)).sort((a, b) => a.sold - b.sold);
+    sh.list = more ? sh.list.concat(add) : add; sh.page = page; sh.more = r.data.length === LPAGE; sh.st = 'ready'; sh.err = '';
+    sh.focus = more && add[0] ? add[0].id : '';
+  }
+  shopChanged();
+  searchSweep(craft);
+  if (sh.focus) { const b = document.querySelector(`.lcard[data-v="${CSS.escape(sh.focus)}"]`); if (b) b.focus({ preventScroll: true }); sh.focus = ''; }
+}
+/* the search looks through every creation, not only the first page: while the search screen is open, the rest of the pages load quietly one after another (up to a limit) */
+function searchSweep(craft = 'all') { const sh = shopOf('all'); if (craft === 'all' && sh.more && !sh.busy && !sh.err && sh.page < 40 && !SHOP.gone && cur().s === 'search') loadShop('all', true); }
+const searchSweeping = () => { const sh = shopOf('all'); return CFG_ON && !SHOP.gone && (sh.st === 'loading' || (sh.st === 'ready' && sh.more && !sh.err && sh.page < 40) || (sh.st === 'idle' && !AD.failed)); };
+async function fetchListing(id) {
+  if (LFETCH[id] === 'loading' || !SB) return; LFETCH[id] = 'loading';
+  const r = await dbq(s => s.from('public_listings').select(LCOLS).eq('id', id).limit(1));
+  if (r.gone) SHOP.gone = true;
+  const l = !r.error && Array.isArray(r.data) && r.data.length ? normListing(r.data[0]) : null;
+  if (l) LST.set(l.id, l); LFETCH[id] = l ? 'ok' : r.error ? 'failed' : 'missing'; if (cur().s === 'listing' && cur().id === id) render();
+}
+const lcard = (l, h = esc) => `<button type="button" class="lcard${l.sold ? ' sold' : ''}" data-act="listing" data-v="${esc(l.id)}"><span class="lph">${l.photos[0] ? rImg(l.photos[0], '', LB) : '<span class="art"></span>'}${l.sold ? '<span class="st badge">נמכר</span>' : ''}</span><span class="lt">${h(l.title)}</span><span class="small lp">${priceHTML(l.price)}</span><span class="small muted">${h(l.mname)}</span></button>`;
+const lskel = n => `<div class="lgrid" role="status" aria-label="טוענים את היצירות">${Array.from({ length: n }, () => '<div class="lcard sk" aria-hidden="true"><span class="lph"><span class="art"></span></span><span class="lt">&nbsp;</span><span class="small">&nbsp;</span></div>').join('')}</div>`;
+const askMore = '<div class="askline"><button type="button" class="link" data-act="tab" data-v="post">לא מצאתם? כתבו בקשה</button></div>';
+const emptyShop = () => `<div class="s-empty"><p class="say">עוד אין כאן יצירות.</p><p class="small muted">יוצרים: אחרי שנאשר אתכם אפשר להציג כאן יצירות.</p>${canJoin() ? '<button type="button" class="btn" data-act="join">להצטרף כיוצרים</button>' : ''}</div>`;
+function shopBody() {
+  const c = S.scraft, sh = shopOf(c), st = shopState(c);
+  if (st === 'loading') return lskel(4);
+  if (st === 'gone') return '<div class="s-empty"><p class="say">היצירות יעלו בקרוב.</p><p class="small muted">בינתיים אפשר לכתוב בקשה, ואנחנו נעביר אותה ליוצרים שמתאימים.</p><button type="button" class="btn" data-act="tab" data-v="post">לכתוב בקשה</button></div>';
+  if (st === 'failed') return '<div class="s-empty"><p class="say">היצירות לא נטענו.</p><p class="small muted">בדקו את החיבור ונסו שוב.</p><button type="button" class="btn" data-act="shopretry">לנסות שוב</button></div>';
+  if (!sh.list.length) return c === 'all' ? emptyShop() : `<p class="empty">עוד אין יצירות בתחום הזה.</p>${askMore}`;
+  return `<div class="lgrid">${sh.list.map(l => lcard(l)).join('')}</div>${sh.err ? '<p class="note" role="alert">לא הצלחנו לטעון עוד. נסו שוב.</p>' : ''}${sh.more ? `<button type="button" class="btn ghost block" data-act="shopmore" ${sh.busy ? 'disabled' : ''}>${sh.busy ? 'טוענים' : 'עוד'}</button>` : ''}${askMore}`;
+}
+function homeStrip() {
+  if (!CFG_ON || SHOP.gone) return '';
+  const ls = shopOf('all').list.filter(l => !l.sold).slice(0, 6); if (!ls.length) return '';
+  return `<section aria-labelledby="h-new"><div class="sec-head"><h2 class="sec-title" id="h-new">יצירות חדשות</h2><button type="button" class="link" data-act="tab" data-v="shop">לכל היצירות</button></div><div class="hstrip">${ls.map(l => lcard(l)).join('')}</div></section>`;
+}
+function searchListings(q) {
+  const terms = parseQuery(q); if (!terms.length || SHOP.gone) return [];
+  return shopOf('all').list.map(l => ({ l, ts: termScores(terms, [[l.title, 3], [l.mname, 2], [craftText(l.mcraft, l.mother) + ' ' + (CRAFT_WORDS[l.mcraft] || ''), 2], [l.mcity, 1], [l.desc, 1]]) }))
+    .filter(x => x.ts.every(Boolean)).sort((a, b) => b.ts.reduce((p, n) => p + n, 0) - a.ts.reduce((p, n) => p + n, 0)).map(x => x.l);
+}
+const waListing = l => `${l.phone.wa}?text=${encodeURIComponent(`היי ${firstOf(l.mname)}, ראיתי את ״${l.title}״ בבהזמנה. אפשר לשמוע עוד?`)}`;
+const mailListing = l => `mailto:${l.email}?subject=${encodeURIComponent('לגבי ״' + l.title + '״ בבהזמנה')}`;
+function listingScreen({ id }) {
+  const l = LST.get(id);
+  if (!l) return `${head('<span class="sr">יצירה</span>')}<div class="stack g">${LFETCH[id] === 'missing' || SHOP.gone ? '<p class="empty">לא מצאנו את היצירה הזו. ייתכן שהיא כבר לא מוצגת.</p>' : LFETCH[id] === 'failed' ? '<div class="s-empty"><p>היצירה לא נטענה. בדקו את החיבור.</p><button type="button" class="btn" data-act="lretry" data-v="' + esc(id) + '">לנסות שוב</button></div>' : '<p class="muted" role="status">טוענים</p>'}</div>`;
+  const m = REAL.list.find(x => x.id === l.makerId);
+  const av = l.mportrait ? `<span class="av">${rImg(l.mportrait, '')}</span>` : `<span class="av"><span class="ini">${esc(initials(l.mname))}</span></span>`;
+  const contact = l.sold ? `<div class="askline"><p>היצירה הזו נמכרה.</p><button type="button" class="link" data-act="tab" data-v="post">אפשר לכתוב בקשה למשהו דומה</button></div>`
+    : l.phone || l.email ? `<div class="contact">${l.phone ? `<a class="cbtn2 wa" href="${esc(waListing(l))}" ${OUT}>${svg(UI.wa)}וואטסאפ</a><a class="cbtn2" href="${esc(l.phone.tel)}">${svg(UI.phone)}התקשרו</a>` : ''}${l.email ? `<a class="cbtn2" href="${esc(mailListing(l))}">${svg(UI.mail)}מייל</a>` : ''}</div>`
+    : `<div class="askline"><p>אפשר לפנות אליהם דרך האתר:</p><button type="button" class="link" data-act="tab" data-v="post">כתבו בקשה</button></div>`;
+  return `${head(`<span class="sr">${esc(l.title)}</span>`)}
+    ${l.photos.length ? `<div class="pwrap"><div class="pscroll" id="pscroll" tabindex="0" role="group" aria-label="${esc(`תמונות של ${l.title}`)}">${l.photos.map((p, i) => `<div class="slide">${rImg(p, `${l.title}, ${i + 1}`, LB)}</div>`).join('')}</div>${l.photos.length > 1 ? `<span class="pcount" id="pcount" dir="ltr" aria-hidden="true">1 / ${l.photos.length}</span>` : ''}</div>` : ''}
+    <div class="stack tight g">
+      <div class="ltop"><h2 class="display l-title">${esc(l.title)}</h2><p class="l-price">${priceHTML(l.price)}${l.sold ? ` ${stChip('נמכר', 'badge-inline')}` : ''}</p></div>
+      ${l.desc ? `<p class="rstory">${esc(l.desc)}</p>` : ''}
+      <div class="panel"><div class="face-row">${av}<div><b>${esc(l.mname)}</b><div class="small muted">${esc(craftText(l.mcraft, l.mother))}${l.mcity ? ` · ${esc(l.mcity)}` : ''}</div></div></div>
+        ${m ? `<button type="button" class="link" data-act="rmaker" data-v="${esc(m.id)}">לפרופיל של ${esc(firstOf(l.mname))}</button>` : ''}</div>
+      ${contact}
+      <p class="note">דרך האתר לא עובר כסף. את המחיר ואת המסירה מסכמים ישירות עם מי שיצר את היצירה.</p>
+    </div>`;
+}
+document.addEventListener('scroll', e => { const t = e.target; if (t && t.id === 'pscroll') { const c = document.getElementById('pcount'); if (c) { const n = t.children.length, w = t.clientWidth || 1; c.textContent = `${Math.min(n, Math.round(Math.abs(t.scrollLeft) / w) + 1)} / ${n}`; } } }, true);
+
+/* ---- who is signed in: the database decides (my_maker); the screen only follows. Cosmetic: RLS is the security ---- */
+const MCOLS = 'id,name,city,craft,craft_other,story,photos,portrait,phone_public,email_public,status,created_at';
+const freshAU = () => ({ st: 'none', uid: '', rows: [], maker: null, probe: '', inbox: { list: [], st: 'idle', more: false, busy: false, open: '', seenSet: new Set() }, my: { list: [], st: 'idle', more: false, busy: false } });
+let AU = freshAU();
+const ME = { tab: 'inbox' };
+const meRedraw = () => { if (cur().s === 'mine') render(); };
+const WANTS_KEY = 'behazmana.wantsMe';
+const wantsMe = () => { try { const t = +localStorage.getItem(WANTS_KEY); return !!t && Date.now() - t < 3600000; } catch (e) { return false; } };
+const setWantsMe = () => { try { localStorage.setItem(WANTS_KEY, String(Date.now())); } catch (e) { /* ignore */ } };
+const clearWantsMe = () => { try { localStorage.removeItem(WANTS_KEY); } catch (e) { /* ignore */ } };
+const meUrl = () => /(^|#)me([&#]|$)/.test(location.hash) || ((/access_token=/.test(location.hash)) && wantsMe());
+function meMode() {
+  if (!CFG_ON || !AD.session) return 'visitor';
+  if (AU.st === 'loading' || AU.st === 'none') return 'loading';
+  if (AU.st === 'gone') return 'visitor';
+  if (AU.st === 'failed') return 'failed';
+  if (AU.maker) return 'maker';
+  const pend = AU.rows.some(r => r.status === 'pending'), rej = AU.rows.some(r => r.status === 'rejected');
+  return pend ? 'pending' : rej ? 'rejected' : 'nonmaker';
+}
+async function loadMe(force) {
+  const uid = AD.session && AD.session.user ? String(AD.session.user.id || '') : '';
+  if (!SB || !uid) return;
+  if (!force && AU.uid === uid && (AU.st === 'loading' || AU.st === 'ready')) return;
+  if (AU.uid !== uid) AU = freshAU();
+  AU.uid = uid; AU.st = 'loading'; meRedraw();
+  const r = await dbq(s => s.from('my_maker').select(MCOLS).order('created_at', { ascending: false }));
+  if (!AD.session || String(AD.session.user.id) !== uid) return;
+  if (r.gone) { AU.st = 'gone'; AU.probe = 'gone'; }
+  else if (r.error || !Array.isArray(r.data)) AU.st = 'failed';
+  else {
+    AU.rows = r.data.filter(x => x && x.id).map(x => ({ id: String(x.id), name: cleanText(x.name, 80), city: cleanText(x.city, 60), craft: String(x.craft || ''), other: cleanOther(x.craft_other), story: cleanBlock(x.story, 1000), photos: Array.isArray(x.photos) ? x.photos.map(String).filter(okPath) : [], portrait: okPath(x.portrait) ? String(x.portrait) : '', phonePublic: !!x.phone_public, emailPublic: !!x.email_public, status: String(x.status || '') }));
+    AU.maker = AU.rows.find(x => x.status === 'approved') || null; AU.st = 'ready';
+    if (AU.maker) { if (cur().s === 'mine') { S.stack = S.stack.map(x => ({ ...x })); } loadInbox(); }
+  }
+  meRedraw();
+}
+/* is the maker login there at all? Asked once, without signing in: a missing view answers 404, a present one answers 401 */
+async function probeMe() {
+  if (!CFG_ON || !SB || AU.probe || AD.session) return;
+  AU.probe = 'busy'; const r = await dbq(s => s.from('my_maker').select('id').limit(1)); AU.probe = r.gone ? 'gone' : 'ok'; if (r.gone) meRedraw();
+}
+const signinOK = () => CFG_ON && AU.probe !== 'gone';
+
+/* ---- the maker's inbox (my_inbox) ---- */
+const IBCOLS = 'route_id,request_id,route_status,seen_at,offer_note,offer_price_ils,routed_at,title,crafts,text,due,contact,created_at,request_status';
+const IBPAGE = 20;
+const normIb = r => ({ route: String(r.route_id), rid: String(r.request_id || ''), rs: String(r.route_status || 'sent'), offerNote: r.offer_note == null ? '' : cleanBlock(r.offer_note, 500), offerPrice: intOrNull(r.offer_price_ils), routedAt: String(r.routed_at || ''), title: cleanText(r.title, 120), crafts: Array.isArray(r.crafts) ? r.crafts.map(c => String(c).slice(0, 30)) : [], text: cleanBlock(r.text, 2000), due: cleanText(r.due, 80), contact: r.contact == null ? '' : String(r.contact).slice(0, 120), created: String(r.created_at || ''), rstatus: String(r.request_status || ''), edited: r.edited_at ? String(r.edited_at) : '', err: '' });
+async function loadInbox(more) {
+  const ib = AU.inbox; if (!SB || !AU.maker || ib.busy) return;
+  ib.busy = true; if (!more && !ib.list.length) ib.st = 'loading'; ib.err = ''; meRedraw();
+  const from = more ? ib.list.length : 0, q = cols => s => s.from('my_inbox').select(cols).order('routed_at', { ascending: false }).range(from, from + IBPAGE - 1);
+  let r = await dbq(q(IBCOLS + ',edited_at'));
+  if (r.error && !r.gone && !r.off) r = await dbq(q(IBCOLS));   /* edited_at arrives with the newest database update */
+  ib.busy = false;
+  if (r.gone) ib.st = 'gone';
+  else if (r.error || !Array.isArray(r.data)) { if (more) ib.err = 'failed'; else ib.st = 'failed'; }
+  else { const rows = r.data.filter(x => x && x.route_id).map(normIb); ib.list = more ? ib.list.concat(rows) : rows; ib.more = r.data.length === IBPAGE; ib.st = 'ready'; }
+  meRedraw();
+}
+function buyerContact(c, title) {
+  const raw = String(c || '').trim(); if (!raw) return '';
+  const em = contactEmail(raw);
+  if (em) return `<div class="contact"><a class="cbtn2" href="${esc(`mailto:${em}?subject=${encodeURIComponent('לגבי הבקשה שלך בבהזמנה: ' + oneLine(title, 80))}`)}">${svg(UI.mail)}מייל</a></div><p class="small muted"><bdi dir="ltr">${esc(em)}</bdi></p>`;
+  const ph = contactPhone(raw);
+  if (ph) return `<div class="contact"><a class="cbtn2 wa" href="${esc(`${ph.wa}?text=${encodeURIComponent(`היי, קיבלתי את הבקשה שלך בבהזמנה: ״${oneLine(title, 80)}״. אפשר לדבר על זה?`)}`)}" ${OUT}>${svg(UI.wa)}וואטסאפ</a><a class="cbtn2" href="${esc(ph.tel)}">${svg(UI.phone)}התקשרו</a></div><p class="small muted"><bdi dir="ltr">${esc(oneLine(raw, 40))}</bdi></p>`;
+  return `<p class="note">פרטי הקשר: <span dir="auto">${esc(oneLine(raw, 120))}</span></p>`;
+}
+const RT_MAKER = { sent: 'חדשה', seen: 'נקראה', thinking: 'בבדיקה', offered: 'הצעתם', declined: 'לא מתאים' };
+function inboxCard(it) {
+  const open = AU.inbox.open === it.route, closed = it.rstatus === 'closed', rid = esc(it.route);
+  const acts = closed ? '<p class="note">מי שביקש סגר את הבקשה. אפשר לראות אותה, אי אפשר להשיב.</p>' : `<div class="row wrap">
+      ${it.rs !== 'thinking' && it.rs !== 'offered' ? `<button type="button" class="btn small ghost" data-act="ibthink" data-v="${rid}">אני חושב על זה</button>` : ''}
+      ${it.rs === 'offered' ? `<button type="button" class="btn small ghost" data-act="ibthink" data-v="${rid}">אני חושב על זה</button>` : ''}
+      <button type="button" class="btn small" data-act="iboffer" data-v="${rid}">${it.rs === 'offered' ? 'לערוך את ההצעה' : 'להציע'}</button>
+      ${it.rs !== 'declined' ? `<button type="button" class="btn small ghost" data-act="ibdecline" data-v="${rid}">לא מתאים</button>` : ''}</div>`;
+  return `<article class="rq${open ? ' open' : ''}${closed ? ' closed' : ''}"><button type="button" class="rq-head" data-act="ibopen" data-v="${rid}" aria-expanded="${open}">
+      <span class="rq-t">${esc(it.title)}</span>
+      <span class="row wrap">${stChip(closed ? 'נסגרה' : RT_MAKER[it.rs] || it.rs, closed ? '' : it.rs === 'sent' ? 'new' : it.rs === 'offered' ? 'go' : it.rs === 'declined' ? 'dim' : '')}${it.edited ? stChip(`הבקשה עודכנה ב־${dateHe(it.edited)}`, 'edit') : ''}${craftTags(it.crafts)}</span>
+      <span class="small muted">${it.due ? `עד מתי: ${esc(it.due)} · ` : ''}הגיעה אליכם ב־${esc(dateHe(it.routedAt))}</span></button>
+    ${open ? `<div class="rq-body">${it.text ? `<p class="rstory">${esc(it.text)}</p>` : ''}
+      ${it.rs === 'offered' ? `<div class="note"><b>ההצעה שלכם:</b> ${esc(it.offerNote)}<br>${priceHTML(it.offerPrice)}</div>` : ''}
+      ${closed ? '' : `<div><span class="lbl">פרטי הקשר של מי שביקש</span>${buyerContact(it.contact, it.title)}</div>`}
+      ${acts}<p class="form-err" role="alert" ${it.err ? '' : 'hidden'}>${esc(it.err)}</p></div>` : ''}</article>`;
+}
+function inboxHTML() {
+  const ib = AU.inbox;
+  if (ib.st === 'loading' || ib.st === 'idle') return '<p class="muted" role="status">טוענים את הבקשות</p>';
+  if (ib.st === 'gone') return '<div class="s-empty"><p>תיבת הבקשות תיפתח בקרוב.</p></div>';
+  if (ib.st === 'failed') return '<div class="s-empty"><p>הבקשות לא נטענו.</p><button type="button" class="btn" data-act="ibretry">לנסות שוב</button></div>';
+  if (!ib.list.length) return '<div class="s-empty"><p class="say">עוד לא הגיעו בקשות.</p><p class="small muted">כשנעביר אליך בקשה היא תופיע כאן.</p></div>';
+  return `<div class="rq-list">${ib.list.map(inboxCard).join('')}</div>${ib.err ? '<p class="note" role="alert">לא הצלחנו לטעון עוד. נסו שוב.</p>' : ''}${ib.more ? `<button type="button" class="btn ghost block" data-act="ibmore" ${ib.busy ? 'disabled' : ''}>עוד</button>` : ''}`;
+}
+async function patchRoute(it, payload, cond) {
+  const r = await dbq(s => { let q = s.from('request_routes').update(payload).eq('id', it.route); if (cond) q = q.eq('status', cond); return q.select(); });
+  if (r.error) return { err: friendly(r.error, 'route') };
+  if (!r.data || !r.data.length) return { none: true, err: 'הבקשה לא נמצאה.' };
+  const row = r.data[0]; it.rs = String(row.status || it.rs); it.offerNote = row.offer_note == null ? '' : cleanBlock(row.offer_note, 500); it.offerPrice = intOrNull(row.offer_price_ils); return { ok: true };
+}
+async function routeAct(id, payload, done) {
+  const it = AU.inbox.list.find(x => x.route === id); if (!it) return;
+  it.err = ''; const r = await patchRoute(it, payload);
+  if (r.err) { it.err = r.err; meRedraw(); return r; }
+  if (done) done(); meRedraw(); return r;
+}
+const offerSheet = it => `<form class="sheet-body" data-form="offer" data-v="${esc(it.route)}" novalidate>
+    <div><h2 class="sec-title">${it.rs === 'offered' ? 'עריכת ההצעה' : 'להציע'}</h2><p class="small muted" style="margin-top:4px">${esc(it.title)}</p></div>
+    <div class="field"><label for="of-note">הערה למי שביקש</label><textarea class="input" id="of-note" name="note" rows="4" maxlength="500" aria-describedby="of-h" aria-required="true">${esc(it.offerNote)}</textarea><span class="hint" id="of-h">למשל: מה תכינו, מאיזה חומר וכמה זמן זה ייקח. עד 500 תווים.</span></div>
+    <div class="field"><label for="of-price">מחיר בשקלים <span class="m">(לא חובה)</span></label><input class="input" id="of-price" name="price" inputmode="numeric" dir="ltr" maxlength="9" autocomplete="off" value="${it.offerPrice === null ? '' : it.offerPrice}"><span class="hint">מספר שלם, עד 1,000,000. בלי מחיר, יופיע ״מחיר בפנייה״.</span></div>
+    <p class="form-err" id="of-err" role="alert" hidden></p>
+    <div class="row"><button type="button" class="btn ghost block" data-act="closesheet">ביטול</button><button type="submit" class="btn block">שליחת ההצעה</button></div></form>`;
+async function submitOffer(f, id) {
+  const it = AU.inbox.list.find(x => x.route === id), err = f.querySelector('#of-err'); if (!it) return;
+  const note = f.querySelector('#of-note').value.trim(), pr = f.querySelector('#of-price').value.replace(/[,\s]/g, '');
+  f.querySelectorAll('[aria-invalid]').forEach(x => x.removeAttribute('aria-invalid'));
+  const bad = !note ? ['of-note', 'כתבו הערה קצרה להצעה.'] : Array.from(note).length > 500 ? ['of-note', 'ההערה ארוכה מדי (עד 500 תווים).'] : pr !== '' && (!/^\d{1,7}$/.test(pr) || +pr > 1000000) ? ['of-price', 'המחיר צריך להיות בין 0 ל־1,000,000.'] : null;
+  if (bad) { const el = f.querySelector('#' + bad[0]); el.setAttribute('aria-invalid', 'true'); err.textContent = bad[1]; err.hidden = false; el.focus(); return; }
+  const btn = f.querySelector('button[type="submit"]'); btn.disabled = true;
+  const r = await patchRoute(it, { status: 'offered', offer_note: note, offer_price_ils: pr === '' ? null : +pr });
+  if (r.err) { err.textContent = r.err; err.hidden = false; btn.disabled = false; return; }
+  it.err = ''; closeSheet(true); meRedraw(); toast('ההצעה נשלחה');
+}
+
+/* ---- the maker's pieces (listings) ---- */
+const MLCOLS = 'id,title,description,price_ils,photos,availability,status,admin_note,created_at';
+const LS_LABEL = { pending: 'ממתין לאישור', approved: 'מוצג באתר', rejected: 'לא אושר', hidden: 'מוסתר' };
+const normMine = r => ({ id: String(r.id), title: cleanText(r.title, 80), desc: cleanBlock(r.description, 1500), price: intOrNull(r.price_ils), photos: (Array.isArray(r.photos) ? r.photos : []).map(String).filter(okPath), sold: r.availability === 'sold', status: String(r.status || 'pending'), note: cleanText(r.admin_note, 300) });
+async function loadMyListings(more) {
+  const my = AU.my; if (!SB || !AU.maker || my.busy) return;
+  my.busy = true; if (!more && !my.list.length) my.st = 'loading'; my.err = ''; meRedraw();
+  const from = more ? my.list.length : 0;
+  const r = await dbq(s => s.from('listings').select(MLCOLS).eq('maker_id', AU.maker.id).order('created_at', { ascending: false }).order('id', { ascending: false }).range(from, from + LPAGE - 1));
+  my.busy = false;
+  if (r.gone) my.st = 'gone'; else if (r.error || !Array.isArray(r.data)) { if (more) my.err = 'failed'; else my.st = 'failed'; }
+  else { const rows = r.data.filter(x => x && x.id).map(normMine); my.list = more ? my.list.concat(rows) : rows; my.more = r.data.length === LPAGE; my.st = 'ready'; }
+  meRedraw();
+}
+const myCard = l => `<article class="mine-l${l.sold ? ' sold' : ''}"><div class="mine-l-top"><span class="av sq">${l.photos[0] ? rImg(l.photos[0], '', LB) : '<span class="ini">·</span>'}</span>
+    <div class="mine-l-info"><b class="lt">${esc(l.title)}</b><span class="small">${priceHTML(l.price)}</span><span class="row wrap">${stChip(LS_LABEL[l.status] || l.status, l.status === 'approved' ? 'go' : l.status === 'rejected' ? 'warn' : l.status === 'hidden' ? 'dim' : '')}${l.sold ? stChip('נמכרה', 'dim') : ''}</span></div></div>
+    ${l.status === 'rejected' && l.note ? `<p class="note">מה שכתבנו: ${esc(l.note)}</p>` : ''}
+    <div class="row wrap"><button type="button" class="btn small ghost" data-act="mlsold" data-v="${esc(l.id)}">${l.sold ? 'סמנו כזמינה שוב' : 'סמנו כנמכרה'}</button><button type="button" class="btn small ghost" data-act="mledit" data-v="${esc(l.id)}">עריכה</button><button type="button" class="btn small ghost" data-act="mldel" data-v="${esc(l.id)}">מחיקה</button></div></article>`;
+function myListingsHTML() {
+  const my = AU.my;
+  const add = '<button type="button" class="btn block" data-act="mladd">להוסיף יצירה</button>';
+  if (my.st === 'idle' || my.st === 'loading') return '<p class="muted" role="status">טוענים את היצירות</p>';
+  if (my.st === 'gone') return '<div class="s-empty"><p>היצירות יעלו בקרוב.</p></div>';
+  if (my.st === 'failed') return '<div class="s-empty"><p>היצירות לא נטענו.</p><button type="button" class="btn" data-act="mlretry">לנסות שוב</button></div>';
+  return `${add}${my.list.length ? `<div class="rq-list">${my.list.map(myCard).join('')}</div>` : '<div class="s-empty"><p class="say">עוד לא הוספתם יצירות.</p><p class="small muted">כל יצירה עוברת אישור אצלנו לפני שהיא מופיעה באתר.</p></div>'}${my.err ? '<p class="note" role="alert">לא הצלחנו לטעון עוד. נסו שוב.</p>' : ''}${my.more ? `<button type="button" class="btn ghost block" data-act="mlmore" ${my.busy ? 'disabled' : ''}>עוד</button>` : ''}`;
+}
+/* the add / edit form. Photos use the same helpers as the join form (preparePhoto, photosHTML, addPhotos): up to 10, as they are, up to 10 MB each. */
+const LP = [];                                    // photos of the listing form: { blob, type, name, url, path } (path = already in the bucket)
+const LF = { id: '', batch: '', n: 0, active: false, saved: false, pending: null, busy: false };
+const MAX_LP = 10;
+function clearListingForm(dropUploaded) {
+  const orphans = dropUploaded && !LF.saved ? LP.filter(p => p.path && p.fresh).map(p => p.path) : [];
+  LP.forEach(p => { if (!p.existing) URL.revokeObjectURL(p.url); }); LP.length = 0;
+  Object.assign(LF, { id: '', batch: '', n: 0, active: false, saved: false, pending: null, busy: false });
+  if (orphans.length && SB) { try { SB.storage.from(LB).remove(orphans).catch(() => {}); } catch (e) { /* only leaves orphan files */ } }
+}
+const lPhotosHTML = () => photosHTML(LP, MAX_LP, 'l', 'תמונה של היצירה');
+const drawLP = () => { const b = document.getElementById('l-photos'); if (b) b.innerHTML = lPhotosHTML(); };
+const lForm = ({ id }) => {
+  const ed = !!id, cur0 = ed ? AU.my.list.find(x => x.id === id) : null;
+  if (!AU.maker) return `${head('יצירה')}<div class="stack g"><div class="s-empty"><p>הדף הזה למי שנכנס כיוצר.</p><button type="button" class="btn" data-act="tab" data-v="mine">לאזור שלי</button></div></div>`;
+  if (ed && !cur0) return `${head('עריכת יצירה')}<div class="stack g"><p class="empty">לא מצאנו את היצירה. חזרו לרשימה ונסו שוב.</p></div>`;
+  const v = cur0 || { title: '', desc: '', price: null };
+  return `${head(ed ? 'עריכת יצירה' : 'יצירה חדשה')}
+  <div class="stack tight g">
+    ${ed ? '<p class="note" role="note">אחרי שמירה, היצירה תחזור לאישור אצלנו ולא תופיע באתר עד שנאשר אותה שוב.</p>' : '<p class="muted">כל יצירה עוברת אישור אצלנו לפני שהיא מופיעה באתר.</p>'}
+    <form class="f" data-form="listing" data-v="${esc(id || '')}" novalidate>
+      <div class="field"><label for="l-title">שם היצירה</label><input class="input" id="l-title" name="title" maxlength="80" autocomplete="off" aria-required="true" value="${esc(v.title)}"><span class="hint">בין 2 ל־80 תווים.</span></div>
+      <div class="field"><label for="l-desc">תיאור <span class="m">(לא חובה)</span></label><textarea class="input" id="l-desc" name="description" rows="5" maxlength="1500" aria-describedby="l-count">${esc(v.desc)}</textarea><span class="hint" id="l-count">${Array.from(v.desc).length} מתוך 1500</span></div>
+      <div class="field"><label for="l-price">מחיר בשקלים</label><input class="input" id="l-price" name="price" inputmode="numeric" dir="ltr" maxlength="9" autocomplete="off" value="${v.price === null || v.price === undefined ? '' : v.price}" ${ed && v.price === null ? 'disabled' : ''} aria-describedby="l-price-h"><span class="hint" id="l-price-h">מספר שלם, עד 1,000,000. המחיר מוצג באתר כמו שכתבתם.</span>
+        <label class="opt"><input type="checkbox" id="l-onreq" name="onreq" ${ed && v.price === null ? 'checked' : ''}><span class="grow">מחיר בפנייה</span></label></div>
+      <div class="field"><span class="lbl" id="l-ph-l">תמונות ${STAR}<span class="sr">, חובה</span></span><div class="photos" id="l-photos" role="group" aria-labelledby="l-ph-l">${lPhotosHTML()}</div>
+        <input type="file" id="l-file" accept="image/jpeg,image/png,image/webp" multiple hidden aria-label="בחירת תמונות של היצירה">
+        <span class="hint">מתמונה אחת עד ${MAX_LP}. התמונות עולות בגודל המקורי, בלי פרטי המיקום והמצלמה שבקובץ. עד 10MB לתמונה (JPG, PNG או WebP).</span><span class="hint" id="l-pmsg" role="status" aria-live="polite">${LP.length ? photoCount(LP, MAX_LP) : ''}</span></div>
+      <p class="form-err" id="l-err" role="alert" hidden></p>
+      <button class="btn block" type="submit">${ed ? 'שמירת השינויים' : 'שליחה לאישור'}</button>
+    </form></div>`;
+};
+async function submitListing(f) {
+  const id = f.dataset.v, err = f.querySelector('#l-err'), mk = AU.maker; if (!mk || LF.busy) return;
+  const title = f.querySelector('#l-title').value.trim(), desc = f.querySelector('#l-desc').value.replace(/\r\n?/g, '\n').trim(), onreq = f.querySelector('#l-onreq').checked, pr = f.querySelector('#l-price').value.replace(/[,\s]/g, '');
+  f.querySelectorAll('[aria-invalid]').forEach(x => x.removeAttribute('aria-invalid'));
+  const bad = Array.from(title).length < 2 ? ['l-title', 'הכותרת צריכה להיות בין 2 ל־80 תווים.'] : Array.from(desc).length > 1500 ? ['l-desc', 'התיאור ארוך מדי (עד 1500 תווים).']
+    : !onreq && pr === '' ? ['l-price', 'כתבו מחיר בשקלים, או סמנו ״מחיר בפנייה״.'] : !onreq && (!/^\d{1,7}$/.test(pr) || +pr > 1000000) ? ['l-price', 'המחיר צריך להיות בין 0 ל־1,000,000.']
+    : !LP.length ? ['l-pick', 'הוסיפו לפחות תמונה אחת.'] : LP.length > MAX_LP ? ['l-pick', 'אפשר עד 10 תמונות.'] : null;
+  if (bad) { const el = f.querySelector('#' + bad[0]) || f.querySelector('.add-photo'); if (el && el.classList.contains('input')) el.setAttribute('aria-invalid', 'true'); err.textContent = bad[1]; err.hidden = false; if (el) el.focus(); return; }
+  err.hidden = true;
+  const vals = { title, desc, price: onreq ? null : +pr };
+  if (id) {
+    const old = AU.my.list.find(x => x.id === id); if (!old) return;
+    const same = old.title === title && old.desc === desc && old.price === vals.price && LP.length === old.photos.length && LP.every((p, i) => p.existing && p.path === old.photos[i]);
+    if (same) { err.textContent = 'לא שיניתם כלום.'; err.hidden = false; return; }
+    LF.pending = vals; openSheet(`<div class="sheet-body"><h2 class="sec-title">לשמור את השינויים?</h2><p>שינוי בפרטי היצירה יוציא אותה מהאתר עד שנאשר אותה מחדש.</p><div class="row"><button type="button" class="btn ghost block" data-act="closesheet">ביטול</button><button type="button" class="btn block" data-act="lfconfirm">כן, לשמור</button></div></div>`, 'לשמור את השינויים?'); return;
+  }
+  await saveListing(f, vals);
+}
+async function saveListing(f, vals) {
+  const id = f.dataset.v, err = f.querySelector('#l-err'), btn = f.querySelector('button[type="submit"]'), mk = AU.maker;
+  if (!SB) { err.textContent = 'אין חיבור כרגע. נסו שוב.'; err.hidden = false; return; }
+  LF.busy = true; btn.disabled = true; btn.textContent = 'שולחים...'; err.hidden = true;
+  let stage = '';
+  try {
+    LF.batch = LF.batch || newToken();
+    for (let i = 0; i < LP.length; i++) {
+      const p = LP[i]; if (p.path) continue;   /* already in the bucket (an earlier try, or an old photo): not uploaded again */
+      stage = `תמונה ${i + 1} מתוך ${LP.length} (${p.name}) לא עלתה. `; btn.textContent = `מעלים תמונה ${i + 1} מתוך ${LP.length}`;
+      /* a fresh name for every upload (a counter, not the place in the list), and a new batch after ten or when a name is taken, so a retry never hits "already exists" */
+      let path = '', error = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (LF.n >= 10) { LF.batch = newToken(); LF.n = 0; }
+        path = `${mk.id}/${LF.batch}-${LF.n++}.${EXT[p.type] || 'jpg'}`;
+        ({ error } = await SB.storage.from(LB).upload(path, p.blob, { contentType: p.type, cacheControl: '31536000', upsert: false }));
+        if (error && (errCode(error) === '409' || /already exists|duplicate/i.test(String(error.message || '')))) { LF.batch = newToken(); LF.n = 0; continue; }
+        break;
+      }
+      if (error) { const ex = new Error(storageErr(error)); ex.storage = true; throw ex; }
+      p.path = path; p.fresh = true;
+    }
+    stage = ''; btn.textContent = 'שומרים...';
+    const photos = LP.map(p => p.path);
+    if (id) {
+      const old = AU.my.list.find(x => x.id === id), patch = {};
+      if (old.title !== vals.title) patch.title = vals.title; if (old.desc !== vals.desc) patch.description = vals.desc; if (old.price !== vals.price) patch.price_ils = vals.price;
+      if (photos.length !== old.photos.length || photos.some((p, i) => p !== old.photos[i])) patch.photos = photos;
+      const { data, error } = await SB.from('listings').update(patch).eq('id', id).select('id');
+      if (error) throw error;
+      if (!data || data.length !== 1) { const ex = new Error('היצירה לא נמצאה.'); ex.plain = true; throw ex; }
+      const gone = old.photos.filter(p => !photos.includes(p)); if (gone.length) { try { SB.storage.from(LB).remove(gone).catch(() => {}); } catch (e) { /* orphans only */ } }
+    } else {
+      const { data, error } = await SB.from('listings').insert({ maker_id: mk.id, title: vals.title, description: vals.desc, price_ils: vals.price, photos, availability: 'available' }).select('id');
+      if (error) throw error;
+      if (!data || !data.length) { const ex = new Error('לא הצלחנו לשמור, נסו שוב.'); ex.plain = true; throw ex; }
+    }
+  } catch (e) {
+    console.warn('listing failed', errCode(e), e); LF.busy = false;
+    const msg = e && (e.storage || e.plain) ? e.message : friendly(e);
+    showErr(err, id ? 'השינויים לא נשמרו. מה שמילאתם עדיין כאן.' : 'היצירה לא נשלחה. מה שמילאתם עדיין כאן.', stage + msg);
+    btn.disabled = false; btn.textContent = id ? 'שמירת השינויים' : 'שליחה לאישור'; return;
+  }
+  LF.saved = true; LF.busy = false; clearListingForm(false); AU.my.st = 'idle'; AU.my.list = []; ME.tab = 'listings'; loadMyListings();
+  if (id) { S.stack = [{ s: 'home' }, { s: 'mine' }]; replaceH(); render(true); toast('השינויים נשמרו. היצירה תופיע שוב באתר אחרי שנאשר אותה שוב.'); }
+  else { S.stack = [{ s: 'home' }, { s: 'mine' }, { s: 'lthanks' }]; replaceH(); render(true); }
+}
+
+/* ---- the buyer: requests sent from this device, and what became of them ---- */
+const MYREQ_KEY = 'behazmana.myRequests';
+let MYREQ = lsGet(MYREQ_KEY, Array.isArray, []).filter(x => x && typeof x.token === 'string' && UUID_RE.test(x.token.toLowerCase()) && typeof x.title === 'string').map(x => ({ token: x.token.toLowerCase(), title: x.title.slice(0, 120), createdAt: String(x.createdAt || '').slice(0, 40) })).slice(0, 50);
+const saveMyReq = () => lsSet(MYREQ_KEY, MYREQ);
+const RQ = {}, EDIT = { st: 'unknown', data: null };
+const REQ_LABEL = { new: 'אנחנו עוד קוראים אותה', routed: 'נשלחה ליוצרים', closed: 'נסגרה' };
+const RT_BUYER = { sent: 'עוד לא ראה', seen: 'ראה', thinking: 'חושב על זה', offered: 'הציע', declined: 'לא מתאים' };
+const reqRedraw = () => { if (cur().s === 'myreq') render(); };
+function normReq(d) {
+  const routes = (Array.isArray(d.routes) ? d.routes : []).filter(r => r && typeof r === 'object').map(r => ({ id: String(r.maker_id || ''), name: cleanText(r.maker_name, 80), city: cleanText(r.maker_city, 60), craft: String(r.maker_craft || '').slice(0, 20), other: cleanOther(r.maker_craft_other), portrait: okPath(r.maker_portrait) ? String(r.maker_portrait) : '',
+    rs: ['sent', 'seen', 'thinking', 'offered', 'declined'].includes(r.route_status) ? r.route_status : 'sent', note: r.offer_note == null ? '' : cleanBlock(r.offer_note, 500), price: intOrNull(r.offer_price_ils), phone: contactPhone(r.contact_phone), email: contactEmail(r.contact_email) }));
+  return { title: cleanText(d.title, 120), text: cleanBlock(d.text, 2000), crafts: (Array.isArray(d.crafts) ? d.crafts : []).map(c => String(c).slice(0, 30)), due: cleanText(d.due, 80), status: ['new', 'routed', 'closed'].includes(d.status) ? d.status : 'new', created: String(d.created_at || ''), closed: !!d.closed || d.status === 'closed', routes };
+}
+async function loadReq(token) {
+  const o = RQ[token] || (RQ[token] = { st: 'loading' }); if (o.busy) return;
+  if (!CFG_ON) { o.st = 'gone'; reqRedraw(); return; }
+  if (!SB) { o.st = AD.failed ? 'failed' : 'loading'; reqRedraw(); return; }
+  o.busy = true; if (!o.data) o.st = 'loading'; o.err = '';
+  const r = await dbq(s => s.rpc('request_status', { p_token: token }));
+  o.busy = false;
+  if (r.gone) o.st = 'gone';
+  else if (r.error) { const m = friendly(r.error, 'status'); if (o.data) { o.st = 'ok'; o.err = m; } else { o.st = /עומס/.test(m) ? 'busy' : 'failed'; o.err = m; } }
+  else if (r.data === null || r.data === undefined) { o.st = 'unknown'; o.data = null; }
+  else if (typeof r.data !== 'object') { o.st = 'failed'; }
+  else { o.st = 'ok'; o.data = normReq(r.data); o.at = Date.now(); if (EDIT.st === 'unknown' && !o.data.closed) probeEdit(token); }
+  reqRedraw();
+}
+/* does the edit function exist? Asked once with a real token (no cost): a missing function hides the pencil */
+async function probeEdit(token) {
+  EDIT.st = 'busy'; const r = await dbq(s => s.rpc('request_for_edit', { p_token: token }));
+  EDIT.st = r.gone ? 'gone' : r.error ? 'unknown' : 'ok'; if (r.gone) reqRedraw();
+}
+const agoText = at => { const n = Math.floor((Date.now() - at) / 60000); return n < 1 ? 'עודכן לפני רגע' : n === 1 ? 'עודכן לפני דקה' : `עודכן לפני ${n} דקות`; };
+function myReqsList() {
+  const legacy = MINE.filter(x => !MYREQ.some(y => y.title === x.t));
+  if (!MYREQ.length && !legacy.length) return `<div class="s-empty"><p>עוד לא שלחתם בקשות מהמכשיר הזה.</p><button class="btn" data-act="tab" data-v="post">לכתוב בקשה</button></div>`;
+  return `<ul class="sent-list">${MYREQ.map(x => `<li><button type="button" class="entry" data-act="myreq" data-v="${esc(x.token)}"><span class="t">${esc(x.title)}</span><span class="small muted">נשלחה ב־${esc(dateHe(x.createdAt))}</span></button></li>`).join('')}${legacy.map(x => `<li class="plain"><span class="t">${esc(x.t)}</span><span class="small muted">נשלחה ב־${esc(dateHe(x.d))}</span></li>`).join('')}</ul>
+    <p class="small muted" style="margin-top:10px">הרשימה נשמרת רק במכשיר הזה. ניקוי נתוני הדפדפן יסתיר אותה.</p>`;
+}
+const pencilBtn = () => `<button type="button" class="round" data-act="rqedit" aria-label="עריכת הבקשה">${svg(UI.pencil)}</button>`;
+function myReqScreen({ token }) {
+  const loc = MYREQ.find(x => x.token === token), o = RQ[token] || { st: 'loading' }, d = o.data;
+  if (!loc) return `${head('הבקשה שלי')}<div class="stack g"><p class="empty">הבקשה הזו לא שמורה במכשיר הזה.</p></div>`;
+  const closed = !!(d && d.closed), canEdit = d && !closed && EDIT.st !== 'gone';
+  const oth = d ? POST_OTHER.exec(d.text) : null, bodyText = d ? (oth ? d.text.replace(POST_OTHER, '').trim() : d.text) : '';
+  const title = d ? d.title : loc.title;
+  let state;
+  if (o.st === 'loading') state = '<p class="muted" role="status">טוענים את מצב הבקשה</p>';
+  else if (o.st === 'gone') state = '<p class="note" role="note">המעקב עוד לא פעיל. הבקשה נשמרה אצלנו, ונעדכן כשהמעקב יתחיל.</p>';
+  else if (o.st === 'unknown') state = `<div class="panel"><p><b>הבקשה לא נמצאה יותר.</b></p><p class="small muted">אפשר שהיא נמחקה. אם אתם רוצים, נסירו אותה מהרשימה במכשיר הזה.</p><button type="button" class="btn ghost" data-act="rqremove" data-v="${esc(token)}">הסרה מהרשימה</button></div>`;
+  else if (o.st === 'failed' || o.st === 'busy') state = `<div class="panel"><p>${esc(o.err || 'לא הצלחנו לטעון את מצב הבקשה.')}</p><button type="button" class="btn" data-act="rqrefresh">לנסות שוב</button></div>`;
+  else state = '';
+  const routes = d ? (d.routes.length ? d.routes.map(r => {
+    const m = REAL.list.find(x => x.id === r.id), av = r.portrait ? `<span class="av">${rImg(r.portrait, '')}</span>` : `<span class="av"><span class="ini">${esc(initials(r.name))}</span></span>`;
+    const who = `${av}<span class="info"><span class="nm">${esc(r.name)}</span><span class="small muted">${esc(craftText(r.craft, r.other))}${r.city ? ` · ${esc(r.city)}` : ''}</span></span>`;
+    return `<li class="route ${r.rs}"><div class="route-top">${m ? `<button type="button" class="mmain" data-act="rmaker" data-v="${esc(m.id)}">${who}</button>` : `<span class="mmain">${who}</span>`}${stChip(RT_BUYER[r.rs], r.rs === 'offered' ? 'go' : r.rs === 'declined' ? 'dim' : r.rs === 'sent' ? '' : 'seen')}</div>
+      ${r.rs === 'offered' ? `<div class="note"><b>ההצעה:</b> ${esc(r.note)}<br>${priceHTML(r.price)}</div>` : ''}
+      ${r.rs !== 'declined' && (r.phone || r.email) ? `<div class="contact">${r.phone ? `<a class="cbtn2 wa" href="${esc(`${r.phone.wa}?text=${encodeURIComponent(`היי ${firstOf(r.name)}, כתבתי בבהזמנה בקשה: ״${oneLine(title, 80)}״. אשמח לדבר.`)}`)}" ${OUT}>${svg(UI.wa)}וואטסאפ</a><a class="cbtn2" href="${esc(r.phone.tel)}">${svg(UI.phone)}התקשרו</a>` : ''}${r.email ? `<a class="cbtn2" href="${esc(`mailto:${r.email}?subject=${encodeURIComponent('הבקשה שלי בבהזמנה: ' + oneLine(title, 80))}`)}">${svg(UI.mail)}מייל</a>` : ''}</div>` : ''}</li>`; }).join('') : '') : '';
+  return `${head('הבקשה שלי', canEdit ? pencilBtn() : '')}
+  <div class="stack tight g">
+    ${o.saved ? '<p class="form-ok" role="status"><b>נשמר.</b> יוצרים ששלחנו אליהם יראו את העדכון.</p>' : ''}
+    <div class="order zig"><span class="stamp">${esc(d ? REQ_LABEL[d.status] : 'הבקשה')}</span><h2 class="sub-title">${esc(title)}</h2>
+      ${d ? `${bodyText ? `<p class="rstory">${esc(bodyText)}</p>` : ''}<dl class="specs"><div><dt>תחום</dt><dd>${esc(d.crafts.map(c => c === 'other' && oth ? `אחר: ${cleanText(oth[1], 60)}` : craftText(c, '')).join(', ') || '-')}</dd></div><div><dt>עד מתי</dt><dd>${esc(d.due || 'גמיש')}</dd></div><div><dt>נשלחה</dt><dd>${esc(dateHe(d.created || loc.createdAt))}</dd></div></dl>` : `<dl class="specs"><div><dt>נשלחה</dt><dd>${esc(dateHe(loc.createdAt))}</dd></div></dl>`}</div>
+    ${state}
+    ${d ? `<section aria-labelledby="h-routes"><div class="sec-head"><h2 class="sec-title small" id="h-routes" style="margin:0">ליוצרים שהבקשה הגיעה אליהם</h2></div>
+      ${d.routes.length ? `<ul class="route-list">${routes}</ul>` : `<p class="muted">${closed ? 'הבקשה נסגרה.' : 'עוד לא העברנו אותה ליוצרים. אנחנו קוראים אותה.'}</p>`}</section>
+      <div class="row wrap"><button type="button" class="chip" data-act="rqrefresh" ${o.busy ? 'disabled' : ''}>רענון</button><span class="small muted" role="status">${o.err ? esc(o.err) : o.at ? agoText(o.at) : ''}</span></div>
+      ${closed ? '' : '<button type="button" class="btn ghost block" data-act="rqclose">סגרתי את הבקשה</button>'}` : (o.st === 'gone' || o.st === 'unknown') ? '' : ''}
+  </div>`;
+}
+/* an open request refreshes when its screen opens, when the tab becomes visible again, and once a minute while it is visible */
+function rqAuto() { const c = cur(); if (c.s !== 'myreq' || document.visibilityState !== 'visible') return; const o = RQ[c.token]; if (o && o.data && o.data.closed) return; if (MYREQ.some(x => x.token === c.token)) loadReq(c.token); }
+document.addEventListener('visibilitychange', rqAuto);
+setInterval(() => { const c = cur(); if (c.s === 'myreq' && document.visibilityState === 'visible') { const o = RQ[c.token]; if (o && o.st === 'ok' && !(o.data && o.data.closed)) loadReq(c.token); } }, 60000);
+/* edit */
+const POST_OTHER = /(?:^|\n)תחום נוסף: ([^\n]*)$/;
+const editScreen = ({ token }) => {
+  const e = EDIT.data;
+  if (!e || e.token !== token) return `${head('עריכת הבקשה')}<div class="stack g"><div class="s-empty"><p>לא הצלחנו לפתוח את העריכה.</p><button type="button" class="btn" data-act="back">חזרה</button></div></div>`;
+  return `${head('עריכת הבקשה')}<div class="stack tight g">${postForm({ edit: true, token, vals: e })}</div>`;
+};
+async function submitEdit(f) {
+  const d = Object.fromEntries(new FormData(f)), token = f.dataset.v, err = f.querySelector('#p-err'), btn = f.querySelector('button[type="submit"]');
+  const v = readPost(f); if (v.bad) { showBad(f, v.bad); return; }
+  err.hidden = true; btn.disabled = true; btn.textContent = 'שומרים...';
+  const r = await dbq(s => s.rpc('update_request', { p_token: token, p_title: v.title, p_crafts: v.crafts, p_text: v.text, p_due: v.due, p_contact: v.contact }));
+  const fail = m => { showErr(err, 'השינויים לא נשמרו. מה שכתבתם עדיין כאן.', m); btn.disabled = false; btn.textContent = 'שמירת השינויים'; };
+  if (r.gone) { EDIT.st = 'gone'; return fail('העריכה עוד לא פעילה.'); }
+  if (r.error) return fail(friendly(r.error, 'edit'));
+  if (r.data !== true) return fail('הבקשה לא נמצאה.');
+  const loc = MYREQ.find(x => x.token === token); if (loc) { loc.title = v.title.slice(0, 120); saveMyReq(); }
+  const o = RQ[token] || (RQ[token] = { st: 'loading' }); o.saved = true; EDIT.data = null;
+  back(); loadReq(token); toast('נשמר');
+}
 
 /* ---------- screens ---------- */
 const head = (title, extra = '') => `<header class="top g">${S.stack.length > 1 && !gated() ? `<button class="round" data-act="back" aria-label="חזרה">${svg(UI.back)}</button>` : ''}<h1>${title}</h1>${extra}</header>`;
 const findBtn = () => `<button class="round" data-act="search" aria-label="חיפוש יוצרים">${svg(UI.search)}</button>`;
 const legalLinks = (first = '') => `<div class="links-row">${first}<button type="button" class="link" data-act="privacy">מדיניות הפרטיות</button><button type="button" class="link" data-act="terms">תנאי השימוש</button></div>`;
 const HOW = [
-  ['כותבים מה תרצו', 'מה, מאיזה חומר ועד מתי. בלי מחיר.', 'בקשה'],
-  ['אנחנו מעבירים ליוצרים שמתאימים', 'קוראים כל בקשה בעצמנו. כל יוצר באתר אושר אצלנו ביד.', 'יוצרים'],
-  ['מדברים ישירות ומסכמים ביניכם', 'על המחיר, הזמן והתשלום (בביט, בהעברה) מסכמים ביניכם. דרך האתר לא עובר כסף.', 'ביחד']];
+  ['מגישים בקשה', 'מה, מאיזה חומר ועד מתי. בלי מחיר.', 'בקשה'],
+  ['אנחנו קוראים כל בקשה בעצמנו ומוצאים בדיוק מי הכי מתאים לכם.', 'כל יוצר באתר אושר אצלנו ביד.', 'יוצרים'],
+  ['מדברים ישירות', 'מחיר, זמן וכל פרט אחר מסכמים ביניכם.', 'ביחד']];
 /* the hero photo settles once (scale 1.04 to 1, 1.2 s). A re-render inside that window carries on from where it was instead of starting over. */
 let DRIFT_T0 = 0;
 function driftAttr() { const now = performance.now(); if (!DRIFT_T0) DRIFT_T0 = now; const t = now - DRIFT_T0; return t < 1150 ? ` data-drift style="animation-delay:-${Math.round(t)}ms"` : ''; }
@@ -899,28 +1580,29 @@ const fitCraft = c => S.mcraft === 'all' || c === S.mcraft;
 const SCREENS = {
   home: () => `<header class="top g on-dark"><img class="corner-mark" src="logo/mark-slip.svg" width="32" height="40" alt="בהזמנה"><span class="grow"></span>
       <button class="round" data-act="search" aria-label="חיפוש יוצרים">${svg(UI.search)}</button></header>
-    <section class="hero"><div class="photo"><img${driftAttr()} src="img/h/hero-880.jpg" srcset="img/h/hero-480.jpg 480w, img/h/hero-880.jpg 880w" sizes="(max-width: 440px) 100vw, 440px" width="880" height="640" alt="" loading="eager" fetchpriority="high" decoding="async" draggable="false"></div>
+    <section class="hero"><div class="photo"><img${driftAttr()} src="img/h/${HERO.k}-880.jpg" srcset="img/h/${HERO.k}-480.jpg 480w, img/h/${HERO.k}-880.jpg 880w" sizes="(max-width: 440px) 100vw, 440px" width="880" height="640" alt="${esc(HERO.alt)}" loading="eager" fetchpriority="high" decoding="async" draggable="false"></div>
       <div class="slip-wrap g"><div class="slip zig"><img class="logo-big" src="logo/logo-primary-ink.svg" width="168" height="109" alt="">
         <h1>כתבו מה תרצו שיכינו לכם בידיים</h1><p>למשל ארנק עם האותיות של אבא. אנחנו קוראים כל בקשה ומעבירים אותה ליוצרים שמתאימים.</p>
-        <div class="acts"><button class="btn" data-act="tab" data-v="post">לכתוב בקשה</button><button class="link" data-act="join">יוצרים? אפשר להצטרף</button></div></div></div><div class="below-slip"></div></section>
+        <div class="acts"><button class="btn" data-act="tab" data-v="post">לכתוב בקשה</button>${canJoin() ? '<button class="link" data-act="join">יוצרים? אפשר להצטרף</button>' : ''}</div></div></div><div class="below-slip"></div></section>
     <div class="stack g">
       <section aria-labelledby="h-how"><div class="sec-head"><h2 class="sec-title" id="h-how">איך זה עובד</h2></div>
         <div class="tale zig">${HOW.map(([t, d, st]) => `<div class="tale-row"><div class="what"><b>${t}</b><span>${d}</span></div><span class="stamp" aria-hidden="true">${st}</span></div>`).join('')}</div></section>
+      ${homeStrip()}
       <section aria-labelledby="h-real"><div class="sec-head"><h2 class="sec-title" id="h-real">יוצרים שהצטרפו</h2>${REAL.list.length ? `<span class="small muted">${REAL.list.length}</span>` : ''}</div>
         ${REAL.list.length ? '<p class="muted" style="margin-bottom:14px">כולם נרשמו בעצמם ואושרו אצלנו ביד.</p>' : ''}${makersBlock(REAL.list, 6)}</section>
       <div class="bleed"><section class="clayfield g" aria-labelledby="h-reply"><p class="say">יש לכם רעיון?</p>
-          <div class="reply"><h2 id="h-reply">ספרו לנו מה תרצו</h2><p>כמה מילים מספיקות: מה, מאיזה חומר ועד מתי. את המחיר היוצרים יציעו.</p><button class="btn" data-act="tab" data-v="post">לכתוב בקשה</button><button class="btn ghost" data-act="join">יוצרים? אפשר להצטרף</button></div></section>
+          <div class="reply"><h2 id="h-reply">ספרו לנו מה תרצו</h2><p>כמה מילים מספיקות: מה, מאיזה חומר ועד מתי. את המחיר היוצרים יציעו.</p><button class="btn" data-act="tab" data-v="post">לכתוב בקשה</button>${canJoin() ? '<button class="btn ghost" data-act="join">יוצרים? אפשר להצטרף</button>' : ''}</div></section>
         <footer class="backside g"><img class="logo-line" src="logo/logo-wordmark-ink.svg" width="204" height="96" alt=""><p class="sign">כתבו לנו</p>
           <div class="links-col">${mailLink('שלום מבהזמנה')}</div>
-          <p>האתר עוד חדש. אנחנו קוראים כל בקשה וכל הרשמה בעצמנו, וחוזרים אליכם כשמספיקים. דרך האתר לא עובר כסף: מי שמבקש ומי שיוצר מסכמים ביניהם.</p>
-          ${legalLinks('<button type="button" class="link" data-act="vision">למה בהזמנה</button>')}<p class="imprint">בהזמנה · עבודת יד, לפי הזמנה</p></footer></div>
+          <p>האתר עוד חדש. אנחנו קוראים כל בקשה וכל הרשמה בעצמנו, וחוזרים אליכם כשמספיקים.</p>
+          ${legalLinks('<button type="button" class="link" data-act="vision">מי אנחנו</button>')}<p class="imprint">בהזמנה · עבודת יד, לפי הזמנה</p></footer></div>
     </div>`,
 
   makers: () => { const list = REAL.list.filter(m => fitCraft(m.craft)), crafts = new Set(REAL.list.map(m => m.craft));
     return `${head('היוצרים', REAL.list.length ? findBtn() : '')}
     <div class="stack tight g">
       <p class="muted">כולם נרשמו בעצמם ואושרו אצלנו ביד.</p>
-      ${REAL.list.length > 1 && crafts.size > 1 ? `<div class="filters bleed" role="group" aria-label="סינון לפי תחום">${[['all', 'הכל'], ...Object.entries(CRAFTS).filter(([k]) => crafts.has(k))].map(([k, v]) => `<button data-act="mcraft" data-v="${k}" aria-pressed="${S.mcraft === k}">${v}</button>`).join('')}</div>` : ''}
+      ${REAL.list.length > 1 && crafts.size > 1 ? `<div class="filters bleed" role="group" aria-label="סינון לפי תחום">${[['all', 'הכל'], ...Object.entries(CRAFTS).filter(([k]) => crafts.has(k)), ...(crafts.has('other') ? [['other', 'אחר']] : [])].map(([k, v]) => `<button data-act="mcraft" data-v="${k}" aria-pressed="${S.mcraft === k}">${v}</button>`).join('')}</div>` : ''}
       ${REAL.list.length && !list.length ? `<p class="empty">עוד אין יוצרים ב${CRAFTS[S.mcraft] || 'תחום הזה'}.</p>` : makersBlock(list)}
       ${REAL.list.length ? '<p class="note">רוצים שיכינו לכם משהו? כתבו בקשה, ואנחנו נעביר אותה ליוצרים שמתאימים.</p><button class="btn block" data-act="tab" data-v="post">לכתוב בקשה</button>' : ''}
     </div>`; },
@@ -930,57 +1612,19 @@ const SCREENS = {
     if (!m) return `${head('יוצר')}<div class="stack g">${realState() === 'loading' ? '<p class="muted" role="status">טוענים...</p>' : '<p class="empty">לא מצאנו את היוצר הזה.</p>'}</div>`;
     const face = m.portrait || m.photos[0], works = m.portrait ? m.photos : m.photos.slice(1);   /* old rows have no portrait: their first photo stands in */
     return `${head(`<span class="sr">פרופיל של ${esc(m.name)}</span>`)}<section class="banner">${face ? rImg(face, `${m.name}`) : ''}
-      <div class="copy g"><h2>${esc(m.name)}</h2><span class="where">${craftName(m.craft)}${m.city ? ` · ${esc(m.city)}` : ''}</span></div></section>
+      <div class="copy g"><h2>${esc(m.name)}</h2><span class="where">${esc(craftText(m.craft, m.craftOther))}${m.city ? ` · ${esc(m.city)}` : ''}</span></div></section>
     <div class="stack g">
-      ${m.contact ? `<div class="contact"><a class="cbtn2 wa" href="${esc(waHref(m))}" ${OUT}>${svg(UI.wa)}וואטסאפ</a><a class="cbtn2" href="${esc(m.contact.tel)}">${svg(UI.phone)}התקשרו</a></div>`
+      ${m.contact || m.email ? `<div class="contact">${m.contact ? `<a class="cbtn2 wa" href="${esc(waHref(m))}" ${OUT}>${svg(UI.wa)}וואטסאפ</a><a class="cbtn2" href="${esc(m.contact.tel)}">${svg(UI.phone)}התקשרו</a>` : ''}${m.email ? `<a class="cbtn2" href="${esc(mailHref(m))}">${svg(UI.mail)}מייל</a>` : ''}</div>`
         : `<div class="askline"><p>אפשר לפנות אליהם דרך האתר. כתבו מה תרצו, ואנחנו נעביר את הבקשה.</p><button type="button" class="link" data-act="ask" data-v="${esc(m.craft)}">לכתוב בקשה</button></div>`}
       ${m.story ? `<section><div class="sec-head"><h2 class="sec-title">הסיפור</h2></div><p class="rstory">${esc(m.story)}</p></section>` : ''}
       ${works.length ? `<section><div class="sec-head"><h2 class="sec-title">מהסדנה</h2></div><div class="strip">${works.map((p, i) => rImg(p, `עבודה של ${m.name}, ${i + 1}`)).join('')}</div></section>` : ''}
-      ${m.contact ? `<p class="note">רוצים שיכינו לכם משהו? כתבו בקשה, ואנחנו נעביר אותה ליוצרים שמתאימים.</p>
+      ${m.contact || m.email ? `<p class="note">רוצים שיכינו לכם משהו? כתבו בקשה, ואנחנו נעביר אותה ליוצרים שמתאימים.</p>
       <button class="btn block" data-act="ask" data-v="${esc(m.craft)}">לכתוב בקשה</button>` : ''}
     </div>`; },
 
   search: () => `<header class="top g">${S.stack.length > 1 ? `<button class="round" data-act="back" aria-label="חזרה">${svg(UI.back)}</button>` : ''}<h1 class="sr">חיפוש יוצרים</h1>
-      <form class="search sq" data-form="search" role="search">${svg(UI.search)}<input id="sq" name="q" type="search" value="${esc(S.sq)}" maxlength="80" placeholder="שם, עיר או מה תרצו שיכינו" aria-label="חיפוש יוצרים" aria-describedby="sq-status" aria-controls="sq-results" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button type="button" class="sq-clear" data-act="sqclear" aria-label="ניקוי החיפוש" ${S.sq ? '' : 'hidden'}>${svg(UI.close)}</button></form></header>
+      <form class="search sq" data-form="search" role="search">${svg(UI.search)}<input id="sq" name="q" type="search" value="${esc(S.sq)}" maxlength="80" placeholder="שם, עיר או מה תרצו שיכינו" aria-label="חיפוש יוצרים ויצירות" aria-describedby="sq-status" aria-controls="sq-results" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button type="button" class="sq-clear" data-act="sqclear" aria-label="ניקוי החיפוש" ${S.sq ? '' : 'hidden'}>${svg(UI.close)}</button></form></header>
     <div class="stack tight g"><p class="small muted sq-status" id="sq-status" role="status" aria-live="polite">${esc(searchStatus())}</p><div id="sq-results" class="stack tight" style="padding:0">${searchHTML()}</div></div>`,
-
-  post: ({ title = '', hint } = {}) => `${head('בקשה חדשה')}
-    <div class="stack tight g">
-      <p class="muted">כתבו מה תרצו. אנחנו קוראים כל בקשה ומעבירים אותה ליוצרים שמתאימים.</p>
-      ${CFG_ON ? '' : '<p class="note" role="note">האתר כרגע לא מחובר לשרת. אפשר למלא ולראות איך זה נראה, אבל שום דבר לא נשלח ולא נשמר.</p>'}
-      <form class="f" data-form="post" novalidate>
-        <div class="field"><label for="p-title">מה תרצו שיכינו בשבילכם?</label><input class="input" id="p-title" name="title" maxlength="120" aria-required="true" placeholder="למשל: קרש חיתוך עם שמות הילדים" autocomplete="off" value="${esc(title)}"></div>
-        <fieldset class="field"><legend class="lbl">תחום (אפשר כמה)</legend>
-          <div class="picks">${Object.entries(CRAFTS).map(([k, v]) => `<label class="pick"><input type="checkbox" name="crafts" value="${k}" id="pc-${k}" ${hint === k ? 'checked' : ''}><span>${v}</span></label>`).join('')}
-            <label class="pick"><input type="checkbox" id="pc-other" name="otherOn" value="1"><span>אחר</span></label></div>
-          <input class="input" id="p-other" name="other" maxlength="60" aria-label="איזה תחום אחר?" placeholder="איזה? למשל זכוכית או טקסטיל" hidden>
-          <span class="hint">עגילים מעץ? סמנו גם ״תכשיטים״ וגם ״עץ״.</span></fieldset>
-        <div class="field"><label for="p-text">פרטים <span class="m">(לא חובה)</span></label><textarea class="input" id="p-text" name="text" maxlength="1900" placeholder="מידות, צבעים, למי זה מיועד"></textarea></div>
-        <div class="field"><label for="p-due">עד מתי? <span class="m">(לא חובה)</span></label><input class="input" id="p-due" name="due" maxlength="80" placeholder="למשל לפני יום ההולדת, ב־12.12"></div>
-        <div class="field"><label for="p-contact">איך חוזרים אליכם?</label><input class="input" id="p-contact" name="contact" dir="auto" maxlength="120" autocomplete="email" placeholder="מייל או טלפון" aria-required="true" aria-describedby="p-contact-h"><span class="hint" id="p-contact-h">הפרטים נשארים אצלנו. ליוצרים הם עוברים רק אם תאשרו.</span></div>
-        <div class="field"><label class="opt"><input type="checkbox" name="consent" id="p-consent" aria-required="true"><span class="grow">מסכימים שנעביר את הבקשה ליוצרים שמתאימים</span></label>
-          <div class="links-col"><button type="button" class="link" data-act="privacy">מדיניות הפרטיות</button></div></div>
-        <p class="form-err" id="p-err" role="alert" hidden></p>
-        <button class="btn block" type="submit">שליחת הבקשה</button>
-      </form>
-    </div>`,
-
-  sent: ({ demo }) => `${head('<span class="sr">הבקשה</span>')}
-    <div class="stack g"><div class="thanks zig"><span class="stamp">${demo ? 'הדגמה' : 'התקבל'}</span><h2 class="display">${demo ? 'זו הייתה הדגמה.' : 'תודה, קיבלנו את הבקשה.'}</h2>
-      <p>${demo ? 'שום דבר לא נשלח ולא נשמר.' : 'נקרא אותה בעצמנו, נעביר ליוצרים שמתאימים ונחזור אליכם בפרטים שהשארתם, ברגע שנספיק.'}</p>
-      ${demo ? '' : '<button class="btn" data-act="tab" data-v="mine">הבקשות ששלחתי</button>'}<button class="btn ghost" data-act="tab" data-v="home">חזרה לדף הבית</button></div></div>`,
-
-  mine: () => `${head('שלי')}
-    <div class="stack g">
-      <section aria-labelledby="h-mine"><div class="sec-head"><h2 class="sec-title" id="h-mine">הבקשות ששלחתי</h2>${MINE.length ? `<span class="small muted">${MINE.length}</span>` : ''}</div>
-        ${MINE.length ? `<ul class="sent-list">${MINE.map(x => `<li><span class="t">${esc(x.t)}</span><span class="small muted">נשלחה ב־${esc(dateHe(x.d))}</span></li>`).join('')}</ul>
-          <p class="small muted" style="margin-top:10px">הרשימה נשמרת רק במכשיר הזה. כדי לשנות או לבטל בקשה, כתבו לנו.</p>`
-        : `<div class="s-empty"><p>עוד לא שלחתם בקשות מהמכשיר הזה.</p><button class="btn" data-act="tab" data-v="post">לכתוב בקשה</button></div>`}</section>
-      <button class="entry" data-act="join"><span class="t">להצטרף כיוצרים</span><span class="small muted">לספר לנו על העבודות שלכם</span></button>
-      <button class="entry" data-act="vision"><span class="t">למה בהזמנה</span><span class="small muted">מה עומד מאחורי האתר</span></button>
-      <section class="panel" aria-labelledby="h-about"><h2 class="sec-title" id="h-about">כתבו לנו</h2>
-        <div class="links-col">${mailLink('שלום מבהזמנה')}</div>${legalLinks()}</section>
-    </div>`,
 
   /* joining as a maker. Whoever came here to sign up sees only this form: no tab bar and no way into the site until it is sent. */
   join: () => `${head('להצטרף כיוצרים')}
@@ -991,19 +1635,24 @@ const SCREENS = {
         <p class="hint">שדות עם כוכבית (<span aria-hidden="true">*</span><span class="sr">כוכבית</span>) הם חובה. הסיפור לא.</p>
         <div class="field"><label for="j-name">שם ${STAR}</label><input class="input" id="j-name" name="name" maxlength="80" autocomplete="name" aria-required="true"></div>
         <div class="field"><label for="j-city">עיר ${STAR}</label><input class="input" id="j-city" name="city" maxlength="60" autocomplete="address-level2" aria-required="true"></div>
-        <div class="field"><label for="j-craft">תחום ${STAR}</label><select class="input" id="j-craft" name="craft" aria-required="true"><option value="">בחרו תחום</option>${Object.entries(CRAFTS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>
+        <div class="field"><label for="j-craft">תחום ${STAR}</label><select class="input" id="j-craft" name="craft" aria-required="true" aria-controls="j-other-f"><option value="">בחרו תחום</option>${Object.entries(CRAFTS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}<option value="other">אחר</option></select><span class="sr" id="j-other-live" role="status" aria-live="polite"></span></div>
+        <div class="field" id="j-other-f" hidden><label for="j-other">איזה תחום? ${STAR}</label><input class="input" id="j-other" name="craft_other" maxlength="40" autocomplete="off" aria-required="true" placeholder="למשל: זכוכית, בדים, נייר"></div>
         <div class="field"><label for="j-email">מייל ${STAR}</label><input class="input" id="j-email" name="email" type="email" dir="ltr" maxlength="120" autocomplete="email" inputmode="email" aria-required="true"></div>
         <div class="field"><label for="j-phone">טלפון ${STAR}</label><input class="input" id="j-phone" name="phone" type="tel" dir="ltr" maxlength="30" autocomplete="tel" inputmode="tel" aria-required="true" aria-describedby="j-contact-h"><span class="hint" id="j-contact-h">אנחנו משתמשים בו כדי לחזור אליכם. אם להציג אותו באתר, תחליטו בשאלה הבאה.</span></div>
         <fieldset class="field" role="radiogroup" aria-required="true" aria-describedby="j-pp-h"><legend class="lbl" id="j-pp-l">הטלפון באתר ${STAR}<span class="sr">, חובה</span></legend>
-          <label class="opt"><input type="radio" name="phone_public" value="yes" id="j-pp-yes"><span class="grow">להציג את הטלפון באתר, כדי שקונים יוכלו להתקשר ולשלוח וואטסאפ</span></label>
-          <label class="opt"><input type="radio" name="phone_public" value="no" id="j-pp-no"><span class="grow">לא, רק אתם תראו אותו</span></label>
-          <span class="hint" id="j-pp-h">המייל לא מוצג אף פעם. אפשר לבקש בכל זמן להסתיר את הטלפון.</span></fieldset>
+          <label class="opt"><input type="radio" name="phone_public" value="yes" id="j-pp-yes"><span class="grow">כן, להציג את הטלפון שלי באתר, כדי שקונים יוצרים קשר בוואטסאפ או בשיחה</span></label>
+          <label class="opt"><input type="radio" name="phone_public" value="no" id="j-pp-no"><span class="grow">לא, אני לא רוצה לפרסם את הטלפון שלי באתר</span></label>
+          <span class="hint" id="j-pp-h">אפשר לבקש בכל זמן להסתיר אותו. מי שרואה אותו באתר יכול להעתיק אותו.</span></fieldset>
+        <fieldset class="field" role="radiogroup" aria-required="true" aria-describedby="j-ep-h"><legend class="lbl" id="j-ep-l">המייל באתר ${STAR}<span class="sr">, חובה</span></legend>
+          <label class="opt"><input type="radio" name="email_public" value="yes" id="j-ep-yes"><span class="grow">כן, להציג את המייל שלי באתר, כדי שקונים יכתבו לי</span></label>
+          <label class="opt"><input type="radio" name="email_public" value="no" id="j-ep-no"><span class="grow">לא, אני לא רוצה לפרסם את המייל שלי באתר</span></label>
+          <span class="hint" id="j-ep-h">הטלפון והמייל מוצגים רק אם בחרתם, ורק אחרי שאישרנו אתכם. אפשר לבקש בכל זמן להסתיר או להסיר אותם, ומי שרואה אותם יכול להעתיק אותם.</span></fieldset>
         <div class="field"><span class="lbl" id="j-pr-l">תמונה שלכם ${STAR}<span class="sr">, חובה</span></span><div class="pt-row"><div class="photos" id="portrait" role="group" aria-labelledby="j-pr-l">${portraitHTML()}</div></div>
           <input type="file" id="j-pfile" accept="image/jpeg,image/png,image/webp" hidden aria-label="בחירת תמונה שלכם">
           <span class="hint">אנשים רוצים לראות מי מכין להם את הדברים. מספיקה תמונה שלכם, בסדנה או ליד עבודה.</span><span class="hint" id="j-prmsg" role="status" aria-live="polite"></span></div>
         <div class="field"><span class="lbl" id="j-ph-l">תמונות של העבודות שלכם ${STAR}<span class="sr">, חובה</span></span><div class="photos" id="photos" role="group" aria-labelledby="j-ph-l">${photosHTML()}</div>
           <input type="file" id="j-file" accept="image/jpeg,image/png,image/webp" multiple hidden aria-label="בחירת תמונות של העבודות">
-          <span class="hint">עבודות שהכנתם בעצמכם. לפחות תמונה אחת ועד ${MAX_PHOTOS}. צלמו ליד חלון, על רקע פשוט. הדפדפן מקטין את התמונות לפני השליחה, כדי שיעלו מהר.</span><span class="hint" id="j-pmsg" role="status" aria-live="polite">${JP.length ? photoCount() : ''}</span></div>
+          <span class="hint">עבודות שהכנתם בעצמכם. לפחות תמונה אחת ועד ${MAX_PHOTOS}. צלמו ליד חלון, על רקע פשוט. התמונות עולות בגודל המקורי, בלי פרטי המיקום והמצלמה שבקובץ. עד 10MB לתמונה (JPG, PNG או WebP).</span><span class="hint" id="j-pmsg" role="status" aria-live="polite">${JP.length ? photoCount() : ''}</span></div>
         <div class="field"><label for="j-story">הסיפור שלכם <span class="m">(לא חובה)</span></label><textarea class="input" id="j-story" name="story" rows="3" maxlength="1000" aria-describedby="j-story-h"></textarea><span class="hint" id="j-story-h">כמה משפטים מספיקים: מה אתם מכינים ואיך התחלתם.</span></div>
         <div class="field"><label class="opt"><input type="checkbox" id="j-consent" name="consent" aria-required="true"><span class="grow">מסכימים לתנאי השימוש ולמדיניות הפרטיות ${STAR}</span></label>
           ${legalLinks()}</div>
@@ -1016,7 +1665,7 @@ const SCREENS = {
   joined: ({ name = '', demo }) => `${head('<span class="sr">תודה</span>')}
     <div class="stack g"><div class="thanks zig"><span class="stamp">${demo ? 'הדגמה' : 'התקבל'}</span><h2 class="display">תודה${name ? `, ${esc(name)}` : ''}.${demo ? ' זו הייתה הדגמה.' : ''}</h2>
       <p>${demo ? 'שום דבר לא נשלח ולא נשמר.' : 'קיבלנו. נקרא את ההרשמה בעצמנו ונחזור אליכם במייל או בטלפון, כשנספיק. אחרי שנאשר, הפרופיל יעלה לאתר.'}</p>
-      <button class="btn" data-act="seesite">לראות את האתר</button></div></div>`,
+      <button class="btn" data-act="seesite">לאתר</button></div></div>`,
 
   /* the owner's screen, only at #admin: magic-link login, then what waits for a decision */
   radmin: () => { let body;
@@ -1026,59 +1675,307 @@ const SCREENS = {
         ${AD.msg ? `<p class="${AD.msgErr ? 'form-err' : 'form-ok'}" role="status">${esc(AD.msg)}</p>` : ''}<button class="btn" data-act="radlogin" ${AD.busy ? 'disabled' : ''}>שליחת קישור כניסה</button></section>`;
     else if (!isOwner()) body = '<section class="panel"><h2 class="sec-title">המסך הזה לבעלים בלבד</h2><p>נכנסתם עם מייל שאינו של הבעלים.</p><button class="btn ghost" data-act="radlogout">יציאה</button></section>';
     else if (!AD.loaded && !AD.err) body = '<p class="muted" role="status">טוענים...</p>';
-    else body = `<div class="adm-bar"><p class="muted">${plural(AD.makers.length, 'יוצר אחד ממתין', 'יוצרים ממתינים', 'אין יוצרים ממתינים')}${AD.moreM ? ' ויש עוד' : ''} · ${plural(AD.requests.length, 'בקשה חדשה אחת', 'בקשות חדשות', 'אין בקשות חדשות')}${AD.moreR ? ' ויש עוד' : ''}</p><span class="row"><button class="chip" data-act="radrefresh">רענון</button><button class="chip" data-act="radlogout">יציאה</button></span></div>
-      ${AD.err ? `<p class="form-err" role="alert">${esc(AD.err)}</p>` : ''}
-      <section aria-labelledby="a-mk"><div class="sec-head"><h2 class="sec-title" id="a-mk">יוצרים שמחכים לאישור</h2></div>
-        <p class="small muted" style="margin-bottom:12px">בודקים שהעבודות באמת שלהם לפני שמאשרים. החדשות למעלה.</p>
-        <div style="display:flex;flex-direction:column;gap:12px">${AD.makers.map(m => `<article class="panel">
-          <div class="face-row">${m.portrait ? `<a class="av" href="${esc(photoURL(m.portrait))}" target="_blank" rel="noopener" aria-label="התמונה של ${esc(m.name)}, בגודל מלא">${rImg(m.portrait)}</a>` : `<span class="av"><span class="ini">${esc(initials(m.name))}</span></span>`}<div><b>${esc(m.name)}</b><div class="small muted">${craftName(m.craft)} · ${esc(m.city)} · ${esc(dateHe(m.created_at))}</div>${m.portrait ? '' : '<div class="small muted">בלי תמונה אישית</div>'}</div></div>
-          <dl class="specs">${m.email ? `<div><dt>מייל</dt><dd dir="ltr">${esc(m.email)}</dd></div>` : ''}${m.phone ? `<div><dt>טלפון</dt><dd dir="ltr">${esc(m.phone)}</dd></div><div><dt>הטלפון באתר</dt><dd>${m.phone_public ? 'יוצג, כי בחרו בזה' : 'לא יוצג'}</dd></div>` : ''}</dl>
-          ${m.story ? `<p class="small rstory">${esc(m.story)}</p>` : ''}
-          ${(m.photos || []).length ? `<div class="strip" style="grid-template-columns:repeat(3,1fr)">${m.photos.map((p, i) => `<a href="${esc(photoURL(p))}" target="_blank" rel="noopener" aria-label="עבודה ${i + 1} של ${esc(m.name)}, בגודל מלא">${rImg(p, `עבודה של ${m.name}`)}</a>`).join('')}</div>` : '<p class="small muted">לא הועלו תמונות.</p>'}
-          <div class="row"><button class="btn small" data-act="radapprove" data-v="${esc(m.id)}">אישור</button><button class="btn small danger" data-act="radreject" data-v="${esc(m.id)}">דחייה</button></div></article>`).join('') || '<p class="empty">אין הרשמות שמחכות.</p>'}
-          ${AD.moreM ? `<button class="btn ghost block" data-act="radmore" data-v="m" ${AD.loading ? 'disabled' : ''}>עוד הרשמות</button>` : ''}</div></section>
-      <section aria-labelledby="a-rq"><div class="sec-head"><h2 class="sec-title" id="a-rq">בקשות חדשות</h2></div>
-        <div style="display:flex;flex-direction:column;gap:12px">${AD.requests.map(r => { const mt = mailtoFor(r); return `<article class="panel">
-          <span class="tags">${(r.crafts || []).map(c => `<span class="tag">${craftName(c)}</span>`).join('')}</span>
+    else body = adminBody();
+    return `${head('ניהול')}<div class="stack g">${body}</div>`; }
+};
+
+/* ---------- the request form (new and edit share one layout) ---------- */
+let PT = null;                                       // the token of the request being sent: kept across retries so a retry never saves it twice
+const hasCraft = c => Object.prototype.hasOwnProperty.call(CRAFTS, c);
+function postForm({ edit = false, token = '', title = '', hint, vals = null } = {}) {
+  let t = vals ? vals.title : title, text = vals ? vals.text : '', other = '', due = vals ? vals.due : '', contact = vals ? vals.contact : '';
+  const set = vals ? new Set(vals.crafts) : new Set(hint ? [hint] : []), otherOn = vals ? set.has('other') : false;
+  if (vals) { const m = POST_OTHER.exec(text); if (m) { other = m[1]; text = text.replace(POST_OTHER, '').trim(); } }
+  const tile = (k, v) => `<label class="tile"><input type="checkbox" name="crafts" value="${k}" id="pc-${k}" ${set.has(k) ? 'checked' : ''}><span class="face">${svg(UI['c_' + k])}<span class="tl">${v}</span>${svg(UI.tick).replace('<svg ', '<svg class="tick" ')}</span></label>`;
+  return `<div class="order zig">
+        <span class="stamp" aria-hidden="true">${edit ? 'עריכה' : 'בקשה'}</span>
+        <p class="order-intro">${edit ? 'אפשר לשנות כל דבר. יוצרים ששלחנו אליהם את הבקשה יראו את העדכון.' : 'כמה מילים מספיקות. אנחנו קוראים כל בקשה ומעבירים אותה ליוצרים שמתאימים.'}</p>
+      <form class="f" data-form="${edit ? 'editreq' : 'post'}" data-v="${esc(token)}" novalidate>
+        <div class="field"><label for="p-title">מה תרצו שיכינו בשבילכם?</label><input class="input" id="p-title" name="title" maxlength="120" aria-required="true" placeholder="למשל: קרש חיתוך עם שמות הילדים" autocomplete="off" value="${esc(t)}"></div>
+        <fieldset class="field"><legend class="lbl">תחום (אפשר כמה)</legend>
+          <div class="tiles">${Object.entries(CRAFTS).map(([k, v]) => tile(k, v)).join('')}
+            <label class="tile"><input type="checkbox" id="pc-other" name="otherOn" value="1" ${otherOn ? 'checked' : ''}><span class="face">${svg(UI.c_other)}<span class="tl">אחר</span>${svg(UI.tick).replace('<svg ', '<svg class="tick" ')}</span></label></div>
+          <input class="input" id="p-other" name="other" maxlength="60" aria-label="איזה תחום אחר?" placeholder="איזה? למשל זכוכית או טקסטיל" value="${esc(other)}" ${otherOn ? '' : 'hidden'}>
+          <span class="hint">עגילים מעץ? סמנו גם ״תכשיטים״ וגם ״עץ״.</span></fieldset>
+        <div class="field"><label for="p-text">פרטים <span class="m">(לא חובה)</span></label><textarea class="input" id="p-text" name="text" maxlength="1900" placeholder="מידות, צבעים, למי זה מיועד">${esc(text)}</textarea></div>
+        <div class="field"><label for="p-due">עד מתי? <span class="m">(לא חובה)</span></label><input class="input" id="p-due" name="due" maxlength="80" placeholder="למשל לפני יום ההולדת, ב־12.12" value="${esc(due)}"></div>
+        <div class="field"><label for="p-contact">איך חוזרים אליכם?</label><input class="input" id="p-contact" name="contact" dir="auto" maxlength="120" autocomplete="email" placeholder="מייל או טלפון" aria-required="true" aria-describedby="p-contact-h" value="${esc(contact)}"><span class="hint" id="p-contact-h">${edit ? 'הפרטים נשארים אצלנו. ליוצרים שקיבלו את הבקשה הם מוצגים כל עוד היא פתוחה.' : 'אנחנו מעבירים אותם רק ליוצרים שמתאימים לבקשה.'}</span></div>
+        <p class="form-err" id="p-err" role="alert" hidden></p>
+        <button class="btn block" type="submit">${edit ? 'שמירת השינויים' : 'שליחת הבקשה'}</button>
+        ${edit ? '' : `<p class="small muted" id="p-agree">בשליחה אתם מסכימים שנעביר את הבקשה ופרטי הקשר שלכם ליוצרים שמתאימים.</p><div class="links-col"><button type="button" class="link" data-act="privacy">מדיניות הפרטיות</button></div>`}
+      </form></div>`;
+}
+function readPost(f) {
+  const fd = new FormData(f), d = Object.fromEntries(fd);
+  const title = String(d.title || '').trim(), crafts = fd.getAll('crafts').filter(hasCraft), otherOn = !!d.otherOn, other = otherOn ? String(d.other || '').trim() : '', contact = String(d.contact || '').trim();
+  const bad = !title ? ['p-title', 'כתבו מה תרצו שיכינו בשבילכם.'] : !crafts.length && !otherOn ? ['pc-wood', 'בחרו לפחות תחום אחד, או ״אחר״.']
+    : otherOn && !other ? ['p-other', 'כתבו איזה תחום, או בטלו את הסימון של ״אחר״.']
+    : !contact ? ['p-contact', 'השאירו מייל או טלפון, כדי שנוכל לחזור אליכם.'] : !(EMAIL_RE.test(contact) || phoneOK(contact)) ? ['p-contact', 'המייל או הטלפון לא נראים נכון. בדקו שוב.'] : null;
+  const body = String(d.text || '').trim();
+  return { bad, title, crafts: [...crafts, ...(other ? ['other'] : [])], text: (body + (other ? `${body ? '\n' : ''}תחום נוסף: ${other}` : '')).slice(0, 2000), due: String(d.due || '').trim(), contact };
+}
+function showBad(f, bad) {
+  const el = f.querySelector('#' + bad[0]), err = f.querySelector('#p-err');
+  if (el.classList.contains('input')) el.setAttribute('aria-invalid', 'true'); err.textContent = bad[1]; err.hidden = false; el.focus();
+}
+async function submitPost(f) {
+  const err = f.querySelector('#p-err'), btn = f.querySelector('button[type="submit"]');
+  f.querySelectorAll('[aria-invalid]').forEach(x => x.removeAttribute('aria-invalid'));
+  const v = readPost(f); if (v.bad) { showBad(f, v.bad); return; }
+  err.hidden = true;
+  const sent = (demo, tracked, kept = true) => { S.stack = [{ s: 'home' }, { s: 'sent', demo, tr: !!tracked && kept, ns: !!tracked && !kept }]; replaceH(); render(true); };
+  if (!CFG_ON) { sent(true); return; }
+  /* never say "sent" when nothing was saved: the library is still loading, or it could not load at all */
+  if (!SB) { err.textContent = AD.failed ? 'אין חיבור לשרת כרגע, אז הבקשה לא נשמרה. אפשר לרענן את הדף ולנסות שוב.' : 'החיבור עדיין נטען. נסו שוב בעוד רגע.'; err.hidden = false; err.scrollIntoView({ block: 'nearest' }); return; }
+  btn.disabled = true; btn.textContent = 'שולחים...';
+  PT = PT || newToken();
+  const row = { title: v.title, crafts: v.crafts, text: v.text, due: v.due, contact: v.contact, consent: true, status: 'new' };
+  let tracked = true, kept = true;
+  try {
+    let { error } = await SB.from('requests').insert({ ...row, token: PT });
+    if (error && (errCode(error) === 'PGRST204' || /'token' column/i.test(String(error.message || '')))) { tracked = false; ({ error } = await SB.from('requests').insert(row)); }   /* the database update is not applied yet: never block a real request */
+    else if (error && errCode(error) === '23505') error = null;                                                                                                        /* our own retry after a dropped connection: it was saved */
+    if (error) throw error;
+  } catch (e) {
+    console.warn('request failed', errCode(e), e);
+    showErr(err, 'הבקשה לא נשלחה. מה שכתבתם עדיין כאן, נסו שוב.', errCode(e) === '23514' && /requests_token_ck/.test(String(e.message || '')) ? friendly(e) : sendWhy(e));
+    btn.disabled = false; btn.textContent = 'שליחת הבקשה'; return;
+  }
+  if (tracked) { MYREQ = [{ token: PT, title: v.title.slice(0, 120), createdAt: new Date().toISOString() }, ...MYREQ.filter(x => x.token !== PT)].slice(0, 50); if (!saveMyReq()) kept = false; }
+  else { MINE = [{ t: v.title.slice(0, 120), d: new Date().toISOString() }, ...MINE].slice(0, 30); lsSet(MINE_KEY, MINE); }
+  PT = null; sent(false, tracked, kept);
+}
+
+/* ---------- maker sign-in by email link ---------- */
+const SI = { sent: 0, email: '', err: '', busy: false, t: 0 };
+const RESEND_MS = 60000;
+function otpErr(e) {
+  const m = String(e && e.message || '') + ' ' + String(e && e.code || ''), st = String(e && (e.status || e.statusCode) || '');
+  if (isOff(e)) return 'אין חיבור כרגע. נסו שוב.';
+  if (/signups? not allowed|signup.?disabled|otp.?disabled|signups? .*disabled/i.test(m)) return 'הכניסה ליוצרים עדיין לא פתוחה, נעדכן כשהיא תיפתח.';
+  if (st === '429' || /rate.?limit|too many|after \d+ seconds|over_email_send_rate_limit|over_request_rate_limit/i.test(m)) return 'נסו שוב בעוד כמה דקות.';
+  if (/invalid|email_address_invalid|validation_failed/i.test(m)) return 'המייל לא נראה נכון. בדקו שוב.';
+  return 'הקישור לא נשלח. נסו שוב בעוד רגע.';
+}
+const signinBody = () => SI.sent ? `<div><h2 class="sec-title">שלחנו קישור למייל</h2><p style="margin-top:6px">פתחו את המייל <span dir="ltr">${esc(SI.email)}</span> במכשיר הזה ולחצו על הקישור. אם הוא לא מגיע, בדקו גם בספאם.</p></div>
+    <p class="form-err" role="alert" ${SI.err ? '' : 'hidden'}>${esc(SI.err)}</p>
+    <div class="field"><button type="button" class="btn ghost block" id="si-resend" data-act="siresend" ${Date.now() - SI.sent >= RESEND_MS && !SI.busy ? '' : 'disabled'}>לא הגיע?</button><span class="small muted" id="si-wait"></span></div>
+    <button type="button" class="btn block" data-act="closesheet">סגירה</button>`
+  : `<form class="sheet-body" data-form="signin" novalidate><div><h2 class="sec-title">כניסה ליוצרים</h2><p style="margin-top:6px">נשלח קישור כניסה למייל. כתבו את המייל שבו נרשמתם כיוצרים.</p></div>
+    <div class="field"><label for="si-email">מייל</label><input class="input" id="si-email" name="email" type="email" dir="ltr" maxlength="120" autocomplete="email" inputmode="email" aria-required="true" value="${esc(SI.email)}" ${SI.err ? 'aria-invalid="true"' : ''}></div>
+    <p class="form-err" id="si-err" role="alert" ${SI.err ? '' : 'hidden'}>${esc(SI.err)}</p>
+    <button type="submit" class="btn block" ${SI.busy ? 'disabled' : ''}>${SI.busy ? 'שולחים...' : 'שליחת קישור כניסה'}</button></form>`;
+const signinSheet = () => `<div class="sheet-body" id="si-body">${signinBody()}</div>`;
+function drawSignin(focusH) { const b = document.getElementById('si-body'); if (!b) return; b.innerHTML = signinBody(); if (focusH) { const h = b.querySelector('h2'); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); } } siTick(); }
+function siTick() {
+  const b = document.getElementById('si-body'); if (!b) { clearInterval(SI.t); SI.t = 0; return; }
+  const btn = document.getElementById('si-resend'); if (!btn) return;
+  const left = Math.ceil((RESEND_MS - (Date.now() - SI.sent)) / 1000), w = document.getElementById('si-wait');
+  if (left <= 0) { if (!SI.busy) btn.disabled = false; if (w) w.textContent = ''; } else { btn.disabled = true; if (w) w.textContent = `אפשר לשלוח שוב בעוד ${left} שניות`; }
+}
+async function sendLink(email) {
+  if (!SB || SI.busy) return;
+  SI.busy = true; SI.err = ''; SI.email = email; drawSignin(); setWantsMe();
+  let error = null;
+  try { ({ error } = await SB.auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: location.origin + location.pathname + '#me' } })); } catch (e) { error = e; }
+  SI.busy = false;
+  if (error) { clearWantsMe(); SI.err = otpErr(error); drawSignin(); const i = document.getElementById(SI.sent ? 'si-resend' : 'si-email'); if (i) i.focus(); return; }
+  SI.sent = Date.now(); SI.err = ''; drawSignin(true);
+  clearInterval(SI.t); SI.t = setInterval(siTick, 1000);
+}
+function showMe() { S.stack = [{ s: 'home' }, { s: 'mine' }]; BH = 1; replaceH(location.pathname + location.search); render(true); }
+
+/* ---------- screens added to the site ---------- */
+Object.assign(SCREENS, {
+  shop: () => { const crafts = SHOP_CR;
+    return `${head('יצירות')}
+    <div class="stack tight g">
+      <p class="muted">מה שהיוצרים הכינו, ואושר אצלנו. הכול בעבודת יד.</p>
+      ${crafts.size > 1 && shopState('all') === 'ready' ? `<div class="filters bleed" role="group" aria-label="סינון לפי תחום">${[['all', 'הכל'], ...Object.entries(CRAFTS).filter(([k]) => crafts.has(k)), ...(crafts.has('other') ? [['other', 'אחר']] : [])].map(([k, v]) => `<button type="button" data-act="scraft" data-v="${k}" aria-pressed="${S.scraft === k}">${v}</button>`).join('')}</div>` : ''}
+      ${shopBody()}
+    </div>`; },
+  listing: p => listingScreen(p),
+  myreqs: () => `${head('הבקשות שלי')}<div class="stack tight g">${myReqsList()}${MYREQ.length ? '<button class="btn block" data-act="tab" data-v="post">לכתוב בקשה חדשה</button>' : ''}</div>`,
+  myreq: p => myReqScreen(p),
+  editreq: p => editScreen(p),
+  lform: p => lForm(p),
+  lthanks: () => `${head('<span class="sr">היצירה</span>')}<div class="stack g"><div class="thanks zig"><span class="stamp">התקבל</span><h2 class="display">תודה.</h2><p>היצירה נשלחה לאישור. כשנאשר אותה היא תופיע באתר.</p><button class="btn" data-act="mtab" data-v="listings">ליצירות שלי</button><button class="btn ghost" data-act="mladd">להוסיף עוד יצירה</button></div></div>`
+});
+SCREENS.post = ({ title = '', hint } = {}) => `${head('בקשה חדשה')}
+    <div class="stack tight g">
+      ${CFG_ON ? '' : '<p class="note" role="note">האתר כרגע לא מחובר לשרת. אפשר למלא ולראות איך זה נראה, אבל שום דבר לא נשלח ולא נשמר.</p>'}
+      ${postForm({ title, hint })}
+    </div>`;
+SCREENS.sent = ({ demo, tr, ns }) => `${head('<span class="sr">הבקשה</span>')}
+    <div class="stack g"><div class="thanks zig"><span class="stamp">${demo ? 'הדגמה' : 'התקבל'}</span><h2 class="display">${demo ? 'זו הייתה הדגמה.' : 'תודה, קיבלנו את הבקשה.'}</h2>
+      <p>${demo ? 'שום דבר לא נשלח ולא נשמר.' : 'נקרא אותה בעצמנו, נעביר ליוצרים שמתאימים ונחזור אליכם בפרטים שהשארתם, ברגע שנספיק.'}</p>
+      ${demo ? '' : ns ? '<p class="small muted">לא הצלחנו לשמור את הבקשה במכשיר הזה, אז היא לא תופיע ברשימת הבקשות שלכם. אפשר לרשום לעצמכם את מה שכתבתם.</p>' : tr ? '<p class="small muted">שמרנו את הבקשה במכשיר הזה, ושם תראו מה קרה איתה. ניקוי נתוני הדפדפן יסתיר אותה.</p><button class="btn" data-act="toreqs">הבקשות שלי</button>' : '<button class="btn" data-act="tab" data-v="mine">הבקשות שלי</button>'}<button class="btn ghost" data-act="tab" data-v="home">חזרה לדף הבית</button></div></div>`;
+
+const meNote = t => `<p class="note" role="note">${t}</p>`;
+const joinCard = () => canJoin() ? '<button class="entry" data-act="join"><span class="t">יוצרים? אפשר להצטרף</span><span class="small muted">לספר לנו על העבודות שלכם</span></button>' : '';
+const signoutBtn = () => AD.session ? `<button type="button" class="link sm" data-act="signout">התנתקות</button>` : '';
+const profileHTML = () => { const m = AU.maker, face = m.portrait || m.photos[0];
+  return `<div class="panel"><div class="face-row">${face ? `<span class="av">${rImg(face, '')}</span>` : `<span class="av"><span class="ini">${esc(initials(m.name))}</span></span>`}<div><b>${esc(m.name)}</b><div class="small muted">${esc(craftText(m.craft, m.other))}${m.city ? ` · ${esc(m.city)}` : ''}</div></div></div>
+    <dl class="specs"><div><dt>הטלפון באתר</dt><dd>${m.phonePublic ? 'מוצג' : 'לא מוצג'}</dd></div><div><dt>המייל באתר</dt><dd>${m.emailPublic ? 'מוצג' : 'לא מוצג'}</dd></div></dl>
+    ${m.story ? `<p class="small rstory">${esc(m.story)}</p>` : ''}
+    <button type="button" class="link" data-act="rmaker" data-v="${esc(m.id)}">הפרופיל כמו שרואים אותו באתר</button>
+    <p class="small muted">לשינוי פרטים כתבו לנו.</p><div class="links-col">${mailLink('שינוי פרטים בפרופיל בבהזמנה')}</div></div>`; };
+SCREENS.mine = () => {
+  const mode = meMode(), reqSec = `<section aria-labelledby="h-mine"><div class="sec-head"><h2 class="sec-title" id="h-mine">הבקשות שלי</h2>${MYREQ.length ? `<span class="small muted">${MYREQ.length}</span>` : ''}</div>${myReqsList()}${MYREQ.length ? '<button class="btn block" style="margin-top:12px" data-act="tab" data-v="post">לכתוב בקשה חדשה</button>' : ''}</section>`;
+  const tail = `<button class="entry" data-act="vision"><span class="t">מי אנחנו</span><span class="small muted">מה עומד מאחורי האתר</span></button>
+      <section class="panel" aria-labelledby="h-about"><h2 class="sec-title" id="h-about">כתבו לנו</h2><div class="links-col">${mailLink('שלום מבהזמנה')}</div>${legalLinks()}</section>`;
+  const joined = JOINED && !AU.maker ? `<section class="panel" aria-labelledby="h-joined"><h2 class="sr" id="h-joined">ההרשמה שלכם</h2><p>הרשמתם כיוצרים. כשנאשר את הפרופיל, הוא יופיע באתר.</p><button type="button" class="link sm" data-act="join">להרשמה נוספת</button></section>` : joinCard();
+  const adminHint = isOwner() ? '<button type="button" class="link sm" data-act="toadmin">למסך הניהול</button>' : '';
+  if (mode === 'loading') return `${head('אני')}<div class="stack g"><p class="muted" role="status">טוענים</p>${AD.session ? signoutBtn() : ''}</div>`;
+  if (mode === 'maker') {
+    const nNew = AU.inbox.list.filter(x => x.rs === 'sent' && x.rstatus !== 'closed').length;
+    const tabs = [['inbox', 'בקשות אליי', nNew], ['listings', 'היצירות שלי', 0], ['profile', 'הפרופיל', 0]];
+    const body = ME.tab === 'listings' ? myListingsHTML() : ME.tab === 'profile' ? profileHTML() : inboxHTML();
+    return `${head('אני')}<div class="stack tight g">
+      <div class="row wrap" style="justify-content:space-between"><p><b>${esc(AU.maker.name)}</b> <span class="small muted">נכנסתם כיוצרים</span></p>${signoutBtn()}</div>
+      <div class="mtabs" role="tablist" aria-label="האזור שלכם כיוצרים">${tabs.map(([k, l, n]) => `<button type="button" role="tab" id="mt-${k}" aria-selected="${ME.tab === k}" aria-controls="mp" tabindex="${ME.tab === k ? 0 : -1}" data-act="mtab" data-v="${k}">${l}${n ? ` <span class="cnt" aria-label="${n} חדשות">${n}</span>` : ''}</button>`).join('')}</div>
+      <div id="mp" role="tabpanel" aria-labelledby="mt-${ME.tab}" class="mp">${body}</div>
+      <div class="row wrap"><button class="btn ghost" data-act="tab" data-v="post">לכתוב בקשה</button><button class="btn ghost" data-act="go" data-v="myreqs">הבקשות שלי${MYREQ.length ? ` (${MYREQ.length})` : ''}</button></div>
+      ${tail}</div>`;
+  }
+  const note = mode === 'pending' ? meNote('ההרשמה שלכם עוד בבדיקה אצלנו. כשנאשר אותה, כאן תופיע תיבת הבקשות שלכם.')
+    : mode === 'rejected' ? meNote('ההרשמה הקודמת לא אושרה. אפשר לכתוב לנו.')
+    : mode === 'nonmaker' ? meNote(`המייל הזה עוד לא מקושר ליוצר מאושר. כדי להיכנס כיוצרים, השתמשו באותו מייל שבו נרשמתם${AD.session && AD.session.user && AD.session.user.email ? ` (נכנסתם עם <span dir="ltr">${esc(AD.session.user.email)}</span>)` : ''}.`)
+    : mode === 'failed' ? '<div class="note" role="note">לא הצלחנו לבדוק את הכניסה. <button type="button" class="link sm" data-act="meretry">לנסות שוב</button></div>' : '';
+  const showJoin = mode !== 'pending';
+  return `${head('אני')}
+    <div class="stack g">
+      ${AD.session ? `<div class="row wrap" style="justify-content:space-between"><span class="small muted">מחוברים</span>${signoutBtn()}</div>` : ''}
+      ${note}
+      ${reqSec}
+      ${showJoin ? joined : ''}
+      ${!AD.session && signinOK() ? '<button class="entry" data-act="signin"><span class="t">כניסה ליוצרים</span><span class="small muted">עם קישור שנשלח למייל</span></button>' : ''}
+      ${adminHint}
+      ${tail}
+    </div>`;
+};
+
+/* ---------- the owner's screen: listings, requests with routing ---------- */
+const RT_ADMIN = { sent: 'נשלחה', seen: 'נראתה', thinking: 'חושב על זה', offered: 'הצעה', declined: 'לא מתאים' };
+const mkOf = x => Array.isArray(x.makers) ? x.makers[0] || {} : x.makers || {};
+const adPhotos = (l) => (l.photos || []).filter(okPath).length ? `<div class="strip" style="grid-template-columns:repeat(3,1fr)">${l.photos.filter(okPath).map((p, i) => `<a href="${esc(photoURL(p, LB))}" target="_blank" rel="noopener" aria-label="תמונה ${i + 1} של ${esc(cleanText(l.title, 80))}, בגודל מלא">${rImg(p, '', LB)}</a>`).join('')}</div>` : '<p class="small muted">אין תמונות.</p>';
+const adListing = (l, kind) => { const mk = mkOf(l); return `<article class="panel"><h3 class="sub-title" style="margin:0">${esc(cleanText(l.title, 80))}</h3>
+    <p class="small muted">${esc(cleanText(mk.name, 80) || 'יוצר')}${mk.city ? ` · ${esc(cleanText(mk.city, 60))}` : ''} · ${esc(dateHe(l.created_at))} · ${priceHTML(intOrNull(l.price_ils))}${l.availability === 'sold' ? ' · נמכרה' : ''}</p>
+    ${l.description ? `<p class="small rstory">${esc(cleanBlock(l.description, 1500))}</p>` : ''}${adPhotos(l)}
+    <div class="row wrap">${kind === 'pending' ? `<button class="btn small" data-act="lpapprove" data-v="${esc(l.id)}">אישור</button><button class="btn small danger" data-act="lpreject" data-v="${esc(l.id)}">דחייה</button><button class="btn small ghost" data-act="lphide" data-v="${esc(l.id)}">הסתרה</button>`
+      : `<button class="btn small ghost" data-act="lphide" data-v="${esc(l.id)}">הסתרה</button><button class="btn small danger" data-act="lsremove" data-v="${esc(l.id)}">הסרה</button>`}</div></article>`; };
+const routesOf = r => AD.routes[r.id] || [];
+const mkName = id => { const m = AD.approved.find(x => x.id === id); return m ? cleanText(m.name, 80) || 'יוצר' : 'יוצר'; };
+function notifyFor(r) {
+  const ids = new Set(routesOf(r).map(x => x.maker_id)), rows = AD.approved.filter(m => ids.has(m.id));
+  const mails = [...new Set(rows.map(m => String(m.email || '').trim()).filter(okMail))];
+  const body = ['שלום,', '', 'הגיעה אליכם בקשה חדשה בבהזמנה, והיא מחכה לכם באזור האישי שלכם.', '', `הבקשה: ${oneLine(r.title, 100)}`, '', `כדי לראות אותה ולענות, היכנסו ל־${location.origin + location.pathname}, בחרו ״אני״ ואז ״כניסה ליוצרים״ עם המייל הזה.`, '', 'תודה,', 'בהזמנה'].join('\n');
+  const base = `subject=${encodeURIComponent('בקשה חדשה מחכה לכם בבהזמנה')}&body=${encodeURIComponent(body)}`, href = `mailto:?bcc=${mails.map(encodeURIComponent).join(',')}&${base}`;
+  return { mails, href, tooLong: href.length > MAILTO_MAX, bare: `mailto:?${base}` };
+}
+const reqRow = r => { const mt = mailtoFor(r), ro = AD.ro, rs = routesOf(r), nt = ro ? notifyFor(r) : null;
+  return `<article class="panel">
+          <span class="tags">${(r.crafts || []).map(c => `<span class="tag">${esc(craftName(c))}</span>`).join('')}</span>
           <h3 class="sub-title" style="margin:0">${esc(r.title)}</h3>
           ${r.text ? `<p class="small rstory">${esc(r.text)}</p>` : ''}
           <dl class="specs"><div><dt>עד מתי</dt><dd>${esc(r.due || 'גמיש')}</dd></div><div><dt>פרטי קשר (פרטיים)</dt><dd dir="auto">${esc(r.contact)}</dd></div></dl>
           <p class="small muted">${esc(dateHe(r.created_at))} · ${mt.mails.length ? plural(mt.mails.length, 'יוצר מאושר אחד עם מייל בתחום', 'יוצרים מאושרים עם מייל בתחום') : 'עוד אין יוצרים מאושרים עם מייל בתחום הזה'}${mt.noMail ? ` · ${mt.noMail} בלי מייל תקין` : ''}</p>
+          ${ro ? `<div class="row wrap">${[['routes_offered', 'הצעות', 'go'], ['routes_thinking', 'חושבים', ''], ['routes_seen', 'ראו', ''], ['routes_sent', 'עוד לא ראו', ''], ['routes_declined', 'לא מתאים', 'dim']].filter(([k]) => +r[k] > 0).map(([k, l, c]) => stChip(`${l}: ${r[k]}`, c)).join('') || '<span class="small muted">עוד לא הועברה ליוצרים</span>'}</div>
+          ${rs.length ? `<ul class="route-list">${rs.map(x => `<li class="route"><div class="route-top"><b>${esc(mkName(x.maker_id))}</b>${stChip(RT_ADMIN[x.status] || x.status, x.status === 'offered' ? 'go' : x.status === 'declined' ? 'dim' : '')}</div>${x.status === 'offered' ? `<p class="small">${esc(cleanBlock(x.offer_note, 500))} · ${priceHTML(intOrNull(x.offer_price_ils))}</p>` : ''}</li>`).join('')}</ul>` : ''}` : ''}
           ${mt.mails.length ? '<p class="small muted">כדאי לקרוא את הבקשה לפני ששולחים אותה הלאה.</p>' : ''}
-          <div class="row wrap">${mt.mails.length && !mt.tooLong ? `<a class="btn small" href="${esc(mt.href)}">מייל ליוצרים מתאימים</a>` : ''}${mt.mails.length && mt.tooLong ? `<button class="btn small" data-act="copymails" data-v="${esc(r.id)}">העתקת ${mt.mails.length} המיילים</button><a class="btn small ghost" href="${esc(mt.bare)}">פתיחת מייל בלי נמענים</a>` : ''}<button class="btn small ghost" data-act="rroute" data-v="${esc(r.id)}">סימון כהועברה</button></div></article>`; }).join('') || '<p class="empty">אין בקשות חדשות.</p>'}
+          <div class="row wrap">${ro ? `<button class="btn small" data-act="rroutesopen" data-v="${esc(r.id)}">להעביר ליוצרים</button>` : ''}${ro && nt.mails.length && !nt.tooLong ? `<a class="btn small ghost" href="${esc(nt.href)}">מייל לכל מי שהועברה אליו</a>` : ''}${ro && nt.mails.length && nt.tooLong ? `<button class="btn small ghost" data-act="copynotify" data-v="${esc(r.id)}">העתקת ${nt.mails.length} המיילים</button><a class="btn small ghost" href="${esc(nt.bare)}">מייל בלי נמענים</a>` : ''}
+          ${mt.mails.length && !mt.tooLong ? `<a class="btn small ghost" href="${esc(mt.href)}">מייל ליוצרים מתאימים</a>` : ''}${mt.mails.length && mt.tooLong ? `<button class="btn small ghost" data-act="copymails" data-v="${esc(r.id)}">העתקת ${mt.mails.length} המיילים</button><a class="btn small ghost" href="${esc(mt.bare)}">פתיחת מייל בלי נמענים</a>` : ''}${ro ? '' : `<button class="btn small ghost" data-act="rroute" data-v="${esc(r.id)}">סימון כהועברה</button>`}</div></article>`; };
+function adminBody() {
+  const gapList = 'display:flex;flex-direction:column;gap:12px';
+  return `<div class="adm-bar"><p class="muted">${plural(AD.makers.length, 'יוצר אחד ממתין', 'יוצרים ממתינים', 'אין יוצרים ממתינים')}${AD.moreM ? ' ויש עוד' : ''} · ${plural(AD.requests.length, 'בקשה פתוחה אחת', 'בקשות פתוחות', 'אין בקשות פתוחות')}${AD.moreR ? ' ויש עוד' : ''}${AD.lst === 'ok' ? ` · ${plural(AD.lpend.length, 'יצירה אחת ממתינה', 'יצירות ממתינות', 'אין יצירות ממתינות')}` : ''}</p><span class="row"><button class="chip" data-act="radrefresh">רענון</button><button class="chip" data-act="radlogout">יציאה</button></span></div>
+      ${AD.err ? `<p class="form-err" role="alert">${esc(AD.err)}</p>` : ''}
+      <section aria-labelledby="a-mk"><div class="sec-head"><h2 class="sec-title" id="a-mk">יוצרים שמחכים לאישור</h2></div>
+        <p class="small muted" style="margin-bottom:12px">בודקים שהעבודות באמת שלהם לפני שמאשרים. החדשות למעלה.</p>
+        <div style="${gapList}">${AD.makers.map(m => `<article class="panel">
+          <div class="face-row">${m.portrait ? `<a class="av" href="${esc(photoURL(m.portrait))}" target="_blank" rel="noopener" aria-label="התמונה של ${esc(m.name)}, בגודל מלא">${rImg(m.portrait)}</a>` : `<span class="av"><span class="ini">${esc(initials(m.name))}</span></span>`}<div><b>${esc(m.name)}</b><div class="small muted">${esc(craftText(m.craft, m.craft_other))} · ${esc(m.city)} · ${esc(dateHe(m.created_at))}</div>${m.portrait ? '' : '<div class="small muted">בלי תמונה אישית</div>'}</div></div>
+          <dl class="specs">${m.email ? `<div><dt>מייל</dt><dd dir="ltr">${esc(m.email)}</dd></div>` : ''}${m.phone ? `<div><dt>טלפון</dt><dd dir="ltr">${esc(m.phone)}</dd></div><div><dt>הטלפון באתר</dt><dd>${m.phone_public ? 'יוצג' : 'לא יוצג'}</dd></div>` : ''}${m.email ? `<div><dt>המייל באתר</dt><dd>${m.email_public ? 'יוצג' : 'לא יוצג'}</dd></div>` : ''}</dl>
+          ${m.story ? `<p class="small rstory">${esc(m.story)}</p>` : ''}
+          ${(m.photos || []).length ? `<div class="strip" style="grid-template-columns:repeat(3,1fr)">${m.photos.map((p, i) => `<a href="${esc(photoURL(p))}" target="_blank" rel="noopener" aria-label="עבודה ${i + 1} של ${esc(m.name)}, בגודל מלא">${rImg(p, `עבודה של ${m.name}`)}</a>`).join('')}</div>` : '<p class="small muted">לא הועלו תמונות.</p>'}
+          <div class="row"><button class="btn small" data-act="radapprove" data-v="${esc(m.id)}">אישור</button><button class="btn small danger" data-act="radreject" data-v="${esc(m.id)}">דחייה</button></div></article>`).join('') || '<p class="empty">אין הרשמות שמחכות.</p>'}
+          ${AD.moreM ? `<button class="btn ghost block" data-act="radmore" data-v="m" ${AD.loading ? 'disabled' : ''}>עוד הרשמות</button>` : ''}</div></section>
+      ${AD.lst === 'gone' ? '' : `<section aria-labelledby="a-lp"><div class="sec-head"><h2 class="sec-title" id="a-lp">יצירות שמחכות לאישור</h2></div>
+        ${AD.lst === 'failed' ? '<p class="form-err" role="alert">היצירות לא נטענו. לחצו על ״רענון״.</p>' : `<div style="${gapList}">${AD.lpend.map(l => adListing(l, 'pending')).join('') || '<p class="empty">אין יצירות שמחכות.</p>'}${AD.moreLP ? `<button class="btn ghost block" data-act="radmore" data-v="lp" ${AD.loading ? 'disabled' : ''}>עוד יצירות</button>` : ''}</div>`}</section>
+      ${AD.lst === 'ok' ? `<section aria-labelledby="a-la"><div class="sec-head"><h2 class="sec-title" id="a-la">יצירות שמוצגות</h2></div><div style="${gapList}">${AD.lappr.map(l => adListing(l, 'approved')).join('') || '<p class="empty">אין יצירות מוצגות.</p>'}${AD.moreLA ? `<button class="btn ghost block" data-act="radmore" data-v="la" ${AD.loading ? 'disabled' : ''}>עוד יצירות</button>` : ''}</div></section>` : ''}`}
+      <section aria-labelledby="a-rq"><div class="sec-head"><h2 class="sec-title" id="a-rq">${AD.ro ? 'בקשות פתוחות' : 'בקשות חדשות'}</h2></div>
+        <div style="${gapList}">${AD.requests.map(reqRow).join('') || '<p class="empty">אין בקשות פתוחות.</p>'}
           ${AD.moreR ? `<button class="btn ghost block" data-act="radmore" data-v="r" ${AD.loading ? 'disabled' : ''}>עוד בקשות</button>` : ''}</div></section>`;
-    return `${head('ניהול')}<div class="stack g">${body}</div>`; }
-};
+}
+async function loadRoutes(ids) {
+  const list = ids || AD.requests.map(r => r.id); if (!list.length) return;
+  for (let i = 0; i < list.length; i += 40) {
+    const chunk = list.slice(i, i + 40);
+    const r = await dbq(s => s.from('request_routes').select('id,request_id,maker_id,status,seen_at,offer_note,offer_price_ils,created_at,updated_at').in('request_id', chunk).order('created_at'));
+    if (r.error || !Array.isArray(r.data)) continue;
+    chunk.forEach(id => { AD.routes[id] = []; }); r.data.forEach(x => { (AD.routes[x.request_id] || (AD.routes[x.request_id] = [])).push(x); });
+  }
+}
+const routeSheet = r => { const keys = new Set(r.crafts || []), done = new Set(routesOf(r).map(x => x.maker_id)), sorted = [...AD.approved].sort((a, b) => (keys.has(b.craft) ? 1 : 0) - (keys.has(a.craft) ? 1 : 0));
+  return `<form class="sheet-body" data-form="rroutes" data-v="${esc(r.id)}" novalidate>
+    <div><h2 class="sec-title">להעביר ליוצרים</h2><p class="small muted" style="margin-top:4px">${esc(oneLine(r.title, 80))}</p></div>
+    <fieldset class="field"><legend class="lbl">יוצרים מאושרים</legend>${sorted.map(m => `<label class="opt"><input type="checkbox" name="mk" value="${esc(m.id)}" ${keys.has(m.craft) && !done.has(m.id) ? 'checked' : ''} ${done.has(m.id) ? 'disabled' : ''}><span class="grow"><b>${esc(cleanText(m.name, 80) || 'יוצר')}</b> <span class="small muted">${esc(craftText(m.craft, m.craft_other))}${m.city ? ` · ${esc(cleanText(m.city, 60))}` : ''}${done.has(m.id) ? ' · כבר הועבר' : keys.has(m.craft) ? ' · מתאים לתחום' : ''}</span></span></label>`).join('') || '<p class="empty">עוד אין יוצרים מאושרים.</p>'}</fieldset>
+    <div id="rt-res" role="status" aria-live="polite"></div>
+    <div class="row"><button type="button" class="btn ghost block" data-act="closesheet">סגירה</button><button type="submit" class="btn block">העברה</button></div></form>`; };
+async function submitRoutes(f, id) {
+  const r = AD.requests.find(x => x.id === id), res = f.querySelector('#rt-res'), ids = [...f.querySelectorAll('input[name="mk"]:checked')].map(x => x.value); if (!r) return;
+  if (!ids.length) { res.innerHTML = '<p class="form-err">בחרו לפחות יוצר אחד.</p>'; return; }
+  const btn = f.querySelector('button[type="submit"]'); btn.disabled = true;
+  const ok = [], dup = [], bad = [];
+  for (const m of ids) {   /* one by one: a batch fails as a whole when one pair already exists */
+    const x = await dbq(s => s.from('request_routes').insert({ request_id: id, maker_id: m }));
+    if (!x.error) ok.push(m); else if (errCode(x.error) === '23505') dup.push(m); else bad.push(`${mkName(m)}: ${friendly(x.error)}`);
+  }
+  btn.disabled = false;
+  const lines = [ok.length ? `הבקשה הועברה ל${plural(ok.length, 'יוצר אחד', 'יוצרים')}.` : '', dup.length ? `כבר הועברה אל ${dup.map(mkName).join(', ')}.` : '', ...bad].filter(Boolean);
+  res.innerHTML = `<p class="${bad.length || !ok.length ? 'form-err' : 'form-ok'}">${lines.map(esc).join('<br>')}</p>`;
+  if (ok.length || dup.length) { await loadRoutes([id]); const n = routesOf(r).length; if (n) { r.route_count = n; if (r.status === 'new') r.status = 'routed'; } ['sent', 'seen', 'thinking', 'offered', 'declined'].forEach(k => { r['routes_' + k] = routesOf(r).filter(y => y.status === k).length; }); redrawAdmin(); }
+  f.querySelectorAll('input[name="mk"]').forEach(c => { if (ok.includes(c.value) || dup.includes(c.value)) { c.checked = false; c.disabled = true; } });
+}
+const lReject = l => `<form class="sheet-body" data-form="lreject" data-v="${esc(l.id)}" novalidate>
+    <div><h2 class="sec-title">דחיית היצירה ״${esc(cleanText(l.title, 60))}״</h2><p class="small muted" style="margin-top:4px">היוצר יראה את ההערה אצלו, ליד היצירה. עד 300 תווים.</p></div>
+    <div class="field"><label for="lr-note">הערה</label><textarea class="input" id="lr-note" name="note" rows="3" maxlength="300"></textarea></div>
+    <p class="form-err" id="lr-err" role="alert" hidden></p>
+    <div class="row"><button type="button" class="btn ghost block" data-act="closesheet">ביטול</button><button type="submit" class="btn block warnbtn">דחייה</button></div></form>`;
 
 /* search results: the makers who joined, or a way to ask for it */
 let sqT;
 function searchHTML() {
-  const q = S.sq.trim(), { terms, list, partial } = searchMakers(q), h = t => hl(t, terms);
+  const q = S.sq.trim(), { terms, list, partial } = searchMakers(q), h = t => hl(t, terms), lst = searchListings(q);
   if (realState() === 'loading') return '<p class="muted" role="status">טוענים את היוצרים</p>';
-  if (!REAL.list.length) {
-    if (!terms.length) return emptyMakers();
+  if (!terms.length) return !REAL.list.length ? emptyMakers() : '<p class="small muted">אפשר לחפש שם, עיר או חפץ: ארנק, ספל, טבעת.</p>';
+  if (!REAL.list.length && !lst.length && searchSweeping()) return '<p class="muted" role="status">מחפשים</p>';
+  if (!REAL.list.length && !lst.length && shopOf('all').list.length) return `<div class="s-empty"><p class="say">לא מצאנו משהו שמתאים לזה.</p>
+      <p class="small muted">כתבו בקשה ואנחנו נעביר אותה ליוצרים שמתאימים.</p>
+      <button type="button" class="btn" data-act="askfor">לבקש: ${esc(q)}</button></div>`;
+  if (!REAL.list.length && !lst.length) {
     /* nobody has joined yet, but a buyer who searched should still be able to ask: the search words become the request */
     return `<div class="s-empty"><p class="say">עוד אין כאן יוצרים, האתר חדש.</p>
       <p class="small muted">כתבו מה אתם מחפשים, ואנחנו נעביר את הבקשה ליוצרים שמתאימים.</p>
       <button type="button" class="btn" data-act="askfor">לבקש: ${esc(q)}</button>
-      <p class="small muted">מכינים דברים בידיים? <button type="button" class="link" data-act="join">אפשר להצטרף</button></p></div>`;
+      ${canJoin() ? '<p class="small muted">מכינים דברים בידיים? <button type="button" class="link" data-act="join">אפשר להצטרף</button></p>' : ''}</div>`;
   }
-  if (!terms.length) return '<p class="small muted">אפשר לחפש שם, עיר או חפץ: ארנק, ספל, טבעת.</p>';
-  const rows = ms => ms.map(m => { const direct = [m.name, m.city, craftName(m.craft)].some(t => scoreDoc(terms, [[t, 1]]));
+  const rows = ms => ms.map(m => { const direct = [m.name, m.city, craftText(m.craft, m.craftOther)].some(t => scoreDoc(terms, [[t, 1]]));
       return realRow(m, h, !direct && m.story && termScores(terms, [[m.story, 1]]).some(Boolean) ? `<span class="small clamp">${h(m.story)}</span>` : ''); }).join('');
-  if (!list.length && !partial.length) return `<div class="s-empty"><p class="say">לא מצאנו יוצר שמתאים לזה.</p>
+  if (!list.length && !partial.length && !lst.length) return `<div class="s-empty"><p class="say">לא מצאנו יוצר או יצירה שמתאימים לזה.</p>
       <p class="small muted">כתבו בקשה ואנחנו נעביר אותה ליוצרים שמתאימים.</p>
       <button type="button" class="btn" data-act="askfor">לבקש: ${esc(q)}</button></div>`;
   return `${list.length ? `<div class="mlist">${rows(list)}</div>` : ''}
     ${partial.length ? `<h2 class="sec-title small">${list.length ? 'אולי גם' : 'הכי קרוב למה שחיפשתם'}</h2><div class="mlist">${rows(partial)}</div>` : ''}
+    ${lst.length ? `<h2 class="sec-title small">יצירות</h2><div class="lgrid">${lst.map(l => lcard(l, h)).join('')}</div>` : ''}
     <button type="button" class="btn ghost block" data-act="askfor">לא בדיוק זה? לבקש: ${esc(q)}</button>`;
 }
 function searchStatus() {
-  const q = S.sq.trim(), { terms, list, partial } = searchMakers(q); if (!terms.length || !REAL.list.length) return '';
-  const n = list.length, k = partial.length;
-  if (!n && !k) return `לא נמצאו יוצרים ל״${q}״`;
+  const q = S.sq.trim(), { terms, list, partial } = searchMakers(q); if (!terms.length) return '';
+  const m = searchListings(q).length; if (!REAL.list.length && !m) return '';
+  const n = list.length, k = partial.length, lt = m ? plural(m, 'נמצאה יצירה אחת', `נמצאו ${m} יצירות`).replace(/^\d+ /, '') : '';
+  if (!n && !k) return m ? (m === 1 ? 'נמצאה יצירה אחת' : `נמצאו ${m} יצירות`) : `לא נמצאו יוצרים ל״${q}״`;
   const part = n === 1 ? 'נמצא יוצר אחד' : `נמצאו ${n} יוצרים`;
-  return n ? (k ? `${part}, ועוד ${k} קרובים` : part) : (k === 1 ? 'נמצא יוצר אחד קרוב' : `נמצאו ${k} יוצרים קרובים`);
+  const base = n ? (k ? `${part}, ועוד ${k} קרובים` : part) : (k === 1 ? 'נמצא יוצר אחד קרוב' : `נמצאו ${k} יוצרים קרובים`);
+  return m ? `${base}, ו${m === 1 ? 'יצירה אחת' : `${m} יצירות`}` : base;
 }
 function runSearch() {
   const box = document.getElementById('sq-results'); if (!box) return;
@@ -1087,7 +1984,7 @@ function runSearch() {
 }
 const craftOf = q => { const ws = toks(q); for (const [c, words] of Object.entries(CRAFT_WORDS)) { const t = toks(words); if (ws.some(w => t.some(x => wordHit({ alts: forms(w), fz: new Set(sing(w)), pre: [] }, x)))) return c; } return undefined; };
 
-const NAV = [['home', 'בית', UI.home], ['makers', 'יוצרים', UI.users], ['post', 'בקשה', UI.plus], ['mine', 'שלי', UI.user]];
+const NAV = [['home', 'בית', UI.home], ['shop', 'יצירות', UI.grid], ['makers', 'יוצרים', UI.users], ['post', 'בקשה', UI.plus], ['mine', 'אני', UI.user]];
 const NAVKEYS = NAV.map(n => n[0]);
 const root = document.documentElement;
 const navOn = () => S.stack.length > 1 && NAVKEYS.includes(S.stack[1].s) ? S.stack[1].s : S.stack[0].s === 'home' ? 'home' : '';
@@ -1106,9 +2003,18 @@ function drawNav(noNav, on) {
     ? `<button class="plus" data-act="tab" data-v="post" ${on === k ? 'aria-current="page"' : ''}><span class="c">${svg(icon)}</span>${label}</button>`
     : `<button data-act="tab" data-v="${k}" ${on === k ? 'aria-current="page"' : ''}>${svg(icon)}${label}</button>`).join(''));
 }
+/* what a screen needs to fetch the moment it appears (each is guarded, so a repaint never fetches twice) */
+function screenHooks(c) {
+  if (LF.active && c.s !== 'lform') clearListingForm(true);
+  if (c.s === 'listing' && !LST.has(c.id) && !LFETCH[c.id]) fetchListing(c.id);
+  if (c.s === 'shop' && shopOf(S.scraft).st === 'idle') loadShop(S.scraft);
+  if (c.s === 'myreq' && !RQ[c.token] && MYREQ.some(x => x.token === c.token)) loadReq(c.token);
+  if (c.s === 'mine') { probeMe(); if (AD.session && AU.st === 'none') loadMe(); }
+}
 function paint(scroll, top) {
   const c = cur(), view = document.getElementById('view');
   view.innerHTML = SCREENS[c.s](c);
+  screenHooks(c);
   const noNav = c.s === 'join' || c.s === 'joined';
   document.body.classList.toggle('no-nav', noNav);
   drawNav(noNav, navOn());
@@ -1167,7 +2073,7 @@ const ACT = {
   join: () => { clearPhotos(); go('join'); },
   seesite: () => { S.stack = [{ s: 'home' }]; HN = 0; BH = 1; replaceH(location.pathname + location.search); render(true); },
   /* search opens fresh (empty, with the keyboard up); coming back to it keeps the words and the results */
-  search: () => { S.sq = ''; go('search', { focus: true }); },
+  search: () => { S.sq = ''; if (shopOf('all').st === 'idle') loadShop('all'); go('search', { focus: true }); searchSweep(); },
   sqclear: () => { const i = document.getElementById('sq'); clearTimeout(sqT); S.sq = ''; if (i) { i.value = ''; i.focus({ preventScroll: true }); } document.querySelector('.sq-clear').hidden = true; runSearch(); },
   askfor: () => { const q = S.sq.trim(); go('post', { title: q.slice(0, 120), hint: craftOf(q) }); },
   ask: v => go('post', { hint: Object.prototype.hasOwnProperty.call(CRAFTS, v) ? v : undefined }),
@@ -1175,11 +2081,11 @@ const ACT = {
   closesheet: () => closeSheet(),
   privacy: () => openSheet(privacySheet(), 'מה אנחנו עושים עם הפרטים שלכם'),
   terms: () => openSheet(termsSheet(), 'תנאי השימוש'),
-  vision: () => openSheet(visionSheet(), 'למה בהזמנה'),
+  vision: () => openSheet(visionSheet(), 'מי אנחנו'),
   jppick: () => { const i = document.getElementById('j-pfile'); if (i) i.click(); },
   jprm: () => { if (JP.portrait) URL.revokeObjectURL(JP.portrait.url); delete JP.portrait; drawPortrait(); const b = document.getElementById('j-portrait'); if (b) b.focus(); },
   jpick: () => { const i = document.getElementById('j-file'); if (i) i.click(); },
-  jrm: v => { const p = JP.splice(+v, 1)[0]; if (p) URL.revokeObjectURL(p.url); drawPhotos(); const b = document.querySelector('#photos .add-photo'); if (b) b.focus(); },
+  jrm: v => { const p = JP.splice(+v, 1)[0]; if (p) URL.revokeObjectURL(p.url); drawPhotos(); const m = document.getElementById('j-pmsg'); if (m) m.textContent = JP.length ? photoCount() : ''; const b = document.querySelector('#photos .add-photo'); if (b) b.focus(); },
   radlogin: async () => { if (!SB || AD.busy) return; AD.busy = true; AD.msg = ''; redrawAdmin();
     const { error } = await SB.auth.signInWithOtp({ email: CONFIG.ADMIN_EMAIL.trim(), options: { shouldCreateUser: false, emailRedirectTo: location.origin + location.pathname + '?admin=1' } });
     AD.busy = false; AD.msgErr = !!error; AD.msg = error ? 'הקישור לא נשלח. נסו שוב בעוד דקה.' : 'שלחנו קישור כניסה למייל. פותחים אותו במכשיר הזה.'; redrawAdmin(); },
@@ -1197,16 +2103,118 @@ const ACT = {
     if (error || !data || !data.length) { toast('השמירה לא הצליחה, נסו שוב'); return; }
     AD.requests = AD.requests.filter(x => x.id !== v); redrawAdmin(); toast('סימנו שהבקשה הועברה'); }
 };
+/* ---------- actions added to the site ---------- */
+const resetMe = () => { AU = freshAU(); ME.tab = 'inbox'; };
+const confirmSheet = (title, text, yes, v, yesLabel) => `<div class="sheet-body"><h2 class="sec-title">${esc(title)}</h2>${text ? `<p>${esc(text)}</p>` : ''}<div class="row"><button type="button" class="btn ghost block" data-act="closesheet">ביטול</button><button type="button" class="btn block warnbtn" data-act="${yes}" data-v="${esc(v)}">${esc(yesLabel)}</button></div></div>`;
+async function rejectListing(f, id) {
+  const note = f.querySelector('#lr-note').value.trim(), err = f.querySelector('#lr-err'), l = AD.lpend.find(x => x.id === id);
+  if (!note) { err.textContent = 'כתבו הערה קצרה לפני הדחייה.'; err.hidden = false; f.querySelector('#lr-note').focus(); return; }
+  const r = await dbq(s => s.from('listings').update({ status: 'rejected', admin_note: note.slice(0, 300) }).eq('id', id).select('id'));
+  if (r.error || !r.data || !r.data.length) { err.textContent = r.error ? friendly(r.error) : 'היצירה לא נמצאה.'; err.hidden = false; return; }
+  AD.lpend = AD.lpend.filter(x => x.id !== id); closeSheet(true); redrawAdmin(); toast(`היצירה ${l ? '״' + cleanText(l.title, 40) + '״ ' : ''}נדחתה, וההערה נשמרה`);
+}
+const adFind = id => AD.lpend.find(x => x.id === id) || AD.lappr.find(x => x.id === id);
+const adDrop = id => { AD.lpend = AD.lpend.filter(x => x.id !== id); AD.lappr = AD.lappr.filter(x => x.id !== id); };
+Object.assign(ACT, {
+  go: v => go(v),
+  listing: v => go('listing', { id: v }),
+  lretry: v => { delete LFETCH[v]; fetchListing(v); render(); },
+  shopmore: () => { loadShop(S.scraft, true); render(); },
+  shopretry: () => { SHOP.gone = false; const sh = shopOf(S.scraft); sh.st = 'idle'; loadShop(S.scraft); render(); },
+  scraft: v => { S.scraft = v; if (shopOf(v).st === 'idle') loadShop(v); render(); const b = document.querySelector(`.filters [data-v="${v}"]`); if (b) b.focus({ preventScroll: true }); },
+  signin: () => { SI.sent = 0; SI.err = ''; SI.busy = false; clearInterval(SI.t); SI.t = 0; openSheet(signinSheet(), 'כניסה ליוצרים'); const i = document.getElementById('si-email'); if (i) i.focus({ preventScroll: true }); },
+  siresend: () => { if (Date.now() - SI.sent >= RESEND_MS) sendLink(SI.email); },
+  signout: async () => { try { if (SB) await SB.auth.signOut(); } catch (e) { /* the local session goes either way */ } AD.session = null; AD.loaded = false; resetMe(); render(); toast('התנתקתם'); },
+  meretry: () => loadMe(true),
+  toadmin: () => { location.hash = '#admin'; },
+  mtab: v => { ME.tab = v; if (v === 'listings' && AU.my.st === 'idle') loadMyListings(); if (v === 'inbox' && AU.inbox.st === 'idle') loadInbox(); render(); const b = document.getElementById('mt-' + v); if (b) b.focus({ preventScroll: true }); },
+  ibopen: v => { const ib = AU.inbox, it = ib.list.find(x => x.route === v); if (!it) return; ib.open = ib.open === v ? '' : v; it.err = '';
+    if (ib.open && it.rs === 'sent' && it.rstatus !== 'closed' && !ib.seenSet.has(v)) { ib.seenSet.add(v); patchRoute(it, { status: 'seen' }, 'sent').then(r => { if (r.ok) meRedraw(); }); }
+    meRedraw(); const b = document.querySelector(`.rq-head[data-v="${CSS.escape(v)}"]`); if (b) b.focus({ preventScroll: true }); },
+  ibthink: v => routeAct(v, { status: 'thinking' }),
+  iboffer: v => { const it = AU.inbox.list.find(x => x.route === v); if (it) openSheet(offerSheet(it), 'להציע'); },
+  ibdecline: v => openSheet(confirmSheet('לסמן שזה לא מתאים?', 'אפשר לשנות את דעתכם אחר כך ולהציע.', 'ibdeclineyes', v, 'כן, לא מתאים'), 'לסמן שזה לא מתאים'),
+  ibdeclineyes: v => { closeSheet(true); routeAct(v, { status: 'declined' }); },
+  ibretry: () => loadInbox(), ibmore: () => { loadInbox(true); meRedraw(); },
+  mladd: () => { clearListingForm(true); LF.active = true; go('lform', {}); },
+  mledit: v => { const l = AU.my.list.find(x => x.id === v); if (!l) return; clearListingForm(true); LF.active = true; l.photos.forEach(p => LP.push({ existing: true, path: p, url: photoURL(p, LB), name: '', type: '' })); go('lform', { id: v }); },
+  mlsold: async v => { const l = AU.my.list.find(x => x.id === v); if (!l) return;
+    const r = await dbq(s => s.from('listings').update({ availability: l.sold ? 'available' : 'sold' }).eq('id', v).select('id'));
+    if (r.error) toast(friendly(r.error)); else if (!r.data || !r.data.length) toast('היצירה לא נמצאה'); else { l.sold = !l.sold; meRedraw(); toast(l.sold ? 'סימנו שהיצירה נמכרה' : 'היצירה זמינה שוב'); } },
+  mldel: v => { const l = AU.my.list.find(x => x.id === v); if (l) openSheet(confirmSheet(`למחוק את ״${cleanText(l.title, 40)}״?`, 'היצירה והתמונות שלה יימחקו. אי אפשר להחזיר.', 'mldelyes', v, 'כן, למחוק'), 'מחיקת יצירה'); },
+  mldelyes: async v => { const l = AU.my.list.find(x => x.id === v); if (!l) return; closeSheet(true);
+    const r = await dbq(s => s.from('listings').delete().eq('id', v).select('id'));
+    if (r.error) { toast(friendly(r.error)); return; }
+    if (!r.data || !r.data.length) { toast('היצירה לא נמצאה'); } else { toast('היצירה נמחקה'); if (l.photos.length && SB) { try { SB.storage.from(LB).remove(l.photos).catch(() => {}); } catch (e) { /* orphans only */ } } }
+    AU.my.list = AU.my.list.filter(x => x.id !== v); meRedraw(); },
+  mlretry: () => loadMyListings(), mlmore: () => { loadMyListings(true); meRedraw(); },
+  lfconfirm: () => { closeSheet(true); const f = document.querySelector('form[data-form="listing"]'); if (f && LF.pending) saveListing(f, LF.pending); },
+  lpick: () => { const i = document.getElementById('l-file'); if (i) i.click(); },
+  lrm: v => { const p = LP.splice(+v, 1)[0]; if (p && !p.existing) URL.revokeObjectURL(p.url); drawLP(); const m = document.getElementById('l-pmsg'); if (m) m.textContent = LP.length ? photoCount(LP, MAX_LP) : ''; const b = document.querySelector('#l-photos .add-photo'); if (b) b.focus(); },
+  myreq: v => { const o = RQ[v]; if (o) o.saved = false; go('myreq', { token: v }); loadReq(v); },
+  rqrefresh: () => { const t = cur().token; if (t) loadReq(t); },
+  rqremove: v => { MYREQ = MYREQ.filter(x => x.token !== v); saveMyReq(); delete RQ[v]; back(); toast('הבקשה הוסרה מהרשימה'); },
+  rqclose: () => openSheet(confirmSheet('לסגור את הבקשה?', 'יוצרים לא יראו יותר את פרטי הקשר שלכם, ואי אפשר לפתוח אותה שוב.', 'rqcloseyes', cur().token, 'כן, לסגור'), 'לסגור את הבקשה'),
+  rqcloseyes: async v => { closeSheet(true);
+    const r = await dbq(s => s.rpc('close_request', { p_token: v }));
+    if (r.gone) toast('המעקב עוד לא פעיל'); else if (r.error) toast(friendly(r.error, 'status')); else if (r.data === true) { toast('הבקשה נסגרה'); loadReq(v); } else toast('הבקשה לא נמצאה'); },
+  rqedit: async () => { const t = cur().token; if (!t) return;
+    const r = await dbq(s => s.rpc('request_for_edit', { p_token: t }));
+    if (r.gone) { EDIT.st = 'gone'; reqRedraw(); toast('העריכה עוד לא פעילה'); return; }
+    if (r.error) { toast(friendly(r.error, 'edit')); return; }
+    const d = r.data; if (!d || typeof d !== 'object') { toast('הבקשה לא נמצאה'); return; }
+    if (d.closed) { toast('הבקשה נסגרה, אי אפשר לערוך אותה'); loadReq(t); return; }
+    EDIT.st = 'ok'; EDIT.data = { token: t, title: cleanText(d.title, 120), crafts: (Array.isArray(d.crafts) ? d.crafts : []).map(c => String(c).slice(0, 30)), text: cleanBlock(d.text, 2000), due: cleanText(d.due, 80), contact: String(d.contact || '').slice(0, 120) };
+    go('editreq', { token: t }); },
+  toreqs: () => { tab('mine'); go('myreqs'); },
+  rroutesopen: v => { const r = AD.requests.find(x => x.id === v); if (r) openSheet(routeSheet(r), 'להעביר ליוצרים'); },
+  copynotify: async v => { const r = AD.requests.find(x => x.id === v); if (!r) return; const list = notifyFor(r).mails.join(', ');
+    try { await navigator.clipboard.writeText(list); toast('רשימת המיילים הועתקה. אפשר להדביק אותה בשדה ״עותק מוסתר״'); } catch (e) { toast('ההעתקה לא הצליחה, נסו שוב'); } },
+  lpapprove: async v => { const l = adFind(v); if (!l) return; const r = await dbq(s => s.from('listings').update({ status: 'approved' }).eq('id', v).select('id'));
+    if (r.error || !r.data || !r.data.length) { toast(r.error ? friendly(r.error) : 'היצירה לא נמצאה'); return; } adDrop(v); AD.lappr.unshift({ ...l, status: 'approved' }); redrawAdmin(); toast('היצירה אושרה ותופיע באתר'); },
+  lpreject: v => { const l = adFind(v); if (l) openSheet(lReject(l), 'דחיית יצירה'); },
+  lphide: async v => { const l = adFind(v); if (!l) return; const r = await dbq(s => s.from('listings').update({ status: 'hidden' }).eq('id', v).select('id'));
+    if (r.error || !r.data || !r.data.length) { toast(r.error ? friendly(r.error) : 'היצירה לא נמצאה'); return; } adDrop(v); redrawAdmin(); toast('היצירה הוסתרה'); },
+  lsremove: v => { const l = adFind(v); if (l) openSheet(confirmSheet(`להסיר את ״${cleanText(l.title, 40)}״?`, 'היצירה והתמונות שלה יימחקו. אי אפשר להחזיר.', 'lsremoveyes', v, 'כן, להסיר'), 'הסרת יצירה'); },
+  lsremoveyes: async v => { const l = adFind(v); if (!l) return; closeSheet(true);
+    const r = await dbq(s => s.from('listings').delete().eq('id', v).select('id'));
+    if (r.error || !r.data || !r.data.length) { toast(r.error ? friendly(r.error) : 'היצירה לא נמצאה'); return; }
+    const ph = (l.photos || []).filter(okPath); if (ph.length && SB) { try { SB.storage.from(LB).remove(ph).catch(() => {}); } catch (e) { /* orphans only */ } }
+    adDrop(v); redrawAdmin(); toast('היצירה הוסרה'); }
+});
+ACT.radmore = v => adminLoad(['m', 'r', 'lp', 'la'].includes(v) ? v : 'r');
+ACT.radlogout = async () => { if (SB) await SB.auth.signOut(); AD.session = null; AD.loaded = false; AD.makers = []; AD.requests = []; AD.approved = []; AD.lpend = []; AD.lappr = []; AD.routes = {}; AD.msg = ''; resetMe(); redrawAdmin(); };
+ACT.radapprove = async v => { const m = AD.makers.find(x => x.id === v); if (!m) return;
+  const { data, error } = await SB.from('makers').update({ status: 'approved' }).eq('id', v).select('id');
+  if (error && errCode(error) === '23505') { toast('כבר יש יוצר מאושר עם אותו מייל או טלפון'); return; }
+  if (error || !data || !data.length) { toast('האישור לא נשמר, נסו שוב'); return; }
+  AD.makers = AD.makers.filter(x => x.id !== v); AD.approved.push({ id: v, name: m.name, city: m.city, craft: m.craft, craft_other: m.craft_other, email: m.email }); redrawAdmin(); toast(`ההרשמה של ${m.name} אושרה, והפרופיל יופיע באתר`); };
+
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-act]'); if (!t || !ACT[t.dataset.act]) return;
   e.preventDefault(); ACT[t.dataset.act](t.dataset.v, t);
 });
 document.addEventListener('input', e => {
+  if (e.target.id === 'l-desc') { const c = document.getElementById('l-count'); if (c) c.textContent = `${Array.from(e.target.value).length} מתוך 1500`; return; }
   if (e.target.id === 'sq') { const c = document.querySelector('.sq-clear'); if (c) c.hidden = !e.target.value; clearTimeout(sqT); const val = e.target.value; sqT = setTimeout(() => { S.sq = val; runSearch(); }, 120); }
 });
+/* joining: "other" shows a text field for the maker's own craft, and focus goes into it. A keyboard user arrowing through the list is not
+   pulled away mid-choice: the field is announced instead, and Tab reaches it. Picking another craft hides the field and clears it. */
+let craftKey = 0;
+document.addEventListener('keydown', e => { if (e.target.id === 'j-craft' && !['Enter', ' ', 'Tab'].includes(e.key)) craftKey = Date.now(); });
+function syncOther(sel) {
+  const w = document.getElementById('j-other-f'), i = document.getElementById('j-other'), live = document.getElementById('j-other-live'), on = sel.value === 'other';
+  if (!w || !i || on === !w.hidden) return;
+  w.hidden = !on;
+  if (on) { if (Date.now() - craftKey < 300) live.textContent = 'נפתח שדה: איזה תחום?'; else i.focus(); }
+  else { i.value = ''; i.removeAttribute('aria-invalid'); live.textContent = ''; }
+}
 document.addEventListener('change', e => {
   if (e.target.id === 'j-pfile') { addPortrait(e.target.files[0]).then(() => { e.target.value = ''; }); return; }
   if (e.target.id === 'j-file') { addPhotos([...e.target.files]).then(() => { e.target.value = ''; }); return; }
+  if (e.target.id === 'j-craft') { syncOther(e.target); return; }
+  if (e.target.id === 'l-file') { addPhotos([...e.target.files], LP, MAX_LP, 'l-pmsg', drawLP).then(() => { e.target.value = ''; }); return; }
+  if (e.target.id === 'l-onreq') { const p = document.getElementById('l-price'); p.disabled = e.target.checked; if (e.target.checked) { p.value = ''; p.removeAttribute('aria-invalid'); } return; }
   if (e.target.id === 'pc-other') { const o = document.getElementById('p-other'); o.hidden = !e.target.checked; if (e.target.checked) o.focus(); }
 });
 document.addEventListener('submit', e => {
@@ -1214,6 +2222,14 @@ document.addEventListener('submit', e => {
   const f = e.target, kind = f.dataset.form;
   if (kind === 'search') { clearTimeout(sqT); S.sq = String(new FormData(f).get('q') || ''); runSearch(); f.querySelector('input').blur(); return; }
   if (kind === 'post') { submitPost(f); return; }
+  if (kind === 'editreq') { submitEdit(f); return; }
+  if (kind === 'signin') { const em = String(new FormData(f).get('email') || '').trim(), er = f.querySelector('#si-err'), i = f.querySelector('#si-email');
+    if (!em || !EMAIL_RE.test(em)) { SI.email = em; er.textContent = em ? 'המייל לא נראה נכון. בדקו שוב.' : 'כתבו את המייל שלכם.'; er.hidden = false; i.setAttribute('aria-invalid', 'true'); i.focus(); return; }
+    sendLink(em); return; }
+  if (kind === 'offer') { submitOffer(f, f.dataset.v); return; }
+  if (kind === 'listing') { submitListing(f); return; }
+  if (kind === 'rroutes') { submitRoutes(f, f.dataset.v); return; }
+  if (kind === 'lreject') { rejectListing(f, f.dataset.v); return; }
   if (kind === 'join') { submitJoin(f); return; }
   if (kind === 'rreject') { rejectMaker(f, f.dataset.v); return; }
 });
@@ -1274,12 +2290,14 @@ function gateJoin() {
   const st = history.state;
   if (CFG_ON && adminUrl()) { S.stack = [{ s: 'radmin' }]; BH = 0; HN = st && st.bz ? st.n : 0; replaceH(); }
   else if (joinUrl()) gateJoin();
+  else if (meUrl()) { S.stack = [{ s: 'home' }, { s: 'mine' }]; BH = 1; HN = 0; replaceH(); }
   else if (st && st.bz && Array.isArray(st.stack) && st.stack.length && st.stack.every(x => x && SCREENS[x.s] && x.s !== 'radmin' && !(x.s === 'join' && x.gate))) { S.stack = st.stack.map(x => ({ ...x })); HN = st.n || 0; BH = st.bh; }
   else { S.stack = [{ s: 'home' }]; HN = 0; BH = 1; replaceH(); }
   if (cur().s === 'joined' && !cur().gate && S.stack.length < 2) S.stack = [{ s: 'home' }];
 })();
 window.addEventListener('hashchange', () => {
   if (joinUrl() && !gated() && cur().s !== 'joined') { gateJoin(); render(true); return; }
+  if (meUrl() && cur().s !== 'mine' && !gated()) { showMe(); return; }
   if (CFG_ON && adminUrl() && cur().s !== 'radmin') { S.stack = [{ s: 'radmin' }]; BH = 0; replaceH(); render(true); if (isOwner() && !AD.loaded) adminLoad(); }
 });
 render();

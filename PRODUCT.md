@@ -18,22 +18,26 @@ web
 
 ## Positioning
 
-Not a shop of finished goods. The piece starts as a conversation with a named maker, and the buyer sees it being made (workshop photos at each stage). Makers are approved by a person, not an algorithm.
+Not a general shop. The piece starts as a conversation with a named maker; the "יצירות" tab shows only what approved makers chose to list (no cart, no payment, contact buttons only). The piece starts as a conversation with a named maker, and the buyer sees it being made (workshop photos at each stage). Makers are approved by a person, not an algorithm.
 
 ## Operating Context
 
 - Phone first, Hebrew, right-to-left. A proper desktop layout comes later.
-- Payments: no money goes through the site. Buyer and maker agree on price, time and payment between themselves (for example bit or a bank transfer). The site holds no deposits and takes no commission; no copy may suggest otherwise.
+- Payments: no money goes through the site. Buyer and maker agree on price, time and payment between themselves (the copy on the site does not name payment methods). The site holds no deposits and takes no commission; no copy may suggest otherwise.
 - Real data only, starting from zero: makers appear only after the owner approved them by hand (Supabase `public_makers`). There are no invented makers, works, reviews, orders or numbers anywhere. Published free on GitHub Pages; everything must stay at ₪0.
 
 ## Capabilities and Constraints
 
 Features that must keep working in every redesign:
 - free-word search over the makers who joined (Hebrew prefixes, plurals, craft words, one-letter typos), its empty state and the "לבקש" button
-- request form: multi-select crafts + "אחר", no budget field, contact + consent; never says "sent" unless the row was saved
-- "שלי": the requests sent from this device (titles and dates, localStorage only)
-- join form (portrait + work photos, shrunk in the browser); arriving by `#join` is a gate until the form is sent
-- direct contact: a maker's phone is shown (WhatsApp and call buttons on cards and profiles) only if the maker chose that at signup (`phone_public`, read through `public_makers.contact_phone`); emails are never shown; there is no messaging through the site
+- request form: multi-select crafts + "אחר", no budget field, contact; no checkbox: a plain sentence under the button says submitting passes the request and contact to suitable makers (consent: true is sent automatically); a secret token is saved on the device; never says "sent" unless the row was saved
+- "הבקשות שלי": requests sent from this device, with status, the makers it was routed to and their answers (request_status RPC), refresh, close, and edit (pencil) for an open request
+- the shop ("יצירות", second tab): approved listings, craft filter, sold shown muted after available ones, listing detail with contact only if the maker opted in
+- makers sign in with an email link ("כניסה ליוצרים") and get their own space: inbox of routed requests (seen / thinking / offer / not a fit), their listings (add, edit, sold, delete), profile; approved makers never see join buttons
+- "אני" (fifth tab) has two spaces: the buyer space (my requests, write a request, "יוצרים? אפשר להצטרף" hidden on a device that already joined, "כניסה ליוצרים") and, for a signed-in approved maker, the maker workspace; signed in but not approved shows a calm note; the owner stays at #admin
+- one signup per email and per phone (database rule): the join form explains a duplicate and keeps the uploaded photos for the retry
+- join form (portrait + up to 20 work photos, uploaded as they are up to 10 MB each; only a bigger file is resized); arriving by `#join` is a gate until the form is sent
+- direct contact: a maker's phone is shown (WhatsApp and call buttons on cards and profiles) only if the maker chose that at signup (`phone_public`, read through `public_makers.contact_phone`); the email likewise, only if the maker chose it (`email_public`, `public_makers.contact_email`), as a mail button; there is no messaging through the site
 - real maker list and profiles, with empty states for zero makers
 - admin at `#admin`: approve, or reject with a note the owner writes; requests with mailto routing; 200 rows per page
 - the phone's back button follows the in-app trail (History API) and closes sheets first; tab bar hidden while typing
