@@ -796,7 +796,7 @@ const PAGE = 200;
 /* the approved makers (for routing by craft). craft_other may not exist yet: ask without it then */
 async function approvedRows() {
   const q = cols => SB.from('makers').select(cols).eq('status', 'approved').range(0, 1999);
-  let a = await q('id,name,city,craft,craft_other,email'); if (a.error) a = await q('id,name,city,craft,email'); if (a.error) a = await q('id,craft,email'); return a;
+  let a = await q('id,name,city,craft,craft_other,story,email'); if (a.error) a = await q('id,name,city,craft,craft_other,email'); if (a.error) a = await q('id,name,city,craft,email'); if (a.error) a = await q('id,craft,email'); return a;
 }
 async function adminLoad(which) {
   if (!SB || !isOwner() || AD.loading) return;
@@ -1914,10 +1914,26 @@ async function loadRoutes(ids) {
     chunk.forEach(id => { AD.routes[id] = []; }); r.data.forEach(x => { (AD.routes[x.request_id] || (AD.routes[x.request_id] = [])).push(x); });
   }
 }
-const routeSheet = r => { const keys = new Set(r.crafts || []), done = new Set(routesOf(r).map(x => x.maker_id)), sorted = [...AD.approved].sort((a, b) => (keys.has(b.craft) ? 1 : 0) - (keys.has(a.craft) ? 1 : 0));
+/* match suggestion: craft is the gate; a city named in the request, shared words with the maker's story, and the maker's open load adjust the order. Pre-selects up to 4, the owner decides. */
+const MATCH_N = 4, MATCH_MIN = 3;
+function matchMakers(r, done) {
+  const keys = new Set(r.crafts || []), text = cleanText(`${r.title || ''} ${r.text || ''}`, 4000).toLowerCase();
+  const load = {}; Object.values(AD.routes || {}).forEach(a => (a || []).forEach(x => { if (['sent', 'seen', 'thinking'].includes(x.status)) load[x.maker_id] = (load[x.maker_id] || 0) + 1; }));
+  return AD.approved.map(m => {
+    const why = []; let sc = 0;
+    if (keys.has(m.craft)) { sc += 100; why.push('מתאים לתחום'); }
+    const city = cleanText(m.city, 60).toLowerCase(); if (city && text.includes(city)) { sc += 20; why.push('העיר מוזכרת בבקשה'); }
+    const words = new Set(cleanText(m.story, 600).toLowerCase().split(/[^֐-׿a-z0-9]+/).filter(w => w.length >= 3)); let hit = 0;
+    words.forEach(w => { if (text.includes(w)) hit++; }); if (hit) { sc += Math.min(25, hit * 5); why.push('מילים משותפות'); }
+    const l = load[m.id] || 0; if (l) { sc -= 10 * l; why.push(`${l} פתוחות אצלו`); } else why.push('פנוי');
+    return { m, sc, why, craftOk: keys.has(m.craft), done: done.has(m.id) };
+  }).sort((a, b) => b.sc - a.sc);
+}
+const routeSheet = r => { const done = new Set(routesOf(r).map(x => x.maker_id)), list = matchMakers(r, done), pick = new Set(list.filter(x => x.craftOk && !x.done).slice(0, MATCH_N).map(x => x.m.id)), few = pick.size < MATCH_MIN;
   return `<form class="sheet-body" data-form="rroutes" data-v="${esc(r.id)}" novalidate>
     <div><h2 class="sec-title">להעביר ליוצרים</h2><p class="small muted" style="margin-top:4px">${esc(oneLine(r.title, 80))}</p></div>
-    <fieldset class="field"><legend class="lbl">יוצרים מאושרים</legend>${sorted.map(m => `<label class="opt"><input type="checkbox" name="mk" value="${esc(m.id)}" ${keys.has(m.craft) && !done.has(m.id) ? 'checked' : ''} ${done.has(m.id) ? 'disabled' : ''}><span class="grow"><b>${esc(cleanText(m.name, 80) || 'יוצר')}</b> <span class="small muted">${esc(craftText(m.craft, m.craft_other))}${m.city ? ` · ${esc(cleanText(m.city, 60))}` : ''}${done.has(m.id) ? ' · כבר הועבר' : keys.has(m.craft) ? ' · מתאים לתחום' : ''}</span></span></label>`).join('') || '<p class="empty">עוד אין יוצרים מאושרים.</p>'}</fieldset>
+    <p class="small muted">סימנו מראש עד ${MATCH_N} יוצרים מתאימים. אפשר לשנות לפני השליחה.${few ? ` יש רק ${pick.size} בתחום הזה, כדאי להוסיף ידנית.` : ''}</p>
+    <fieldset class="field"><legend class="lbl">יוצרים מאושרים</legend>${list.map(({ m, why, done: d }) => `<label class="opt"><input type="checkbox" name="mk" value="${esc(m.id)}" ${pick.has(m.id) ? 'checked' : ''} ${d ? 'disabled' : ''}><span class="grow"><b>${esc(cleanText(m.name, 80) || 'יוצר')}</b> <span class="small muted">${esc(craftText(m.craft, m.craft_other))}${m.city ? ` · ${esc(cleanText(m.city, 60))}` : ''} · ${d ? 'כבר הועבר' : esc(why.join(', '))}</span></span></label>`).join('') || '<p class="empty">עוד אין יוצרים מאושרים.</p>'}</fieldset>
     <div id="rt-res" role="status" aria-live="polite"></div>
     <div class="row"><button type="button" class="btn ghost block" data-act="closesheet">סגירה</button><button type="submit" class="btn block">העברה</button></div></form>`; };
 async function submitRoutes(f, id) {
